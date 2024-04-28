@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useWeb3Contract, useMoralis } from "react-moralis";
 import marketplaceAbi from "../../constants/Marketplace.json";
 import Image from "next/image";
-import { Card, useNotification } from "web3uikit";
+import { Card, Skeleton, useNotification } from "web3uikit";
 import { ethers } from "ethers";
 // import UpdateListingModal from "./UpdateListingModal";
 
@@ -39,7 +39,7 @@ export default function ItemBox({ id, price, title, description, seller, marketp
     abi: marketplaceAbi,
     contractAddress: marketplaceAddress,
     functionName: "buyItem",
-    msgValue: BigInt(price),
+    msgValue: ethers.utils.parseEther(price).toString(), //this is specific in Wei
     params: {
       sellerAddress: seller,
       id: id,
@@ -78,17 +78,12 @@ export default function ItemBox({ id, price, title, description, seller, marketp
   const isOwnedByUser = seller === account || seller === undefined;
   const formattedSellerAddress = isOwnedByUser ? "you" : truncateStr(seller || "", 15);
 
-  const handleCardClick = (id, sellerAddress, price) => {
+  const handleCardClick = () => {
     isOwnedByUser
       ? setShowModal(true)
       : buyItem({
-          //   msgValue: price,
-          //   params: {
-          //     sellerAddress: sellerAddress,
-          //     id: id,
-          //   },
-          onError: (error) => console.log(error),
           onSuccess: () => handleBuyItemSuccess(),
+          onError: (error) => handleBuyItemError(error),
         });
   };
 
@@ -97,6 +92,15 @@ export default function ItemBox({ id, price, title, description, seller, marketp
       type: "success",
       message: "Item bought!",
       title: "Item Bought",
+      position: "topR",
+    });
+  };
+
+  const handleBuyItemError = (error) => {
+    dispatch({
+      type: "error",
+      message: error.data.message,
+      title: "Item buying error",
       position: "topR",
     });
   };
@@ -112,8 +116,9 @@ export default function ItemBox({ id, price, title, description, seller, marketp
                 <div className="flex flex-col items-end gap-2">
                   {/* <div>#{id}</div> */}
                   <div className="italic text-sm">Owned by {formattedSellerAddress}</div>
-                  <Image loader={() => imageURI} src={imageURI} height="200" width="200" />
-                  <div className="font-bold">{ethers.utils.formatUnits(price, "ether")} ETH</div>
+                  {imageURI || imageURI == true ? <Skeleton theme="image" height="200px" width="200px" /> : <Image loader={() => imageURI} src={imageURI} height="200" width="200" />}
+                  <div className="font-bold">{ethers.utils.parseEther(price).toString()} WEI</div>
+                  <div className="font-bold self-center">{price} ETH</div>
                 </div>
               </div>
             </Card>
