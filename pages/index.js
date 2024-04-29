@@ -1,7 +1,8 @@
-import { gql, useQuery } from "@apollo/client";
+import { gql, useLazyQuery, useQuery } from "@apollo/client";
 import { useMoralis } from "react-moralis";
 import networkMapping from "../constants/networkMapping.json";
 import ItemBox from "./components/ItemBox";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const { chainId, isWeb3Enabled } = useMoralis();
@@ -24,8 +25,12 @@ export default function Home() {
     }
   `;
 
-  const { loading, error, data: items } = useQuery(getItemsQuery);
-  console.log(items);
+  const [runQuery, { loading, data: items }] = useLazyQuery(getItemsQuery, { fetchPolicy: "network-only" }); // fetch policy is to not look for cache and take the data from network only
+  // const { loading, _, data: items } = useQuery(getItemsQuery);
+
+  useEffect(() => {
+    runQuery();
+  }, []);
 
   return (
     <div className="container mx-auto">
@@ -36,6 +41,7 @@ export default function Home() {
             <div>Loading...</div>
           ) : (
             items.items.map((item) => {
+              if (item.itemStatus === "Bought") return;
               const { price, title, description, seller, id, photosIPFSHashes, itemStatus, blockTimestamp } = item;
               return (
                 <ItemBox
