@@ -17,6 +17,9 @@ export default function Home() {
         price
         title
         description
+        blockTimestamp
+        itemStatus
+        photosIPFSHashes
       }
     }
   `;
@@ -33,8 +36,20 @@ export default function Home() {
             <div>Loading...</div>
           ) : (
             items.items.map((item) => {
-              const { price, title, description, seller, id } = item;
-              return <ItemBox id={id} price={price} title={title} description={description} seller={seller} marketplaceAddress={marketplaceAddress} />;
+              const { price, title, description, seller, id, photosIPFSHashes, itemStatus, blockTimestamp } = item;
+              return (
+                <ItemBox
+                  id={id}
+                  price={price}
+                  title={title}
+                  description={description}
+                  seller={seller}
+                  photosIPFSHashes={photosIPFSHashes}
+                  itemStatus={itemStatus}
+                  blockTimestamp={blockTimestamp}
+                  marketplaceAddress={marketplaceAddress}
+                />
+              );
             })
           )
         ) : (

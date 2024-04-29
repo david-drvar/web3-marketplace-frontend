@@ -17,23 +17,12 @@ const truncateStr = (fullStr, strLen) => {
   return fullStr.substring(0, frontChars) + separator + fullStr.substring(fullStr.length - backChars);
 };
 
-export default function ItemBox({ id, price, title, description, seller, marketplaceAddress }) {
+export default function ItemBox({ id, price, title, description, seller, marketplaceAddress, photosIPFSHashes, itemStatus, blockTimestamp }) {
   const { isWeb3Enabled, account } = useMoralis();
   const [imageURI, setImageURI] = useState("");
-  const [tokenName, setTokenName] = useState("");
-  const [tokenDescription, setTokenDescription] = useState("");
   const [showModal, setShowModal] = useState(false);
   const hideModal = () => setShowModal(false);
   const dispatch = useNotification();
-
-  //   const { runContractFunction: getTokenURI } = useWeb3Contract({
-  //     abi: marketplaceAbi,
-  //     contractAddress: nftAddress,
-  //     functionName: "tokenURI",
-  //     params: {
-  //       tokenId: tokenId,
-  //     },
-  //   });
 
   const { runContractFunction: buyItem } = useWeb3Contract({
     abi: marketplaceAbi,
@@ -46,32 +35,9 @@ export default function ItemBox({ id, price, title, description, seller, marketp
     },
   });
 
-  //   async function updateUI() {
-  //     const tokenURI = await getTokenURI();
-  //     console.log(`The TokenURI is ${tokenURI}`);
-  //     // We are going to cheat a little here...
-  //     if (tokenURI) {
-  //       // IPFS Gateway: A server that will return IPFS files from a "normal" URL.
-  //       const requestURL = tokenURI.replace("ipfs://", "https://ipfs.io/ipfs/");
-  //       const tokenURIResponse = await (await fetch(requestURL)).json();
-  //       const imageURI = tokenURIResponse.image;
-  //       const imageURIURL = imageURI.replace("ipfs://", "https://ipfs.io/ipfs/");
-  //       setImageURI(imageURIURL);
-  //       setTokenName(tokenURIResponse.name);
-  //       setTokenDescription(tokenURIResponse.description);
-  //       // We could render the Image on our sever, and just call our sever.
-  //       // For testnets & mainnet -> use moralis server hooks
-  //       // Have the world adopt IPFS
-  //       // Build our own IPFS gateway
-  //     }
-  //     // get the tokenURI
-  //     // using the image tag from the tokenURI, get the image
-  //   }
-
   useEffect(() => {
     if (isWeb3Enabled) {
-      //   updateUI();
-      setImageURI(true); //my temp fix david
+      setImageURI(`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photosIPFSHashes[0]}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`);
     }
   }, [isWeb3Enabled]);
 
@@ -116,7 +82,7 @@ export default function ItemBox({ id, price, title, description, seller, marketp
                 <div className="flex flex-col items-end gap-2">
                   {/* <div>#{id}</div> */}
                   <div className="italic text-sm">Owned by {formattedSellerAddress}</div>
-                  {imageURI || imageURI == true ? <Skeleton theme="image" height="200px" width="200px" /> : <Image loader={() => imageURI} src={imageURI} height="200" width="200" />}
+                  {imageURI == "" ? <Skeleton theme="image" height="200px" width="200px" /> : <Image loader={() => imageURI} src={imageURI} height="200" width="200" alt="item image" />}
                   <div className="font-bold">{ethers.utils.parseEther(price).toString()} WEI</div>
                   <div className="font-bold self-center">{price} ETH</div>
                 </div>
