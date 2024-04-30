@@ -82,6 +82,12 @@ export default function Home() {
     } catch (e) {
       console.error(e);
       console.log("stopping listing new item");
+      dispatch({
+        type: "error",
+        message: "Uploading images to IPFS failed.",
+        title: "Listing item error",
+        position: "topR",
+      });
       return;
     }
 
@@ -110,8 +116,23 @@ export default function Home() {
   };
 
   async function removePinnedImages(hashes) {
-    //https://api.pinata.cloud/pinning/unpin/{CID}
-    //todo
+    for (const hash of hashes) {
+      try {
+        const res = await fetch("/api/unpin-file-from-IPFS", {
+          method: "POST",
+          body: JSON.stringify({ hash: hash }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const responseText = await res.text();
+        console.log(responseText);
+      } catch (e) {
+        console.log(e);
+        alert("Trouble uploading file");
+        throw e;
+      }
+    }
   }
 
   async function handleListSuccess() {
@@ -136,7 +157,7 @@ export default function Home() {
     try {
       const formData = new FormData();
       formData.append("file", fileToUpload, { filename: fileToUpload.name });
-      const res = await fetch("/api/files", {
+      const res = await fetch("/api/upload-file-to-IPFS", {
         method: "POST",
         body: formData,
       });
