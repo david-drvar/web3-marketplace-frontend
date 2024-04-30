@@ -4,11 +4,11 @@ import marketplaceAbi from "../../constants/Marketplace.json";
 import Image from "next/image";
 import { Card, Skeleton, useNotification } from "web3uikit";
 import { ethers } from "ethers";
+import Link from "next/link";
 // import UpdateListingModal from "./UpdateListingModal";
 
 const truncateStr = (fullStr, strLen) => {
   if (fullStr.length <= strLen) return fullStr;
-
   const separator = "...";
   const seperatorLength = separator.length;
   const charsToShow = strLen - seperatorLength;
@@ -77,17 +77,19 @@ export default function ItemBox({ id, price, title, description, seller, marketp
         {imageURI ? (
           <div className="m-4">
             {/* <UpdateListingModal isVisible={showModal} tokenId={tokenId} marketplaceAddress={marketplaceAddress} onClose={hideModal} /> */}
-            <Card title={title} description={description} onClick={handleCardClick}>
-              <div className="p-2">
-                <div className="flex flex-col items-end gap-2">
-                  {/* <div>#{id}</div> */}
-                  <div className="italic text-sm">Owned by {formattedSellerAddress}</div>
-                  {imageURI == "" ? <Skeleton theme="image" height="200px" width="200px" /> : <Image loader={() => imageURI} src={imageURI} height="200" width="200" alt="item image" />}
-                  <div className="font-bold">{ethers.utils.parseEther(price).toString()} WEI</div>
-                  <div className="font-bold self-center">{price} ETH</div>
+            <Link href={{ pathname: `/item/${id}`, query: { id, title, description, price, seller, photosIPFSHashes, itemStatus, blockTimestamp, marketplaceAddress } }}>
+              <Card title={title} description={description}>
+                <div className="p-2">
+                  <div className="flex flex-col items-end gap-2">
+                    {/* <div>#{id}</div> */}
+                    <div className="italic text-sm">Owned by {formattedSellerAddress}</div>
+                    {imageURI == "" ? <Skeleton theme="image" height="200px" width="200px" /> : <Image loader={() => imageURI} src={imageURI} height="200" width="200" alt="item image" />}
+                    <div className="font-bold">{ethers.utils.parseEther(price).toString()} WEI</div>
+                    <div className="font-bold self-center">{price} ETH</div>
+                  </div>
                 </div>
-              </div>
-            </Card>
+              </Card>
+            </Link>
           </div>
         ) : (
           <div>Loading...</div>
