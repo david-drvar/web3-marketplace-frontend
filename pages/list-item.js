@@ -3,7 +3,8 @@ import { useMoralis, useWeb3Contract } from "react-moralis";
 import { ethers } from "ethers";
 import marketplaceAbi from "../constants/Marketplace.json";
 import networkMapping from "../constants/networkMapping.json";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 // import Files from "@/pages/components/Files";
 
 export default function Home() {
@@ -18,8 +19,42 @@ export default function Home() {
     title: "",
     description: "",
     price: "",
-    file: null,
   });
+
+  const [images, setImages] = useState([]); // Start with one empty image input
+
+  const handleAddImage = () => {
+    if (images.length >= 3) {
+      dispatch({
+        type: "error",
+        message: "Cannot add more than 3 images",
+        title: "Item listing",
+        position: "topR",
+      });
+      return;
+    }
+    setImages([...images, null]); // Add a new empty image input
+  };
+
+  const handleRemoveImage = (index) => {
+    console.log(index);
+    const updatedImages = [...images];
+    updatedImages.splice(index, 1); // Remove the image input at the specified index
+    setImages(updatedImages);
+    // document.getElementById(`div${index}`).hidden = true;
+
+    document.getElementById(`preview${index}`).hidden = true;
+  };
+
+  const handleImageChange = (index, event) => {
+    const file = event.target.files[0]; // Get the selected file
+    const updatedImages = [...images];
+    updatedImages[index] = file; // Update the value of the image input at the specified index
+    setImages(updatedImages);
+
+    document.getElementById(`preview${index}`).src = URL.createObjectURL(file);
+    document.getElementById(`preview${index}`).hidden = false;
+  };
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -27,21 +62,30 @@ export default function Home() {
       ...prevState,
       [name]: name === "file" ? files[0] : value,
     }));
+    if (name === "file") {
+      document.getElementById("preview1").src = URL.createObjectURL(files[0]);
+      document.getElementById("preview1").hidden = false;
+    }
   };
 
   const handleSubmit = async (e) => {
+    console.log("images");
+    console.log(images);
     e.preventDefault();
-    var hash;
+    var hashes = [];
 
     try {
-      hash = await uploadFile(formData.file);
+      for (const image of images) {
+        const hash = await uploadFile(image);
+        hashes.push(hash);
+      }
     } catch (e) {
       console.error(e);
       console.log("stopping listing new item");
       return;
     }
 
-    console.log(hash);
+    console.log(hashes);
 
     const listOptions = {
       abi: marketplaceAbi,
@@ -51,16 +95,24 @@ export default function Home() {
         _title: formData.title,
         _description: formData.description,
         _price: ethers.utils.parseEther(formData.price).toString(),
-        photosIPFSHashes: [hash],
+        photosIPFSHashes: hashes,
       },
     };
 
     await runContractFunction({
       params: listOptions,
       onSuccess: () => handleListSuccess(),
-      onError: (error) => handleListError(error),
+      onError: (error) => {
+        removePinnedImages(hashes);
+        handleListError(error);
+      },
     });
   };
+
+  async function removePinnedImages(hashes) {
+    //https://api.pinata.cloud/pinning/unpin/{CID}
+    //todo
+  }
 
   async function handleListSuccess() {
     dispatch({
@@ -103,16 +155,49 @@ export default function Home() {
         <div>
           <h1>Create Listing</h1>
           <form onSubmit={handleSubmit}>
-            <label htmlFor="title">Title:</label>
-            <input type="text" id="title" name="title" value={formData.title} onChange={handleChange} required />
-            <label htmlFor="description">Description:</label>
-            <input type="text" id="description" name="description" value={formData.description} onChange={handleChange} required />
-            <label htmlFor="price">Price:</label>
-            <input type="number" id="price" name="price" value={formData.price} onChange={handleChange} required />
-            <label htmlFor="file">File:</label>
-            <input type="file" id="file" name="file" onChange={handleChange} required />
+            <div>
+              <label htmlFor="title">Title:</label>
+              <input type="text" id="title" name="title" value={formData.title} onChange={handleChange} required />
+            </div>
+            <div>
+              <label htmlFor="description">Description:</label>
+              <input type="text" id="description" name="description" value={formData.description} onChange={handleChange} required />
+            </div>
+            <div>
+              <label htmlFor="price">Price:</label>
+              <input type="number" id="price" name="price" value={formData.price} onChange={handleChange} required />
+            </div>
+
+            <div>
+              {images.map((image, index) => (
+                <div key={index}>
+                  {image && (
+                    <>
+                      <button type="button" onClick={() => handleRemoveImage(index)}>
+                        Remove
+                      </button>
+                    </>
+                  )}
+                  <input type="file" class="hidden" id={`img${index}`} accept="image/*" onChange={(e) => handleImageChange(index, e)} />
+                  <label for="files" htmlFor={`img${index}`}>
+                    Select file
+                  </label>
+                  <br />
+                </div>
+              ))}
+              <button type="button" onClick={handleAddImage}>
+                Add Image
+              </button>
+            </div>
+
             <button type="submit">Submit</button>
           </form>
+
+          <img id="preview0" src="#" hidden={true} height="100" width="100" />
+          <img id="preview1" src="#" hidden={true} height="100" width="100" />
+          <img id="preview2" src="#" hidden={true} height="100" width="100" />
+
+          {/* {formData.file ? <Image loader={() => formData.file} id="blah" src="#" height="200" width="200" alt="item image" /> : <div></div>} */}
         </div>
       ) : (
         <div className="m-4 italic">Web3 Currently Not Enabled</div>
