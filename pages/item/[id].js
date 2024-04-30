@@ -16,22 +16,16 @@ export default function ItemPage() {
   const price = router.query.price;
   const seller = router.query.seller;
   const description = router.query.description;
-  const photosIPFSHashes = router.query.photosIPFSHashes;
+  const photosIPFSHashes = typeof router.query.photosIPFSHashes == "string" ? [router.query.photosIPFSHashes] : router.query.photosIPFSHashes;
   const itemStatus = router.query.itemStatus;
   const blockTimestamp = router.query.blockTimestamp;
   const marketplaceAddress = router.query.marketplaceAddress;
-
-  console.log(id);
 
   const dispatch = useNotification();
 
   const [imageURI, setImageURI] = useState("");
 
   const isOwnedByUser = seller === account || seller === undefined;
-
-  useEffect(() => {
-    setImageURI(`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photosIPFSHashes}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`);
-  }, []);
 
   const { runContractFunction: buyItem } = useWeb3Contract({
     abi: marketplaceAbi,
@@ -71,13 +65,18 @@ export default function ItemPage() {
       <p>Price: {price}</p>
       <p>Timestamp: {blockTimestamp}</p>
 
-      {/* {
-        photosIPFSHashes.map((photoHash) => {
-          return <Image loader={() => photoHash} src={photoHash} height="200" width="200" alt="item image" />;
-        })
-      } */}
-
-      {imageURI == "" ? <Skeleton theme="image" height="200px" width="200px" /> : <Image loader={() => imageURI} src={imageURI} height="200" width="200" alt="item image" />}
+      {photosIPFSHashes.map((photoHash) => {
+        return (
+          <Image
+            key={photoHash}
+            loader={() => `${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
+            src={`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
+            height="200"
+            width="200"
+            alt="item image"
+          />
+        );
+      })}
 
       {isOwnedByUser ? (
         <div></div>
