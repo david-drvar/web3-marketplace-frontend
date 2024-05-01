@@ -1,17 +1,17 @@
-import { gql, useLazyQuery, useQuery } from "@apollo/client";
+import { gql, useLazyQuery } from "@apollo/client";
 import { useMoralis } from "react-moralis";
 import networkMapping from "../constants/networkMapping.json";
+import { useEffect } from "react";
 import ItemBox from "./components/ItemBox";
-import { useEffect, useState } from "react";
 
-export default function Home() {
-  const { chainId, isWeb3Enabled } = useMoralis();
+export default function MyItems() {
+  const { chainId, isWeb3Enabled, account } = useMoralis();
   const chainString = chainId ? parseInt(chainId).toString() : null;
   const marketplaceAddress = chainId ? networkMapping[chainString].Marketplace[0] : null;
 
   const getItemsQuery = gql`
-    {
-      items(where: { itemStatus: "Listed" }) {
+    query GetItems($sellerAddress: String!) {
+      items(where: { seller: $sellerAddress }) {
         id
         buyer
         seller
@@ -26,22 +26,24 @@ export default function Home() {
   `;
 
   const [runQuery, { loading, data: items }] = useLazyQuery(getItemsQuery, { fetchPolicy: "network-only" }); // fetch policy is to not look for cache and take the data from network only
-  // const { loading, _, data: items } = useQuery(getItemsQuery);
 
   useEffect(() => {
-    runQuery();
+    const sellerAddress = account;
+    runQuery({
+      query: getItemsQuery,
+      variables: { sellerAddress },
+    });
   }, []);
 
   return (
     <div className="container mx-auto">
-      <h1 className="py-4 px-4 font-bold text-2xl">Recently Listed</h1>
+      <h1 className="py-4 px-4 font-bold text-2xl">My Items</h1>
       <div className="flex flex-wrap">
         {isWeb3Enabled && chainId ? (
           loading || !items ? (
             <div>Loading...</div>
           ) : (
             items.items.map((item) => {
-              if (item.itemStatus === "Bought") return;
               const { price, title, description, seller, id, photosIPFSHashes, itemStatus, blockTimestamp } = item;
               return (
                 <ItemBox

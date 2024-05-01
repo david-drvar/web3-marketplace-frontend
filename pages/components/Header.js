@@ -1,7 +1,22 @@
 import Link from "next/link";
-import { ConnectButton } from "web3uikit";
+import { useRouter } from "next/router";
+import { useMoralis } from "react-moralis";
+import { ConnectButton, Dropdown } from "web3uikit";
 
 export default function Header() {
+  const { isWeb3Enabled } = useMoralis();
+  const router = useRouter();
+
+  const handleChange = (event) => {
+    if (event.id === "orders") {
+      router.push("/my-orders");
+    } else if (event.id === "home") {
+      router.push("/");
+    } else if (event.id === "items") {
+      router.push("/my-items");
+    }
+  };
+
   return (
     <nav className="p-5 border-b-2 flex flex-row justify-between items-center">
       <Link href="/">
@@ -15,7 +30,43 @@ export default function Header() {
         <Link href="/list-item" className="mr-4 p-6">
           List item
         </Link>
-        <ConnectButton moralisAuth={false} />
+        <div>
+          <ConnectButton moralisAuth={false} />
+        </div>
+        {isWeb3Enabled ? (
+          <div>
+            <Dropdown
+              // icon={<SvgDownload fontSize={24} />}
+              width="400"
+              showSelected={false}
+              defaultOptionIndex={0}
+              onChange={handleChange}
+              onComplete={function noRefCheck() {}}
+              options={[
+                {
+                  id: "home",
+                  label: "Home",
+                },
+
+                {
+                  id: "orders",
+                  label: "My orders",
+                  // prefix: <SvgServer fill="#0B72C4" />,
+                },
+                {
+                  id: "items",
+                  label: "My items",
+                },
+                {
+                  id: "account",
+                  label: "Settings",
+                },
+              ]}
+            />
+          </div>
+        ) : (
+          <></>
+        )}
       </div>
     </nav>
   );
