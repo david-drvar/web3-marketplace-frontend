@@ -88,6 +88,7 @@ export default function Home() {
         title: "Listing item error",
         position: "topR",
       });
+      removePinnedImages(hashes);
       return;
     }
 
@@ -129,7 +130,7 @@ export default function Home() {
         console.log(responseText);
       } catch (e) {
         console.log(e);
-        alert("Trouble uploading file");
+        alert("Trouble removing file");
         throw e;
       }
     }

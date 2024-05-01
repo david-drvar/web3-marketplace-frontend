@@ -1,7 +1,7 @@
 import { Modal, Input, useNotification, Upload } from "web3uikit";
 import { useEffect, useState } from "react";
 import { useWeb3Contract } from "react-moralis";
-import nftMarketplaceAbi from "../../constants/Marketplace.json";
+import marketplaceAbi from "../../constants/Marketplace.json";
 import { ethers } from "ethers";
 import Image from "next/image";
 
@@ -13,9 +13,10 @@ export default function UpdateListingModal({ id, title, price, description, mark
     description: description,
     price: price,
   });
-  const [priceToUpdateListingWith, setPriceToUpdateListingWith] = useState(0);
   const [imageURIs, setImageURIs] = useState([]); //item images, ipfs hashes
   const [newImages, setNewImages] = useState([]); //new images
+
+  const { runContractFunction } = useWeb3Contract();
 
   const handleUpdateListingSuccess = () => {
     dispatch({
@@ -28,17 +29,6 @@ export default function UpdateListingModal({ id, title, price, description, mark
     setPriceToUpdateListingWith("0");
   };
 
-  const { runContractFunction: updateListing } = useWeb3Contract({
-    abi: nftMarketplaceAbi,
-    contractAddress: marketplaceAddress,
-    functionName: "updateListing",
-    params: {
-      nftAddress: "nftAddress",
-      tokenId: "tokenId",
-      newPrice: ethers.utils.parseEther(priceToUpdateListingWith || "0"),
-    },
-  });
-
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     setFormData((prevState) => ({
@@ -48,8 +38,6 @@ export default function UpdateListingModal({ id, title, price, description, mark
   };
 
   useEffect(() => {
-    // document.getElementById("upload1");
-    // console.log(photosIPFSHashes);
     setImageURIs(photosIPFSHashes);
   }, []);
 
@@ -60,59 +48,94 @@ export default function UpdateListingModal({ id, title, price, description, mark
     console.log(newImages);
     console.log("imageURIs");
     console.log(imageURIs);
-    // console.log("images");
-    // console.log(images);
-    // e.preventDefault();
-    // var hashes = [];
-    // try {
-    //   for (const image of images) {
-    //     const hash = await uploadFile(image);
-    //     hashes.push(hash);
-    //   }
-    // } catch (e) {
-    //   console.error(e);
-    //   console.log("stopping listing new item");
-    //   dispatch({
-    //     type: "error",
-    //     message: "Uploading images to IPFS failed.",
-    //     title: "Listing item error",
-    //     position: "topR",
-    //   });
-    //   return;
-    // }
-    // console.log(hashes);
-    // const listOptions = {
-    //   abi: marketplaceAbi,
-    //   contractAddress: marketplaceAddress,
-    //   functionName: "listNewItem",
-    //   params: {
-    //     _title: formData.title,
-    //     _description: formData.description,
-    //     _price: ethers.utils.parseEther(formData.price).toString(),
-    //     photosIPFSHashes: hashes,
-    //   },
-    // };
-    // await runContractFunction({
-    //   params: listOptions,
-    //   onSuccess: () => handleListSuccess(),
-    //   onError: (error) => {
-    //     removePinnedImages(hashes);
-    //     handleListError(error);
-    //   },
-    // });
+
+    var hashes = [];
+    try {
+      for (const image of newImages) {
+        if (image == null) continue;
+        const hash = await uploadFile(image);
+        hashes.push(hash);
+      }
+    } catch (e) {
+      console.error(e);
+      console.log("stopping listing new item");
+      //remove uploaded images
+      removePinnedImages(hashes);
+      dispatch({
+        type: "error",
+        message: "Uploading images to IPFS failed.",
+        title: "Listing item error",
+        position: "topR",
+      });
+      return;
+    }
+
+    const newItemImageHashes = imageURIs.concat(hashes);
+    console.log(hashes);
+    const listOptions = {
+      abi: marketplaceAbi,
+      contractAddress: marketplaceAddress,
+      functionName: "updateItem",
+      params: {
+        id: id,
+        _title: formData.title,
+        _description: formData.description,
+        _price: ethers.utils.parseEther(formData.price).toString(),
+        photosIPFSHashes: newItemImageHashes,
+      },
+    };
+    await runContractFunction({
+      params: listOptions,
+      onSuccess: () => handleListSuccess(),
+      onError: (error) => {
+        removePinnedImages(hashes);
+        handleListError(error);
+      },
+    });
   };
 
-  const handleImageChange = (event) => {
-    // Handle image change if needed
-  };
+  async function handleListSuccess() {
+    dispatch({
+      type: "success",
+      message: "Item updated successfully!",
+      title: "Item updated",
+      position: "topR",
+    });
+  }
+
+  async function handleListError(error) {
+    dispatch({
+      type: "error",
+      message: `error`, //todo fix error.data.message not always accessible, depends on error if it is from metamask or contract itself
+      title: "Item update error",
+      position: "topR",
+    });
+  }
+
+  async function removePinnedImages(hashes) {
+    for (const hash of hashes) {
+      try {
+        const res = await fetch("/api/unpin-file-from-IPFS", {
+          method: "POST",
+          body: JSON.stringify({ hash: hash }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const responseText = await res.text();
+        console.log(responseText);
+      } catch (e) {
+        console.log(e);
+        alert("Trouble removing file");
+        throw e;
+      }
+    }
+  }
 
   const handleDeleteImage = (index) => {
     const updatedImages = [...imageURIs];
-    updatedImages.splice(index, 1); // Remove the image input at the specified index
+    updatedImages.splice(index, 1);
     setImageURIs(updatedImages);
-    // document.getElementById(`div${index}`).hidden = true;
-
-    // document.getElementById(`preview${index}`).hidden = true;
   };
 
   const handleAddImageButton = () => {
@@ -140,11 +163,6 @@ export default function UpdateListingModal({ id, title, price, description, mark
 
     console.log("newImages");
     console.log(newImages);
-
-    // const file = event.target.files[0]; // Get the selected file
-    // const updatedImages = [...images];
-    // updatedImages[index] = file; // Update the value of the image input at the specified index
-    // setImages(updatedImages);
   };
 
   const resetFormData = () => {
@@ -171,9 +189,12 @@ export default function UpdateListingModal({ id, title, price, description, mark
       onOk={() => {
         handleSubmit({
           onError: (error) => {
-            console.log(error);
+            handleListError(error);
           },
-          onSuccess: () => handleUpdateListingSuccess(),
+          onSuccess: () => {
+            handleUpdateListingSuccess();
+            onClose();
+          },
         });
       }}
     >
@@ -181,29 +202,7 @@ export default function UpdateListingModal({ id, title, price, description, mark
       <Input label="Description" name="description" value={formData.description} type="text" onChange={handleChange} />
       <Input label="Price" name="price" value={formData.price} type="number" onChange={handleChange} />
 
-      {/* <Upload
-        id="upload1"
-        onChange={function noRefCheck() {}}
-        value={`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photosIPFSHashes[0]}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
-        theme="withIcon"
-      /> */}
-
       {newImages.map((newImage, index) => (
-        // <div key={index}>
-        //   {newImage && (
-        //     <>
-        //       <button type="button" onClick={() => handleRemoveImage(index)}>
-        //         Remove
-        //       </button>
-        //     </>
-        //   )}
-        //   <input type="file" class="hidden" id={`img${index}`} accept="image/*" onChange={(e) => handleImageChange(index, e)} />
-        //   <label for="files" htmlFor={`img${index}`}>
-        //     Select file
-        //   </label>
-        //   <br />
-        // </div>
-
         <Upload onChange={(event) => handleAddNewImage(event, index)} theme="withIcon" />
       ))}
 
