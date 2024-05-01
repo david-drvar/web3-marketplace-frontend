@@ -39,6 +39,7 @@ export default function Header() {
               // icon={<SvgDownload fontSize={24} />}
               width="400"
               showSelected={false}
+              isLabelFixed={false}
               defaultOptionIndex={0}
               onChange={handleChange}
               onComplete={function noRefCheck() {}}

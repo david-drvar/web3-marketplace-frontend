@@ -7,6 +7,7 @@ import { useMoralis, useWeb3Contract } from "react-moralis";
 import { Button, Skeleton, useNotification } from "web3uikit";
 import marketplaceAbi from "../../constants/Marketplace.json";
 import { ethers } from "ethers";
+import UpdateListingModal from "../components/UpdateListingModal";
 
 export default function ItemPage() {
   const { isWeb3Enabled, account } = useMoralis();
@@ -20,6 +21,9 @@ export default function ItemPage() {
   const itemStatus = router.query.itemStatus;
   const blockTimestamp = router.query.blockTimestamp;
   const marketplaceAddress = router.query.marketplaceAddress;
+
+  const [showModal, setShowModal] = useState(false);
+  const hideModal = () => setShowModal(false);
 
   const dispatch = useNotification();
 
@@ -59,11 +63,22 @@ export default function ItemPage() {
 
   return (
     <div>
+      <UpdateListingModal
+        isVisible={showModal}
+        id={id}
+        title={title}
+        price={price}
+        description={description}
+        marketplaceAddress={marketplaceAddress}
+        photosIPFSHashes={photosIPFSHashes}
+        onClose={hideModal}
+      />
+
       <p>Item: {id}</p>
       <p>Title: {title}</p>
       <p>Description: {description}</p>
       <p>Price: {price}</p>
-      <p>Timestamp: {blockTimestamp}</p>
+      <p>Date posted: {new Date(blockTimestamp * 1000).toDateString()}</p>
 
       {photosIPFSHashes.map((photoHash) => {
         return (
@@ -79,7 +94,7 @@ export default function ItemPage() {
       })}
 
       {isOwnedByUser ? (
-        <div></div>
+        <Button text="Update item" id="updateButton" onClick={() => setShowModal(true)} />
       ) : (
         <Button
           text="Buy item"
