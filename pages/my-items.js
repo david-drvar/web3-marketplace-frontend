@@ -11,7 +11,7 @@ export default function MyItems() {
 
   const getItemsQuery = gql`
     query GetItems($sellerAddress: String!) {
-      items(where: { seller: $sellerAddress }) {
+      items(where: { seller: $sellerAddress, itemStatus: "Listed" }) {
         id
         buyer
         seller

@@ -108,7 +108,12 @@ export default function Home() {
 
     await runContractFunction({
       params: listOptions,
-      onSuccess: () => handleListSuccess(),
+      onSuccess: (tx) => {
+        handleListWaitingConfirmation();
+        tx.wait().then((finalTx) => {
+          handleListSuccess();
+        });
+      },
       onError: (error) => {
         removePinnedImages(hashes);
         handleListError(error);
@@ -139,8 +144,17 @@ export default function Home() {
   async function handleListSuccess() {
     dispatch({
       type: "success",
-      message: "Item listing",
+      message: "Item listed successfully!",
       title: "Item listed",
+      position: "topR",
+    });
+  }
+
+  async function handleListWaitingConfirmation() {
+    dispatch({
+      type: "info",
+      message: "Transaction submitted. Waiting for confirmations.",
+      title: "Waiting for confirmations",
       position: "topR",
     });
   }

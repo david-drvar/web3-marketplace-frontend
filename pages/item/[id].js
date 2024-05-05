@@ -8,6 +8,7 @@ import { Button, Skeleton, useNotification } from "web3uikit";
 import marketplaceAbi from "../../constants/Marketplace.json";
 import { ethers } from "ethers";
 import UpdateListingModal from "../components/UpdateListingModal";
+import DeleteItemModal from "../components/DeleteItemModal";
 
 export default function ItemPage() {
   const { isWeb3Enabled, account } = useMoralis();
@@ -24,6 +25,9 @@ export default function ItemPage() {
 
   const [showModal, setShowModal] = useState(false);
   const hideModal = () => setShowModal(false);
+
+  const [showModalDelete, setShowModalDelete] = useState(false);
+  const hideModalDelete = () => setShowModalDelete(false);
 
   const dispatch = useNotification();
 
@@ -73,6 +77,7 @@ export default function ItemPage() {
         photosIPFSHashes={photosIPFSHashes}
         onClose={hideModal}
       />
+      <DeleteItemModal isVisible={showModalDelete} id={id} marketplaceAddress={marketplaceAddress} onClose={hideModalDelete} />
 
       <p>Item: {id}</p>
       <p>Title: {title}</p>
@@ -94,7 +99,10 @@ export default function ItemPage() {
       })}
 
       {isOwnedByUser ? (
-        <Button text="Update item" id="updateButton" onClick={() => setShowModal(true)} />
+        <>
+          <Button text="Update item" id="updateButton" onClick={() => setShowModal(true)} />
+          <Button text="Delete item" id="deleteButton" onClick={() => setShowModalDelete(true)} />
+        </>
       ) : (
         <Button
           text="Buy item"
