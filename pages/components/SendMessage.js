@@ -3,13 +3,11 @@ import React, { useState } from "react";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useMoralis } from "react-moralis";
 import { firebase_db } from "../firebaseConfig";
-import { getChatID } from "../utils/utils";
+import { getChatId } from "../utils/utils";
 
-const SendMessage = ({ scroll }) => {
+const SendMessage = ({ scroll, chatId, sendToAddress }) => {
   const [message, setMessage] = useState("");
-  //   const { account } = useMoralis();
-  const idAccountTo = "0x8D512c7D634F140FdfE1995790998066f5a795c2";
-  const account = "0x092024b4A7A2a774AAc4F271f5383AF7aBf6eF8b";
+  const { account } = useMoralis();
 
   const sendMessage = async (event) => {
     event.preventDefault();
@@ -17,18 +15,11 @@ const SendMessage = ({ scroll }) => {
       alert("Enter valid message");
       return;
     }
-    // const { uid, displayName, photoURL } = auth.currentUser;
-    // await addDoc(collection(db, "messages"), {
-    //   text: message,
-    //   name: displayName,
-    //   avatar: photoURL,
-    //   createdAt: serverTimestamp(),
-    //   uid,
-    // });
-    await addDoc(collection(firebase_db, "chats", getChatID(account, idAccountTo), "messages"), {
+
+    await addDoc(collection(firebase_db, "chats", chatId, "messages"), {
       content: message,
       from: account,
-      to: idAccountTo,
+      to: sendToAddress,
       timestamp: serverTimestamp(),
     });
     setMessage("");

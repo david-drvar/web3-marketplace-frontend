@@ -9,6 +9,9 @@ import marketplaceAbi from "../../constants/Marketplace.json";
 import { ethers } from "ethers";
 import UpdateListingModal from "../components/UpdateListingModal";
 import DeleteItemModal from "../components/DeleteItemModal";
+import { getChatId } from "../utils/utils";
+import { query, collection, orderBy, onSnapshot, limit } from "firebase/firestore";
+import { firebase_db } from "../firebaseConfig";
 
 export default function ItemPage() {
   const { isWeb3Enabled, account } = useMoralis();
@@ -65,6 +68,13 @@ export default function ItemPage() {
     });
   };
 
+  const startChat = () => {
+    const accountAddr1 = account;
+    const accountAddr2 = seller;
+    const chatId = getChatId(accountAddr1, accountAddr2);
+    router.push({ pathname: `/chat/${chatId}`, query: { chatId } });
+  };
+
   return (
     <div>
       <UpdateListingModal
@@ -104,16 +114,19 @@ export default function ItemPage() {
           <Button text="Delete item" id="deleteButton" onClick={() => setShowModalDelete(true)} />
         </>
       ) : (
-        <Button
-          text="Buy item"
-          id="buyButton"
-          onClick={() => {
-            buyItem({
-              onSuccess: () => handleBuyItemSuccess(),
-              onError: (error) => handleBuyItemError(error),
-            });
-          }}
-        />
+        <>
+          <Button
+            text="Buy item"
+            id="buyButton"
+            onClick={() => {
+              buyItem({
+                onSuccess: () => handleBuyItemSuccess(),
+                onError: (error) => handleBuyItemError(error),
+              });
+            }}
+          />
+          <Button text="Chat with seller" id="chatButton" onClick={startChat} />
+        </>
       )}
     </div>
   );
