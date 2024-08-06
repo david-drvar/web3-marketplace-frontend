@@ -1,6 +1,8 @@
 # Created by https://www.toptal.com/developers/gitignore/api/nextjs,react,node,webstorm,yarn
 # Edit at https://www.toptal.com/developers/gitignore?templates=nextjs,react,node,webstorm,yarn
 
+.idea
+
 ### NextJS ###
 # dependencies
 /node_modules
