@@ -44,57 +44,59 @@ export default function ItemBox({ id, price, title, description, seller, marketp
   const isOwnedByUser = seller === account || seller === undefined;
   const formattedSellerAddress = isOwnedByUser ? "you" : truncateStr(seller || "", 15);
 
-  const handleCardClick = () => {
-    isOwnedByUser
-      ? setShowModal(true)
-      : buyItem({
-          onSuccess: () => handleBuyItemSuccess(),
-          onError: (error) => handleBuyItemError(error),
-        });
-  };
-
-  const handleBuyItemSuccess = () => {
-    dispatch({
-      type: "success",
-      message: "Item bought!",
-      title: "Item Bought",
-      position: "topR",
-    });
-  };
-
-  const handleBuyItemError = (error) => {
-    dispatch({
-      type: "error",
-      message: error.data.message,
-      title: "Item buying error",
-      position: "topR",
-    });
-  };
-
   return (
-    <div>
-      <div>
-        {imageURI ? (
-          <div className="m-4">
-            {/* <UpdateListingModal isVisible={showModal} tokenId={tokenId} marketplaceAddress={marketplaceAddress} onClose={hideModal} /> */}
-            <Link href={{ pathname: `/item/${id}`, query: { id, title, description, price, seller, photosIPFSHashes, itemStatus, blockTimestamp, marketplaceAddress } }}>
-              <Card title={title} description={description}>
-                <div className="p-2">
-                  <div className="flex flex-col items-end gap-2">
-                    {/* <div>#{id}</div> */}
-                    <div className="italic text-sm">Owned by {formattedSellerAddress}</div>
-                    {imageURI == "" ? <Skeleton theme="image" height="200px" width="200px" /> : <Image loader={() => imageURI} src={imageURI} height="200" width="200" alt="item image" />}
-                    <div className="font-bold">{ethers.utils.parseEther(price).toString()} WEI</div>
-                    <div className="font-bold self-center">{price} ETH</div>
+      <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
+        <div className="m-4">
+          {imageURI ? (
+              <Link
+                  href={{
+                    pathname: `/item/${id}`,
+                    query: {
+                      id,
+                      title,
+                      description,
+                      price,
+                      seller,
+                      photosIPFSHashes,
+                      itemStatus,
+                      blockTimestamp,
+                      marketplaceAddress,
+                    },
+                  }}
+              >
+                <div className="cursor-pointer">
+                  <div className="relative w-full h-48 mb-4">
+                    {imageURI == "" ? (
+                        <Skeleton theme="image" height="100%" width="100%" />
+                    ) : (
+                        <Image
+                            loader={() => imageURI}
+                            src={imageURI}
+                            layout="fill"
+                            objectFit="cover"
+                            alt="item image"
+                            className="rounded-t-lg"
+                        />
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
+                    <p className="text-gray-600 text-sm mb-2">{description}</p>
+                    <div className="flex justify-between items-center mt-4">
+                      <span className="italic text-sm text-gray-500">Owned by {formattedSellerAddress}</span>
+                      <div className="text-right">
+                        <p className="font-bold text-gray-800">{price} ETH</p>
+                        <p className="text-sm text-gray-600">{ethers.utils.parseEther(price).toString()} WEI</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </Card>
-            </Link>
-          </div>
-        ) : (
-          <div>Loading...</div>
-        )}
+              </Link>
+          ) : (
+              <div>Loading...</div>
+          )}
+        </div>
       </div>
-    </div>
   );
+
 }

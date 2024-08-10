@@ -66,55 +66,75 @@ export default function ItemPage() {
   };
 
   return (
-    <div>
-      <UpdateListingModal
-        isVisible={showModal}
-        id={id}
-        title={title}
-        price={price}
-        description={description}
-        marketplaceAddress={marketplaceAddress}
-        photosIPFSHashes={photosIPFSHashes}
-        onClose={hideModal}
-      />
-      <DeleteItemModal isVisible={showModalDelete} id={id} marketplaceAddress={marketplaceAddress} onClose={hideModalDelete} />
-
-      <p>Item: {id}</p>
-      <p>Title: {title}</p>
-      <p>Description: {description}</p>
-      <p>Price: {price}</p>
-      <p>Date posted: {new Date(blockTimestamp * 1000).toDateString()}</p>
-
-      {photosIPFSHashes.map((photoHash) => {
-        return (
-          <Image
-            key={photoHash}
-            loader={() => `${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
-            src={`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
-            height="200"
-            width="200"
-            alt="item image"
-          />
-        );
-      })}
-
-      {isOwnedByUser ? (
-        <>
-          <Button text="Update item" id="updateButton" onClick={() => setShowModal(true)} />
-          <Button text="Delete item" id="deleteButton" onClick={() => setShowModalDelete(true)} />
-        </>
-      ) : (
-        <Button
-          text="Buy item"
-          id="buyButton"
-          onClick={() => {
-            buyItem({
-              onSuccess: () => handleBuyItemSuccess(),
-              onError: (error) => handleBuyItemError(error),
-            });
-          }}
+      <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
+        <UpdateListingModal
+            isVisible={showModal}
+            id={id}
+            title={title}
+            price={price}
+            description={description}
+            marketplaceAddress={marketplaceAddress}
+            photosIPFSHashes={photosIPFSHashes}
+            onClose={hideModal}
         />
-      )}
-    </div>
+        <DeleteItemModal isVisible={showModalDelete} id={id} marketplaceAddress={marketplaceAddress} onClose={hideModalDelete} />
+
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">{title}</h1>
+          <p className="text-gray-500 mb-2">Item ID: {id}</p>
+          <p className="text-lg mb-4">{description}</p>
+          <p className="text-xl font-semibold text-green-600 mb-2">Price: {price} ETH</p>
+          <p className="text-gray-400">Date posted: {new Date(blockTimestamp * 1000).toDateString()}</p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mt-6">
+          {photosIPFSHashes.map((photoHash) => (
+              <Image
+                  key={photoHash}
+                  loader={() => `${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
+                  src={`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
+                  height="200"
+                  width="200"
+                  alt="item image"
+                  className="rounded-lg shadow-md"
+              />
+          ))}
+        </div>
+
+        <div className="flex justify-center mt-6">
+          {isOwnedByUser ? (
+              <div className="flex space-x-4">
+                <Button
+                    text="Update item"
+                    id="updateButton"
+                    onClick={() => setShowModal(true)}
+                    theme="primary"
+                    className="bg-blue-500 hover:bg-blue-600"
+                />
+                <Button
+                    text="Delete item"
+                    id="deleteButton"
+                    onClick={() => setShowModalDelete(true)}
+                    theme="colored"
+                    color="red"
+                    className="bg-red-500 hover:bg-red-600"
+                />
+              </div>
+          ) : (
+              <Button
+                  text="Buy item"
+                  id="buyButton"
+                  onClick={() => {
+                    buyItem({
+                      onSuccess: () => handleBuyItemSuccess(),
+                      onError: (error) => handleBuyItemError(error),
+                    });
+                  }}
+                  theme="primary"
+                  className="bg-green-500 hover:bg-green-600"
+              />
+          )}
+        </div>
+      </div>
   );
 }

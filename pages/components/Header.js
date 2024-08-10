@@ -37,9 +37,7 @@ export default function Header() {
           <div>
             <Dropdown
               // icon={<SvgDownload fontSize={24} />}
-              width="400"
-              showSelected={false}
-              isLabelFixed={false}
+              width="800"
               defaultOptionIndex={0}
               onChange={handleChange}
               onComplete={function noRefCheck() {}}

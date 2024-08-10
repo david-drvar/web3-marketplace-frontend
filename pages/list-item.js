@@ -5,21 +5,27 @@ import marketplaceAbi from "../constants/Marketplace.json";
 import networkMapping from "../constants/networkMapping.json";
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import {useRouter} from "next/router";
+import {query} from "firebase/firestore";
 // import Files from "@/pages/components/Files";
 
 export default function Home() {
-  const { chainId, isWeb3Enabled } = useMoralis();
+  const { chainId, isWeb3Enabled , account} = useMoralis();
   const chainString = chainId ? parseInt(chainId).toString() : null;
   const marketplaceAddress = chainId ? networkMapping[chainString].Marketplace[0] : null;
   const dispatch = useNotification();
 
   const { runContractFunction } = useWeb3Contract();
 
+  const router = useRouter();
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
     price: "",
   });
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [images, setImages] = useState([]); // Start with one empty image input
 
@@ -69,6 +75,7 @@ export default function Home() {
   };
 
   const handleSubmit = async (e) => {
+    setIsSubmitting(true);
     console.log("images");
     console.log(images);
     e.preventDefault();
@@ -89,9 +96,11 @@ export default function Home() {
         position: "topR",
       });
       removePinnedImages(hashes);
+      setIsSubmitting(false);
       return;
     }
 
+    console.log("hashes");
     console.log(hashes);
 
     const listOptions = {
@@ -112,13 +121,44 @@ export default function Home() {
         handleListWaitingConfirmation();
         tx.wait().then((finalTx) => {
           handleListSuccess();
+          setIsSubmitting(false);
+          console.log("finalTx");
+          console.log(finalTx);
+
+          console.log(finalTx.logs[0].topics[1])
+          console.log(Number(finalTx.logs[0].topics[1]))
+
+          let id = Number(finalTx.logs[0].topics[1]);
+          let title = formData.title;
+          let description = formData.description;
+          let price = formData.price;
+          let seller = account;
+          let itemStatus = "Listed";
+          let blockTimestamp = finalTx.blockNumber;
+
+          router.push({
+            pathname: `/item/${id}`,
+            query: {
+              id,
+              title,
+              description,
+              price,
+              seller: account,
+              photosIPFSHashes: hashes,
+              itemStatus,
+              blockTimestamp: blockTimestamp,
+              marketplaceAddress
+            },
+          });
         });
       },
       onError: (error) => {
         removePinnedImages(hashes);
         handleListError(error);
+        setIsSubmitting(false);
       },
     });
+
   };
 
   async function removePinnedImages(hashes) {
@@ -186,58 +226,116 @@ export default function Home() {
   };
 
   return (
-    <div>
-      {isWeb3Enabled && chainId ? (
-        <div>
-          <h1>Create Listing</h1>
-          <form onSubmit={handleSubmit}>
+      <div className="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+        {isWeb3Enabled && chainId ? (
             <div>
-              <label htmlFor="title">Title:</label>
-              <input type="text" id="title" name="title" value={formData.title} onChange={handleChange} required />
-            </div>
-            <div>
-              <label htmlFor="description">Description:</label>
-              <input type="text" id="description" name="description" value={formData.description} onChange={handleChange} required />
-            </div>
-            <div>
-              <label htmlFor="price">Price:</label>
-              <input type="number" id="price" name="price" value={formData.price} onChange={handleChange} required />
-            </div>
-
-            <div>
-              {images.map((image, index) => (
-                <div key={index}>
-                  {image && (
-                    <>
-                      <button type="button" onClick={() => handleRemoveImage(index)}>
-                        Remove
-                      </button>
-                    </>
-                  )}
-                  <input type="file" class="hidden" id={`img${index}`} accept="image/*" onChange={(e) => handleImageChange(index, e)} />
-                  <label for="files" htmlFor={`img${index}`}>
-                    Select file
+              <h1 className="text-2xl font-bold text-center mb-6">Create Listing</h1>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div>
+                  <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                    Title
                   </label>
-                  <br />
+                  <input
+                      type="text"
+                      id="title"
+                      name="title"
+                      value={formData.title}
+                      onChange={handleChange}
+                      required
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  />
                 </div>
-              ))}
-              <button type="button" onClick={handleAddImage}>
-                Add Image
-              </button>
+                <div>
+                  <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                    Description
+                  </label>
+                  <input
+                      type="text"
+                      id="description"
+                      name="description"
+                      value={formData.description}
+                      onChange={handleChange}
+                      required
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="price" className="block text-sm font-medium text-gray-700">
+                    Price (ETH)
+                  </label>
+                  <input
+                      type="number"
+                      id="price"
+                      name="price"
+                      value={formData.price}
+                      onChange={handleChange}
+                      required
+                      className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  />
+                </div>
+
+                <div className="space-y-4">
+                  {images.map((image, index) => (
+                      <div key={index} className="flex items-center space-x-4">
+                        <input
+                            type="file"
+                            id={`img${index}`}
+                            accept="image/*"
+                            onChange={(e) => handleImageChange(index, e)}
+                            className="hidden"
+                        />
+                        <label
+                            htmlFor={`img${index}`}
+                            className="cursor-pointer px-4 py-2 bg-indigo-600 text-white rounded-md shadow hover:bg-indigo-700"
+                        >
+                          Select File
+                        </label>
+                        <img
+                            id={`preview${index}`}
+                            src="#"
+                            hidden={true}
+                            height="100"
+                            width="100"
+                            className="border border-gray-300 rounded-md"
+                        />
+                        {image && (
+                            <button
+                                type="button"
+                                onClick={() => handleRemoveImage(index)}
+                                className="text-red-500 hover:text-red-700"
+                            >
+                              Remove
+                            </button>
+                        )}
+                      </div>
+                  ))}
+                  <button
+                      type="button"
+                      onClick={handleAddImage}
+                      className="w-full py-2 bg-green-500 text-white rounded-md shadow hover:bg-green-600"
+                  >
+                    Add Image
+                  </button>
+                </div>
+
+                <button disabled={!formData.title || !formData.description || !formData.price || isSubmitting} // Disable if any field is empty
+                          type="submit"
+                    className="w-full py-2 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                >
+                  Submit
+                </button>
+              </form>
+
+              {/* Image previews */}
+              <div className="flex space-x-4 mt-4">
+                <img id="preview0" src="#" hidden={true} height="100" width="100" className="rounded-md" />
+                <img id="preview1" src="#" hidden={true} height="100" width="100" className="rounded-md" />
+                <img id="preview2" src="#" hidden={true} height="100" width="100" className="rounded-md" />
+              </div>
             </div>
-
-            <button type="submit">Submit</button>
-          </form>
-
-          <img id="preview0" src="#" hidden={true} height="100" width="100" />
-          <img id="preview1" src="#" hidden={true} height="100" width="100" />
-          <img id="preview2" src="#" hidden={true} height="100" width="100" />
-
-          {/* {formData.file ? <Image loader={() => formData.file} id="blah" src="#" height="200" width="200" alt="item image" /> : <div></div>} */}
-        </div>
-      ) : (
-        <div className="m-4 italic">Web3 Currently Not Enabled</div>
-      )}
-    </div>
+        ) : (
+            <div className="m-4 italic text-center">Web3 Currently Not Enabled</div>
+        )}
+      </div>
   );
 }
