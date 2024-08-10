@@ -7,7 +7,7 @@ import { useMoralis, useWeb3Contract } from "react-moralis";
 import { Button, Skeleton, useNotification } from "web3uikit";
 import marketplaceAbi from "../../constants/Marketplace.json";
 import { ethers } from "ethers";
-import UpdateListingModal from "../components/UpdateListingModal";
+import UpdateItemModal from "../components/UpdateItemModal";
 import DeleteItemModal from "../components/DeleteItemModal";
 
 export default function ItemPage() {
@@ -67,7 +67,7 @@ export default function ItemPage() {
 
   return (
       <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
-        <UpdateListingModal
+        <UpdateItemModal
             isVisible={showModal}
             id={id}
             title={title}

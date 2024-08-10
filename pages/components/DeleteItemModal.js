@@ -47,33 +47,32 @@ export default function DeleteItemModal({ id, marketplaceAddress, onClose, isVis
   }
 
   return (
-    <Modal
-      isVisible={isVisible}
-      okButtonColor="red"
-      okText="Yes! I am 100% sure!"
-      onCancel={onClose}
-      onCloseButtonPressed={onClose}
-      onOk={() => {
-        handleSubmit({
-          onError: (error) => {
-            handleItemDeletionSuccess(error);
-          },
-          onSuccess: () => {
-            handleItemDeletionError();
-          },
-        });
-      }}
-      title="Delete item"
-    >
-      <p
-        style={{
-          fontWeight: 600,
-          marginRight: "1em",
-          textAlign: "center",
-        }}
+      <Modal
+          isVisible={isVisible}
+          okButtonColor="red"
+          okText="Yes! I am 100% sure!"
+          onCancel={onClose}
+          onCloseButtonPressed={onClose}
+          onOk={() => {
+            handleSubmit({
+              onError: (error) => {
+                handleItemDeletionSuccess(error);
+              },
+              onSuccess: () => {
+                handleItemDeletionError();
+              },
+            });
+          }}
+          title="Delete item"
       >
-        Are you sure you want to delete your item?
-      </p>
-    </Modal>
+        <div className="p-4 text-center">
+          <p className="text-lg font-semibold text-gray-800 mb-4">
+            Are you sure you want to delete your item?
+          </p>
+          <p className="text-sm text-gray-600 mb-6">
+            This action cannot be undone and you will lose all associated data.
+          </p>
+        </div>
+      </Modal>
   );
 }

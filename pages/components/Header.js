@@ -30,42 +30,48 @@ export default function Header() {
         <Link href="/list-item" className="mr-4 p-6">
           List item
         </Link>
+        <Link href="/my-orders" className="mr-4 p-6">
+          My orders
+        </Link>
+        <Link href="/my-items" className="mr-4 p-6">
+          My items
+        </Link>
         <div>
           <ConnectButton moralisAuth={false} />
         </div>
-        {isWeb3Enabled ? (
-          <div>
-            <Dropdown
-              // icon={<SvgDownload fontSize={24} />}
-              width="800"
-              defaultOptionIndex={0}
-              onChange={handleChange}
-              onComplete={function noRefCheck() {}}
-              options={[
-                {
-                  id: "home",
-                  label: "Home",
-                },
+        {/*{isWeb3Enabled ? (*/}
+        {/*  <div>*/}
+        {/*    <Dropdown*/}
+        {/*      // icon={<SvgDownload fontSize={24} />}*/}
+        {/*      width="800"*/}
+        {/*      defaultOptionIndex={0}*/}
+        {/*      onChange={handleChange}*/}
+        {/*      onComplete={function noRefCheck() {}}*/}
+        {/*      options={[*/}
+        {/*        {*/}
+        {/*          id: "home",*/}
+        {/*          label: "Home",*/}
+        {/*        },*/}
 
-                {
-                  id: "orders",
-                  label: "My orders",
-                  // prefix: <SvgServer fill="#0B72C4" />,
-                },
-                {
-                  id: "items",
-                  label: "My items",
-                },
-                {
-                  id: "account",
-                  label: "Settings",
-                },
-              ]}
-            />
-          </div>
-        ) : (
-          <></>
-        )}
+        {/*        {*/}
+        {/*          id: "orders",*/}
+        {/*          label: "My orders",*/}
+        {/*          // prefix: <SvgServer fill="#0B72C4" />,*/}
+        {/*        },*/}
+        {/*        {*/}
+        {/*          id: "items",*/}
+        {/*          label: "My items",*/}
+        {/*        },*/}
+        {/*        {*/}
+        {/*          id: "account",*/}
+        {/*          label: "Settings",*/}
+        {/*        },*/}
+        {/*      ]}*/}
+        {/*    />*/}
+        {/*  </div>*/}
+        {/*) : (*/}
+        {/*  <></>*/}
+        {/*)}*/}
       </div>
     </nav>
   );

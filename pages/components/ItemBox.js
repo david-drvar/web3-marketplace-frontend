@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Card, Skeleton, useNotification } from "web3uikit";
 import { ethers } from "ethers";
 import Link from "next/link";
-// import UpdateListingModal from "./UpdateListingModal";
+// import UpdateItemModal from "./UpdateItemModal";
 
 const truncateStr = (fullStr, strLen) => {
   if (fullStr.length <= strLen) return fullStr;

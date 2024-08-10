@@ -5,7 +5,7 @@ import marketplaceAbi from "../../constants/Marketplace.json";
 import { ethers } from "ethers";
 import Image from "next/image";
 
-export default function UpdateListingModal({ id, title, price, description, marketplaceAddress, onClose, isVisible, photosIPFSHashes }) {
+export default function UpdateItemModal({ id, title, price, description, marketplaceAddress, onClose, isVisible, photosIPFSHashes }) {
   const dispatch = useNotification();
 
   const [formData, setFormData] = useState({
@@ -176,58 +176,107 @@ export default function UpdateListingModal({ id, title, price, description, mark
   };
 
   return (
-    <Modal
-      isVisible={isVisible}
-      onCancel={() => {
-        resetFormData();
-        onClose();
-      }}
-      onCloseButtonPressed={() => {
-        resetFormData();
-        onClose();
-      }}
-      onOk={() => {
-        handleSubmit({
-          onError: (error) => {
-            handleListError(error);
-          },
-          onSuccess: () => {
-            handleUpdateListingSuccess();
+      <Modal
+          isVisible={isVisible}
+          onCancel={() => {
+            resetFormData();
             onClose();
-          },
-        });
-      }}
-    >
-      <Input label="Title" name="title" value={formData.title} type="text" onChange={handleChange} />
-      <Input label="Description" name="description" value={formData.description} type="text" onChange={handleChange} />
-      <Input label="Price" name="price" value={formData.price} type="number" onChange={handleChange} />
+          }}
+          onCloseButtonPressed={() => {
+            resetFormData();
+            onClose();
+          }}
+          onOk={() => {
+            handleSubmit({
+              onError: (error) => {
+                handleListError(error);
+              },
+              onSuccess: () => {
+                handleUpdateListingSuccess();
+                onClose();
+              },
+            });
+          }}
+          title="Update Item"
+      >
+        <div className="p-4 space-y-4">
+          <Input
+              label="Title"
+              name="title"
+              value={formData.title}
+              type="text"
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          />
+          <Input
+              label="Description"
+              name="description"
+              value={formData.description}
+              type="text"
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          />
+          <Input
+              label="Price"
+              name="price"
+              value={formData.price}
+              type="number"
+              onChange={handleChange}
+              className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+          />
 
-      {newImages.map((newImage, index) => (
-        <Upload onChange={(event) => handleAddNewImage(event, index)} theme="withIcon" />
-      ))}
+          {newImages.map((newImage, index) => (
+              <Upload
+                  key={index}
+                  onChange={(event) => handleAddNewImage(event, index)}
+                  theme="withIcon"
+                  className="w-full bg-gray-100 p-2 rounded-lg border border-gray-300"
+              />
+          ))}
 
-      <button type="button" onClick={handleAddImageButton}>
-        Add Image
-      </button>
+          <button
+              type="button"
+              onClick={handleAddImageButton}
+              className="w-full py-2 bg-green-500 text-white rounded-md shadow hover:bg-green-600 focus:outline-none"
+          >
+            Add Image
+          </button>
 
-      {imageURIs.map((photoHash, index) => {
-        return (
-          <div className="relative w-64 h-64 rounded-lg overflow-hidden shadow-lg">
-            <Image
-              loader={() => `${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
-              src={`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
-              alt="Image"
-              layout="fill"
-              objectFit="cover"
-            />
-            <button className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 focus:outline-none hover:bg-red-600" onClick={() => handleDeleteImage(index)}>
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-              </svg>
-            </button>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {imageURIs.map((photoHash, index) => (
+                <div key={index} className="relative w-full h-64 rounded-lg overflow-hidden shadow-lg">
+                  <Image
+                      loader={() => `${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
+                      src={`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
+                      alt="Image"
+                      layout="fill"
+                      objectFit="cover"
+                      className="rounded-lg"
+                  />
+                  <button
+                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 focus:outline-none hover:bg-red-600"
+                      onClick={() => handleDeleteImage(index)}
+                  >
+                    <svg
+                        className="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+            ))}
           </div>
-        );
-      })}
-    </Modal>
+        </div>
+      </Modal>
   );
+
 }
