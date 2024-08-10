@@ -14,10 +14,10 @@ export default function ItemPage() {
   const { isWeb3Enabled, account } = useMoralis();
   const router = useRouter();
   const id = router.query.id;
-  const title = router.query.title;
-  const price = router.query.price;
+  const [title, setTitle] = useState(router.query.title);
+  const [price, setPrice] = useState(router.query.price);
   const seller = router.query.seller;
-  const description = router.query.description;
+  const [description, setDescription] = useState(router.query.description);
   const photosIPFSHashes = typeof router.query.photosIPFSHashes == "string" ? [router.query.photosIPFSHashes] : router.query.photosIPFSHashes;
   const itemStatus = router.query.itemStatus;
   const blockTimestamp = router.query.blockTimestamp;
@@ -99,6 +99,9 @@ export default function ItemPage() {
             marketplaceAddress={marketplaceAddress}
             photosIPFSHashes={photosIPFSHashes}
             onClose={hideModal}
+            setPrice={setPrice}
+            setDescription={setDescription}
+            setTitle={setTitle}
         />
         <DeleteItemModal isVisible={showModalDelete} id={id} marketplaceAddress={marketplaceAddress} onClose={hideModalDelete} disableButtons={disableButtons}/>
 

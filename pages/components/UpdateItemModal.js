@@ -5,16 +5,17 @@ import marketplaceAbi from "../../constants/Marketplace.json";
 import { ethers } from "ethers";
 import Image from "next/image";
 
-export default function UpdateItemModal({ id, title, price, description, marketplaceAddress, onClose, isVisible, photosIPFSHashes }) {
+export default function UpdateItemModal({ id, title, price, description, marketplaceAddress, onClose, isVisible, photosIPFSHashes, setPrice, setTitle, setDescription }) {
   const dispatch = useNotification();
 
   const [formData, setFormData] = useState({
     title: title,
     description: description,
-    price: price,
+    price: ethers.utils.formatEther(price),
   });
   const [imageURIs, setImageURIs] = useState([]); //item images, ipfs hashes
   const [newImages, setNewImages] = useState([]); //new images
+  const [buttonsDisabled, setButtonsDisabled] = useState(false); //new images
 
   const { runContractFunction } = useWeb3Contract();
 
@@ -86,13 +87,34 @@ export default function UpdateItemModal({ id, title, price, description, marketp
     };
     await runContractFunction({
       params: listOptions,
-      onSuccess: () => handleListSuccess(),
+      onSuccess: (tx) => {
+        setButtonsDisabled(true);
+        handleListWaitingConfirmation();
+        tx.wait().then((finalTx) => {
+          setPrice(ethers.utils.parseEther(formData.price).toString());
+          setDescription(formData.description);
+          setTitle(formData.title);
+          handleListSuccess();
+          onClose();
+          setButtonsDisabled(false);
+        })
+      },
       onError: (error) => {
         removePinnedImages(hashes);
         handleListError(error);
       },
     });
   };
+
+  async function handleListWaitingConfirmation() {
+    dispatch({
+      type: "info",
+      message: "Transaction submitted. Waiting for confirmations.",
+      title: "Waiting for confirmations",
+      position: "topR",
+    });
+  }
+
 
   async function handleListSuccess() {
     dispatch({
@@ -170,13 +192,15 @@ export default function UpdateItemModal({ id, title, price, description, marketp
     setFormData({
       title: title,
       description: description,
-      price: price,
+      price: ethers.utils.formatEther(price),
     });
     setNewImages([]);
   };
 
   return (
       <Modal
+          isCancelDisabled={buttonsDisabled}
+          isOkDisabled={buttonsDisabled}
           isVisible={isVisible}
           onCancel={() => {
             resetFormData();

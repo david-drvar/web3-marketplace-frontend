@@ -36,34 +36,45 @@ export default function MyItems() {
   }, []);
 
   return (
-    <div className="container mx-auto">
-      <h1 className="py-4 px-4 font-bold text-2xl">My Items</h1>
-      <div className="flex flex-wrap">
-        {isWeb3Enabled && chainId ? (
-          loading || !items ? (
-            <div>Loading...</div>
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold text-gray-800 mb-8">Recently Listed</h1>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {isWeb3Enabled && chainId ? (
+              loading || !items ? (
+                  <div className="text-center w-full">Loading...</div>
+              ) : (
+                  items.items.map((item) => {
+                    if (item.itemStatus === "Bought") return null;
+                    const {
+                      price,
+                      title,
+                      description,
+                      seller,
+                      id,
+                      photosIPFSHashes,
+                      itemStatus,
+                      blockTimestamp
+                    } = item;
+                    return (
+                        <ItemBox
+                            key={id}
+                            id={id}
+                            price={price}
+                            title={title}
+                            description={description}
+                            seller={seller}
+                            photosIPFSHashes={photosIPFSHashes}
+                            itemStatus={itemStatus}
+                            blockTimestamp={blockTimestamp}
+                            marketplaceAddress={marketplaceAddress}
+                        />
+                    );
+                  })
+              )
           ) : (
-            items.items.map((item) => {
-              const { price, title, description, seller, id, photosIPFSHashes, itemStatus, blockTimestamp } = item;
-              return (
-                <ItemBox
-                  id={id}
-                  price={price}
-                  title={title}
-                  description={description}
-                  seller={seller}
-                  photosIPFSHashes={photosIPFSHashes}
-                  itemStatus={itemStatus}
-                  blockTimestamp={blockTimestamp}
-                  marketplaceAddress={marketplaceAddress}
-                />
-              );
-            })
-          )
-        ) : (
-          <div className="m-4 italic">Please connect your wallet first to use the platform</div>
-        )}
+              <div className="m-4 italic text-center w-full">Please connect your wallet first to use the platform</div>
+          )}
+        </div>
       </div>
-    </div>
   );
 }
