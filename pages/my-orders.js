@@ -44,7 +44,7 @@ export default function MyOrders() {
                     loading || !items ? (
                         <div className="text-center w-full">Loading...</div>
                     ) : (
-                        items.items ? <div className="text-center w-full">You don't have any orders</div> :
+                        items.items ?
                         items.items.map((item) => {
                             const {
                                 price,
@@ -70,10 +70,10 @@ export default function MyOrders() {
                                     marketplaceAddress={marketplaceAddress}
                                 />
                             );
-                        })
+                        }) : null
                     )
                 ) : (
-                    <div className="m-4 italic text-center w-full">Web3 Currently Not Enabled</div>
+                    <div className="m-4 italic text-center w-full">Please connect your wallet first to use the platform</div>
                 )}
             </div>
         </div>

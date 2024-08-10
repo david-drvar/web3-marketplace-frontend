@@ -69,7 +69,7 @@ export default function Home() {
                         })
                     )
                 ) : (
-                    <div className="m-4 italic text-center w-full">Web3 Currently Not Enabled</div>
+                    <div className="m-4 italic text-center w-full">Please connect your wallet first to use the platform</div>
                 )}
             </div>
         </div>

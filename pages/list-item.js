@@ -318,7 +318,7 @@ export default function Home() {
                   </button>
                 </div>
 
-                <button disabled={!formData.title || !formData.description || !formData.price || isSubmitting} // Disable if any field is empty
+                <button disabled={!formData.title || !formData.description || !formData.price || isSubmitting || images.length === 0 || images.includes(null)}
                           type="submit"
                     className="w-full py-2 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
@@ -334,7 +334,7 @@ export default function Home() {
               </div>
             </div>
         ) : (
-            <div className="m-4 italic text-center">Web3 Currently Not Enabled</div>
+            <div className="m-4 italic text-center">Please connect your wallet first to use the platform.</div>
         )}
       </div>
   );

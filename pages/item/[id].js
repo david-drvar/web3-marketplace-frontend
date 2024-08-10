@@ -25,6 +25,7 @@ export default function ItemPage() {
 
   const [showModal, setShowModal] = useState(false);
   const hideModal = () => setShowModal(false);
+  const disableButtons = () => setButtonsDisabled(true);
 
   const [showModalDelete, setShowModalDelete] = useState(false);
   const hideModalDelete = () => setShowModalDelete(false);
@@ -32,6 +33,7 @@ export default function ItemPage() {
   const dispatch = useNotification();
 
   const [imageURI, setImageURI] = useState("");
+  const [buttonsDisabled, setButtonsDisabled] = useState(false);
 
   const isOwnedByUser = seller === account || seller === undefined;
 
@@ -39,12 +41,33 @@ export default function ItemPage() {
     abi: marketplaceAbi,
     contractAddress: marketplaceAddress,
     functionName: "buyItem",
-    msgValue: ethers.utils.parseEther(price).toString(), //this is specific in Wei
+    msgValue: price,
     params: {
       sellerAddress: seller,
       id: id,
     },
   });
+
+  const handleBuyItem = () => {
+    buyItem({
+      onSuccess: (tx) => {
+        handleListWaitingConfirmation();
+        tx.wait().then((finalTx) => {
+          handleBuyItemSuccess();
+        })
+      },
+      onError: (error) => handleBuyItemError(error),
+    })
+  }
+
+  async function handleListWaitingConfirmation() {
+    dispatch({
+      type: "info",
+      message: "Transaction submitted. Waiting for confirmations.",
+      title: "Waiting for confirmations",
+      position: "topR",
+    });
+  }
 
   const handleBuyItemSuccess = () => {
     dispatch({
@@ -56,10 +79,10 @@ export default function ItemPage() {
   };
 
   const handleBuyItemError = (error) => {
-    console.log(error);
+    // before it used to be error?.data?.message
     dispatch({
       type: "error",
-      message: error.data.message,
+      message: error?.message ? error.message : "Insufficient funds",
       title: "Item buying error",
       position: "topR",
     });
@@ -77,13 +100,13 @@ export default function ItemPage() {
             photosIPFSHashes={photosIPFSHashes}
             onClose={hideModal}
         />
-        <DeleteItemModal isVisible={showModalDelete} id={id} marketplaceAddress={marketplaceAddress} onClose={hideModalDelete} />
+        <DeleteItemModal isVisible={showModalDelete} id={id} marketplaceAddress={marketplaceAddress} onClose={hideModalDelete} disableButtons={disableButtons}/>
 
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">{title}</h1>
           <p className="text-gray-500 mb-2">Item ID: {id}</p>
           <p className="text-lg mb-4">{description}</p>
-          <p className="text-xl font-semibold text-green-600 mb-2">Price: {price} ETH</p>
+          <p className="text-xl font-semibold text-green-600 mb-2">Price: {ethers.utils.formatEther(price)} ETH</p>
           <p className="text-gray-400">Date posted: {new Date(blockTimestamp * 1000).toDateString()}</p>
         </div>
 
@@ -101,10 +124,11 @@ export default function ItemPage() {
           ))}
         </div>
 
-        <div className="flex justify-center mt-6">
+        {itemStatus !== "Bought" ? ( <div className="flex justify-center mt-6">
           {isOwnedByUser ? (
               <div className="flex space-x-4">
                 <Button
+                    disabled={buttonsDisabled}
                     text="Update item"
                     id="updateButton"
                     onClick={() => setShowModal(true)}
@@ -112,6 +136,7 @@ export default function ItemPage() {
                     className="bg-blue-500 hover:bg-blue-600"
                 />
                 <Button
+                    disabled={buttonsDisabled}
                     text="Delete item"
                     id="deleteButton"
                     onClick={() => setShowModalDelete(true)}
@@ -124,17 +149,13 @@ export default function ItemPage() {
               <Button
                   text="Buy item"
                   id="buyButton"
-                  onClick={() => {
-                    buyItem({
-                      onSuccess: () => handleBuyItemSuccess(),
-                      onError: (error) => handleBuyItemError(error),
-                    });
-                  }}
+                  onClick={handleBuyItem}
                   theme="primary"
                   className="bg-green-500 hover:bg-green-600"
               />
           )}
-        </div>
+        </div>) : null}
+
       </div>
   );
 }

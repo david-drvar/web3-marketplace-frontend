@@ -61,7 +61,7 @@ export default function MyItems() {
             })
           )
         ) : (
-          <div className="m-4 italic">Web3 Currently Not Enabled</div>
+          <div className="m-4 italic">Please connect your wallet first to use the platform</div>
         )}
       </div>
     </div>

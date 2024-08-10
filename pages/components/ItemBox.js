@@ -20,20 +20,6 @@ const truncateStr = (fullStr, strLen) => {
 export default function ItemBox({ id, price, title, description, seller, marketplaceAddress, photosIPFSHashes, itemStatus, blockTimestamp }) {
   const { isWeb3Enabled, account } = useMoralis();
   const [imageURI, setImageURI] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const hideModal = () => setShowModal(false);
-  const dispatch = useNotification();
-
-  const { runContractFunction: buyItem } = useWeb3Contract({
-    abi: marketplaceAbi,
-    contractAddress: marketplaceAddress,
-    functionName: "buyItem",
-    msgValue: ethers.utils.parseEther(price).toString(), //this is specific in Wei
-    params: {
-      sellerAddress: seller,
-      id: id,
-    },
-  });
 
   useEffect(() => {
     if (isWeb3Enabled) {
@@ -67,7 +53,7 @@ export default function ItemBox({ id, price, title, description, seller, marketp
                 <div className="cursor-pointer">
                   <div className="relative w-full h-48 mb-4">
                     {imageURI == "" ? (
-                        <Skeleton theme="image" height="100%" width="100%" />
+                        <Skeleton theme="image" height="100%" width="100%"/>
                     ) : (
                         <Image
                             loader={() => imageURI}
@@ -78,15 +64,22 @@ export default function ItemBox({ id, price, title, description, seller, marketp
                             className="rounded-t-lg"
                         />
                     )}
+                    {/* Overlay for owner information */}
+                    {isOwnedByUser ?
+                        (<div
+                            className="absolute top-0 right-0 m-2 bg-gray-800 bg-opacity-75 text-white text-xs px-2 py-1 rounded-lg">
+                          Owned by you
+                        </div>)
+                        : null
+                    }
+
                   </div>
                   <div className="p-4">
                     <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
                     <p className="text-gray-600 text-sm mb-2">{description}</p>
                     <div className="flex justify-between items-center mt-4">
-                      <span className="italic text-sm text-gray-500">Owned by {formattedSellerAddress}</span>
-                      <div className="text-right">
-                        <p className="font-bold text-gray-800">{price} ETH</p>
-                        <p className="text-sm text-gray-600">{ethers.utils.parseEther(price).toString()} WEI</p>
+                      <div>
+                        <p className="font-bold text-gray-800">{ethers.utils.formatEther(price)} ETH</p>
                       </div>
                     </div>
                   </div>
@@ -97,6 +90,7 @@ export default function ItemBox({ id, price, title, description, seller, marketp
           )}
         </div>
       </div>
+
   );
 
 }

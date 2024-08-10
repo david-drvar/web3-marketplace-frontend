@@ -4,11 +4,14 @@ import { useWeb3Contract } from "react-moralis";
 import marketplaceAbi from "../../constants/Marketplace.json";
 import { ethers } from "ethers";
 import Image from "next/image";
+import {useRouter} from "next/router";
 
-export default function DeleteItemModal({ id, marketplaceAddress, onClose, isVisible }) {
+export default function DeleteItemModal({ id, marketplaceAddress, onClose, isVisible, disableButtons }) {
   const dispatch = useNotification();
 
   const { runContractFunction } = useWeb3Contract();
+
+  const router = useRouter();
 
   const handleSubmit = async () => {
     const listOptions = {
@@ -21,12 +24,29 @@ export default function DeleteItemModal({ id, marketplaceAddress, onClose, isVis
     };
     await runContractFunction({
       params: listOptions,
-      onSuccess: () => handleItemDeletionSuccess(),
+      onSuccess: (tx) => {
+        handleListWaitingConfirmation();
+        onClose();
+        disableButtons();
+        tx.wait().then((finalTx) => {
+          handleItemDeletionSuccess().then(() => router.push("/"))
+
+        })
+      },
       onError: (error) => {
         handleItemDeletionError(error);
       },
     });
   };
+
+  async function handleListWaitingConfirmation() {
+    dispatch({
+      type: "info",
+      message: "Transaction submitted. Waiting for confirmations.",
+      title: "Waiting for confirmations",
+      position: "topR",
+    });
+  }
 
   async function handleItemDeletionSuccess() {
     dispatch({
