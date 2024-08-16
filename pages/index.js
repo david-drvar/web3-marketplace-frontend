@@ -1,15 +1,22 @@
-import { gql, useLazyQuery, useQuery } from "@apollo/client";
-import { useMoralis } from "react-moralis";
+import {gql, useLazyQuery, useQuery} from "@apollo/client";
+import {useMoralis} from "react-moralis";
 import networkMapping from "../constants/networkMapping.json";
 import ItemBox from "./components/ItemBox";
-import { useEffect, useState } from "react";
+import {useEffect, useState} from "react";
+import {useDispatch, useSelector} from "react-redux";
+import {setContractAddress} from "@/store/slices/contractSlice";
+import {setAllItems} from "@/store/slices/itemsSlice";
 
 export default function Home() {
-  const { chainId, isWeb3Enabled } = useMoralis();
-  const chainString = chainId ? parseInt(chainId).toString() : null;
-  const marketplaceAddress = chainId ? networkMapping[chainString].Marketplace[0] : null;
+    const {chainId, isWeb3Enabled} = useMoralis();
+    const chainString = chainId ? parseInt(chainId).toString() : null;
+    const contractAddress = chainId ? networkMapping[chainString].Marketplace[0] : null;
 
-  const getItemsQuery = gql`
+    const dispatch = useDispatch();
+
+    const items = useSelector((state) => state.items);
+
+    const getItemsQuery = gql`
     {
       items(where: { itemStatus: "Listed" }) {
         id
@@ -25,22 +32,32 @@ export default function Home() {
     }
   `;
 
-    const [runQuery, {loading, data: items}] = useLazyQuery(getItemsQuery, {fetchPolicy: "network-only"}); // fetch policy is to not look for cache and take the data from network only
-    // const { loading, _, data: items } = useQuery(getItemsQuery);
+    const { loading, error, data } = useQuery(getItemsQuery, {fetchPolicy: "network-only", onCompleted: (data) => setItems(data)}); // fetch policy is to not look for cache and take the data from network only
 
     useEffect(() => {
-        runQuery();
+        dispatch(setContractAddress(contractAddress))
     }, []);
+
+    const setItems = (data) => {
+        if (data.items === undefined)
+            return;
+
+        let itemsArray = []
+        data.items.forEach((item) => {
+            itemsArray.push(item)
+        })
+        dispatch(setAllItems(itemsArray));
+    }
 
     return (
         <div className="container mx-auto px-4 py-8">
             <h1 className="text-3xl font-bold text-gray-800 mb-8">Recently Listed</h1>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {isWeb3Enabled && chainId ? (
-                    loading || !items ? (
+                {isWeb3Enabled ? (
+                    loading ? (
                         <div className="text-center w-full">Loading...</div>
                     ) : (
-                        items.items.map((item) => {
+                        items.map((item) => {
                             if (item.itemStatus === "Bought") return null;
                             const {
                                 price,
@@ -63,13 +80,13 @@ export default function Home() {
                                     photosIPFSHashes={photosIPFSHashes}
                                     itemStatus={itemStatus}
                                     blockTimestamp={blockTimestamp}
-                                    marketplaceAddress={marketplaceAddress}
                                 />
                             );
                         })
                     )
                 ) : (
-                    <div className="m-4 italic text-center w-full">Please connect your wallet first to use the platform</div>
+                    <div className="m-4 italic text-center w-full">Please connect your wallet first to use the
+                        platform</div>
                 )}
             </div>
         </div>

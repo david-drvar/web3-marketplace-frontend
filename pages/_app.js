@@ -4,13 +4,15 @@ import { MoralisProvider } from "react-moralis";
 import Header from "./components/Header";
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
 import { NotificationProvider } from "web3uikit";
+import { wrapper } from '../store/store';
+
 
 const client = new ApolloClient({
   cache: new InMemoryCache(),
   uri: "https://api.studio.thegraph.com/query/72409/marketplace-dapp/version/latest",
 });
 
-export default function App({ Component, pageProps }) {
+function App({ Component, pageProps }) {
   return (
     <div>
       <Head>
@@ -30,3 +32,5 @@ export default function App({ Component, pageProps }) {
     </div>
   );
 }
+
+export default wrapper.withRedux(App);

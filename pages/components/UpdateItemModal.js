@@ -4,8 +4,9 @@ import { useWeb3Contract } from "react-moralis";
 import marketplaceAbi from "../../constants/Marketplace.json";
 import { ethers } from "ethers";
 import Image from "next/image";
+import {useSelector} from "react-redux";
 
-export default function UpdateItemModal({ id, title, price, description, marketplaceAddress, onClose, isVisible, photosIPFSHashes, setPrice, setTitle, setDescription, setPhotosIPFSHashes }) {
+export default function UpdateItemModal({ id, title, price, description, onClose, isVisible, photosIPFSHashes, setPrice, setTitle, setDescription, setPhotosIPFSHashes }) {
   const dispatch = useNotification();
 
   const [formData, setFormData] = useState({
@@ -16,6 +17,8 @@ export default function UpdateItemModal({ id, title, price, description, marketp
   const [imageURIs, setImageURIs] = useState([]); //item images, ipfs hashes
   const [newImages, setNewImages] = useState([]); //new images
   const [buttonsDisabled, setButtonsDisabled] = useState(false); //new images
+
+  const contractAddress = useSelector((state) => state.contract.contractAddress);
 
   const { runContractFunction } = useWeb3Contract();
 
@@ -75,7 +78,7 @@ export default function UpdateItemModal({ id, title, price, description, marketp
     console.log(hashes);
     const listOptions = {
       abi: marketplaceAbi,
-      contractAddress: marketplaceAddress,
+      contractAddress: contractAddress,
       functionName: "updateItem",
       params: {
         id: id,

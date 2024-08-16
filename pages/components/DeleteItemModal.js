@@ -5,9 +5,12 @@ import marketplaceAbi from "../../constants/Marketplace.json";
 import { ethers } from "ethers";
 import Image from "next/image";
 import {useRouter} from "next/router";
+import {useSelector} from "react-redux";
 
-export default function DeleteItemModal({ id, marketplaceAddress, onClose, isVisible, disableButtons }) {
+export default function DeleteItemModal({ id, onClose, isVisible, disableButtons }) {
   const dispatch = useNotification();
+
+  const contractAddress = useSelector((state) => state.contract.contractAddress);
 
   const { runContractFunction } = useWeb3Contract();
 
@@ -16,7 +19,7 @@ export default function DeleteItemModal({ id, marketplaceAddress, onClose, isVis
   const handleSubmit = async () => {
     const listOptions = {
       abi: marketplaceAbi,
-      contractAddress: marketplaceAddress,
+      contractAddress: contractAddress,
       functionName: "deleteItem",
       params: {
         id: id,

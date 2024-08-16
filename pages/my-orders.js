@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 export default function MyOrders() {
     const { chainId, isWeb3Enabled, account } = useMoralis();
     const chainString = chainId ? parseInt(chainId).toString() : null;
-    const marketplaceAddress = chainId ? networkMapping[chainString].Marketplace[0] : null;
 
     const getItemsQuery = gql`
     query GetItems($buyerAddress: String!) {
@@ -67,7 +66,6 @@ export default function MyOrders() {
                                     photosIPFSHashes={photosIPFSHashes}
                                     itemStatus={itemStatus}
                                     blockTimestamp={blockTimestamp}
-                                    marketplaceAddress={marketplaceAddress}
                                 />
                             );
                         }) : null

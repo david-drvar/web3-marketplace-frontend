@@ -7,13 +7,14 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import {useRouter} from "next/router";
 import {query} from "firebase/firestore";
+import {useSelector} from "react-redux";
 // import Files from "@/pages/components/Files";
 
 export default function Home() {
   const { chainId, isWeb3Enabled , account} = useMoralis();
-  const chainString = chainId ? parseInt(chainId).toString() : null;
-  const marketplaceAddress = chainId ? networkMapping[chainString].Marketplace[0] : null;
   const dispatch = useNotification();
+
+  const contractAddress = useSelector((state) => state.contract.contractAddress);
 
   const { runContractFunction } = useWeb3Contract();
 
@@ -105,7 +106,7 @@ export default function Home() {
 
     const listOptions = {
       abi: marketplaceAbi,
-      contractAddress: marketplaceAddress,
+      contractAddress: contractAddress,
       functionName: "listNewItem",
       params: {
         _title: formData.title,
@@ -147,7 +148,6 @@ export default function Home() {
               photosIPFSHashes: hashes,
               itemStatus,
               blockTimestamp: blockTimestamp,
-              marketplaceAddress
             },
           });
         });
