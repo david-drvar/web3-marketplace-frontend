@@ -5,7 +5,7 @@ import marketplaceAbi from "../../constants/Marketplace.json";
 import { ethers } from "ethers";
 import Image from "next/image";
 
-export default function UpdateItemModal({ id, title, price, description, marketplaceAddress, onClose, isVisible, photosIPFSHashes, setPrice, setTitle, setDescription }) {
+export default function UpdateItemModal({ id, title, price, description, marketplaceAddress, onClose, isVisible, photosIPFSHashes, setPrice, setTitle, setDescription, setPhotosIPFSHashes }) {
   const dispatch = useNotification();
 
   const [formData, setFormData] = useState({
@@ -94,6 +94,7 @@ export default function UpdateItemModal({ id, title, price, description, marketp
           setPrice(ethers.utils.parseEther(formData.price).toString());
           setDescription(formData.description);
           setTitle(formData.title);
+          setPhotosIPFSHashes(newItemImageHashes);
           handleListSuccess();
           onClose();
           setButtonsDisabled(false);
@@ -114,6 +115,23 @@ export default function UpdateItemModal({ id, title, price, description, marketp
       position: "topR",
     });
   }
+
+  const uploadFile = async (fileToUpload) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", fileToUpload, { filename: fileToUpload.name });
+      const res = await fetch("/api/upload-file-to-IPFS", {
+        method: "POST",
+        body: formData,
+      });
+      const ipfsHash = await res.text();
+      return ipfsHash;
+    } catch (e) {
+      console.log(e);
+      alert("Trouble uploading file");
+      throw e;
+    }
+  };
 
 
   async function handleListSuccess() {
@@ -199,8 +217,9 @@ export default function UpdateItemModal({ id, title, price, description, marketp
 
   return (
       <Modal
+
           isCancelDisabled={buttonsDisabled}
-          isOkDisabled={buttonsDisabled}
+          isOkDisabled={buttonsDisabled || ((newImages.length + imageURIs.length) === 0) || (newImages.every(element => element === null) && imageURIs.length === 0)}
           isVisible={isVisible}
           onCancel={() => {
             resetFormData();

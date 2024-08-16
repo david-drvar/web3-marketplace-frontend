@@ -2,9 +2,9 @@
 
 import Image from "next/image";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useMoralis, useWeb3Contract } from "react-moralis";
-import { Button, Skeleton, useNotification } from "web3uikit";
+import { Button, useNotification } from "web3uikit";
 import marketplaceAbi from "../../constants/Marketplace.json";
 import { ethers } from "ethers";
 import UpdateItemModal from "../components/UpdateItemModal";
@@ -18,7 +18,7 @@ export default function ItemPage() {
   const [price, setPrice] = useState(router.query.price);
   const seller = router.query.seller;
   const [description, setDescription] = useState(router.query.description);
-  const photosIPFSHashes = typeof router.query.photosIPFSHashes == "string" ? [router.query.photosIPFSHashes] : router.query.photosIPFSHashes;
+  const [photosIPFSHashes, setPhotosIPFSHashes] = useState(typeof router.query.photosIPFSHashes == "string" ? [router.query.photosIPFSHashes] : router.query.photosIPFSHashes);
   const itemStatus = router.query.itemStatus;
   const blockTimestamp = router.query.blockTimestamp;
   const marketplaceAddress = router.query.marketplaceAddress;
@@ -102,6 +102,7 @@ export default function ItemPage() {
             setPrice={setPrice}
             setDescription={setDescription}
             setTitle={setTitle}
+            setPhotosIPFSHashes={setPhotosIPFSHashes}
         />
         <DeleteItemModal isVisible={showModalDelete} id={id} marketplaceAddress={marketplaceAddress} onClose={hideModalDelete} disableButtons={disableButtons}/>
 
