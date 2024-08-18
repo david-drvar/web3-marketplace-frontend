@@ -1,16 +1,16 @@
 import {createSlice} from '@reduxjs/toolkit';
 
+const initialState = "";
+
 const contractSlice = createSlice({
     name: 'contract',
-    initialState: {
-        contractAddress: '',
-    },
+    initialState,
     reducers: {
         setContractAddress: (state, action) => {
-            state.contractAddress = action.payload;
+            return action.payload;
         },
         clearContractAddress: (state) => {
-            state.contractAddress = '';
+            return '';
         },
     },
 });

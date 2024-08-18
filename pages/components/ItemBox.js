@@ -33,7 +33,7 @@ export default function ItemBox({id, price, title, description, seller, photosIP
         <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
             <div className="m-4">
                 {imageURI ? (
-                    <Link href={{pathname: `/item/${id}`}}>
+                    <Link href={`/item/${id}`}>
                         <div className="cursor-pointer">
                             <div className="relative w-full h-48 mb-4">
                                 {imageURI == "" ? (

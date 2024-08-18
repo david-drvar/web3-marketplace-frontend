@@ -32,10 +32,15 @@ export default function Home() {
     }
   `;
 
-    const { loading, error, data } = useQuery(getItemsQuery, {fetchPolicy: "network-only", onCompleted: (data) => setItems(data)}); // fetch policy is to not look for cache and take the data from network only
+    const {loading, error, data} = useQuery(getItemsQuery, {
+        fetchPolicy: "network-only",
+        onCompleted: (data) => setItems(data)
+    }); // fetch policy is to not look for cache and take the data from network only
 
     useEffect(() => {
-        dispatch(setContractAddress(contractAddress))
+        if (contractAddress !== undefined && contractAddress !== null) {
+            dispatch(setContractAddress(contractAddress))
+        }
     }, []);
 
     const setItems = (data) => {
@@ -44,8 +49,9 @@ export default function Home() {
 
         let itemsArray = []
         data.items.forEach((item) => {
-            itemsArray.push(item)
+            itemsArray.push(item);
         })
+
         dispatch(setAllItems(itemsArray));
     }
 

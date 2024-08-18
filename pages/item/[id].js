@@ -27,7 +27,7 @@ export default function ItemPage() {
     const itemStatus = item.itemStatus;
     const blockTimestamp = item.blockTimestamp;
 
-    const contractAddress = useSelector((state) => state.contract.contractAddress);
+    const contractAddress = useSelector((state) => state.contract);
 
     const [showModal, setShowModal] = useState(false);
     const hideModal = () => setShowModal(false);
@@ -167,4 +167,11 @@ export default function ItemPage() {
 
         </div>
     );
+}
+
+
+export async function getServerSideProps(context) {
+    return {
+        props: {},
+    };
 }
