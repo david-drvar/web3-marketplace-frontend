@@ -95,75 +95,80 @@ export default function ItemPage() {
 
     return (
         <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
-            <UpdateItemModal
-                isVisible={showModal}
-                id={id}
-                title={title}
-                price={price}
-                description={description}
-                photosIPFSHashes={photosIPFSHashes}
-                onClose={hideModal}
-                setPrice={setPrice}
-                setDescription={setDescription}
-                setTitle={setTitle}
-                setPhotosIPFSHashes={setPhotosIPFSHashes}
-            />
-            <DeleteItemModal isVisible={showModalDelete} id={id} onClose={hideModalDelete}
-                             disableButtons={disableButtons}/>
+            {isWeb3Enabled ? (<div>
+                <UpdateItemModal
+                    isVisible={showModal}
+                    id={id}
+                    title={title}
+                    price={price}
+                    description={description}
+                    photosIPFSHashes={photosIPFSHashes}
+                    onClose={hideModal}
+                    setPrice={setPrice}
+                    setDescription={setDescription}
+                    setTitle={setTitle}
+                    setPhotosIPFSHashes={setPhotosIPFSHashes}
+                />
+                <DeleteItemModal isVisible={showModalDelete} id={id} onClose={hideModalDelete}
+                                 disableButtons={disableButtons}/>
 
-            <div className="text-center">
-                <h1 className="text-2xl font-bold mb-4">{title}</h1>
-                <p className="text-gray-500 mb-2">Item ID: {id}</p>
-                <p className="text-lg mb-4">{description}</p>
-                <p className="text-xl font-semibold text-green-600 mb-2">Price: {ethers.utils.formatEther(price)} ETH</p>
-                <p className="text-gray-400">Date posted: {new Date(blockTimestamp * 1000).toDateString()}</p>
-            </div>
+                <div className="text-center">
+                    <h1 className="text-2xl font-bold mb-4">{title}</h1>
+                    <p className="text-gray-500 mb-2">Item ID: {id}</p>
+                    <p className="text-lg mb-4">{description}</p>
+                    <p className="text-xl font-semibold text-green-600 mb-2">Price: {ethers.utils.formatEther(price)} ETH</p>
+                    <p className="text-gray-400">Date posted: {new Date(blockTimestamp * 1000).toDateString()}</p>
+                </div>
 
-            <div className="grid grid-cols-2 gap-4 mt-6">
-                {photosIPFSHashes.map((photoHash) => (
-                    <Image
-                        key={photoHash}
-                        loader={() => `${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
-                        src={`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
-                        height="200"
-                        width="200"
-                        alt="item image"
-                        className="rounded-lg shadow-md"
-                    />
-                ))}
-            </div>
+                <div className="grid grid-cols-2 gap-4 mt-6">
+                    {photosIPFSHashes.map((photoHash) => (
+                        <Image
+                            key={photoHash}
+                            loader={() => `${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
+                            src={`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
+                            height="200"
+                            width="200"
+                            alt="item image"
+                            className="rounded-lg shadow-md"
+                        />
+                    ))}
+                </div>
 
-            {itemStatus !== "Bought" ? (<div className="flex justify-center mt-6">
-                {isOwnedByUser ? (
-                    <div className="flex space-x-4">
+                {itemStatus !== "Bought" ? (<div className="flex justify-center mt-6">
+                    {isOwnedByUser ? (
+                        <div className="flex space-x-4">
+                            <Button
+                                disabled={buttonsDisabled}
+                                text="Update item"
+                                id="updateButton"
+                                onClick={() => setShowModal(true)}
+                                theme="primary"
+                                className="bg-blue-500 hover:bg-blue-600"
+                            />
+                            <Button
+                                disabled={buttonsDisabled}
+                                text="Delete item"
+                                id="deleteButton"
+                                onClick={() => setShowModalDelete(true)}
+                                theme="colored"
+                                color="red"
+                                className="bg-red-500 hover:bg-red-600"
+                            />
+                        </div>
+                    ) : (
                         <Button
-                            disabled={buttonsDisabled}
-                            text="Update item"
-                            id="updateButton"
-                            onClick={() => setShowModal(true)}
+                            text="Buy item"
+                            id="buyButton"
+                            onClick={handleBuyItem}
                             theme="primary"
-                            className="bg-blue-500 hover:bg-blue-600"
+                            className="bg-green-500 hover:bg-green-600"
                         />
-                        <Button
-                            disabled={buttonsDisabled}
-                            text="Delete item"
-                            id="deleteButton"
-                            onClick={() => setShowModalDelete(true)}
-                            theme="colored"
-                            color="red"
-                            className="bg-red-500 hover:bg-red-600"
-                        />
-                    </div>
-                ) : (
-                    <Button
-                        text="Buy item"
-                        id="buyButton"
-                        onClick={handleBuyItem}
-                        theme="primary"
-                        className="bg-green-500 hover:bg-green-600"
-                    />
-                )}
-            </div>) : null}
+                    )}
+                </div>) : null}
+            </div>) : (
+                <div className="m-4 italic text-center w-full">Please connect your wallet first to use the
+                    platform</div>)}
+
 
         </div>
     );

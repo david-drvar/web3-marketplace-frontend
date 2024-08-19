@@ -6,8 +6,7 @@ import {useEffect, useState} from "react";
 import {useSelector} from "react-redux";
 
 export default function MyOrders() {
-    const {chainId, isWeb3Enabled, account} = useMoralis();
-    const chainString = chainId ? parseInt(chainId).toString() : null;
+    const {isWeb3Enabled, account} = useMoralis();
 
     //   const getItemsQuery = gql`
     //   query GetItems($buyerAddress: String!) {
@@ -43,7 +42,7 @@ export default function MyOrders() {
         <div className="container mx-auto px-4 py-8">
             <h1 className="text-3xl font-bold text-gray-800 mb-8">Your orders</h1>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {isWeb3Enabled && chainId ? (
+                {isWeb3Enabled ? (
                     !items ? (
                         <div className="text-center w-full">Loading...</div>
                     ) : (
