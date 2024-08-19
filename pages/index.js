@@ -18,7 +18,7 @@ export default function Home() {
 
     const getItemsQuery = gql`
     {
-      items(where: { itemStatus: "Listed" }) {
+      items {
         id
         buyer
         seller
@@ -64,7 +64,7 @@ export default function Home() {
                         <div className="text-center w-full">Loading...</div>
                     ) : (
                         items.map((item) => {
-                            if (item.itemStatus === "Bought") return null;
+                            if (item.itemStatus === "Bought" || item.itemStatus === "Deleted") return null;
                             const {
                                 price,
                                 title,

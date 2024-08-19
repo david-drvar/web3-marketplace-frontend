@@ -23,26 +23,31 @@ export default function MyItems() {
     }
   `;
 
-    const [runQuery, {loading, data: items}] = useLazyQuery(getItemsQuery, {fetchPolicy: "network-only"}); // fetch policy is to not look for cache and take the data from network only
+    const items = useSelector((state) => state.items).filter(item => item.seller === account);
+    console.log("items")
+    console.log(items)
 
-    useEffect(() => {
-        const sellerAddress = account;
-        runQuery({
-            query: getItemsQuery,
-            variables: {sellerAddress},
-        });
-    }, []);
+
+    // const [runQuery, {loading, data: items}] = useLazyQuery(getItemsQuery, {fetchPolicy: "network-only"}); // fetch policy is to not look for cache and take the data from network only
+
+    // useEffect(() => {
+    //     const sellerAddress = account;
+    //     runQuery({
+    //         query: getItemsQuery,
+    //         variables: {sellerAddress},
+    //     });
+    // }, []);
 
     return (
         <div className="container mx-auto px-4 py-8">
             <h1 className="text-3xl font-bold text-gray-800 mb-8">Recently Listed</h1>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {isWeb3Enabled ? (
-                    loading || !items ? (
+                    !items ? (
                         <div className="text-center w-full">Loading...</div>
                     ) : (
-                        items.items.map((item) => {
-                            if (item.itemStatus === "Bought") return null;
+                        items.map((item) => {
+                            if (item.itemStatus === "Bought" || item.itemStatus === "Deleted") return null;
                             const {
                                 price,
                                 title,

@@ -7,13 +7,7 @@ const itemsSlice = createSlice({
     initialState,
     reducers: {
         upsertItem: (state, action) => {
-            const {id, item} = action.payload;
-            const existingIndex = state.findIndex((i) => i.id === id);
-
-            if (existingIndex !== -1)
-                state[existingIndex] = item;
-            else
-                state.push(item);
+            return [...state, action.payload];
         },
         deleteItem: (state, action) => {
             const {id} = action.payload;

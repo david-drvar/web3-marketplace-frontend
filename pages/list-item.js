@@ -7,7 +7,8 @@ import {useEffect, useRef, useState} from "react";
 import Image from "next/image";
 import {useRouter} from "next/router";
 import {query} from "firebase/firestore";
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
+import {upsertItem} from "@/store/slices/itemsSlice";
 // import Files from "@/pages/components/Files";
 
 export default function Home() {
@@ -15,6 +16,8 @@ export default function Home() {
     const dispatch = useNotification();
 
     const contractAddress = useSelector((state) => state.contract);
+    const dispatchRedux = useDispatch();
+
 
     const {runContractFunction} = useWeb3Contract();
 
@@ -129,27 +132,26 @@ export default function Home() {
                     console.log(finalTx.logs[0].topics[1])
                     console.log(Number(finalTx.logs[0].topics[1]))
 
-                    let id = Number(finalTx.logs[0].topics[1]);
+                    let id = BigInt(finalTx.logs[0].topics[1]).toString();
                     let title = formData.title;
                     let description = formData.description;
-                    let price = formData.price;
+                    let price = ethers.utils.parseEther(formData.price);
                     let seller = account;
                     let itemStatus = "Listed";
                     let blockTimestamp = finalTx.blockNumber;
 
-                    router.push({
-                        pathname: `/item/${id}`,
-                        query: {
-                            id,
-                            title,
-                            description,
-                            price,
-                            seller: account,
-                            photosIPFSHashes: hashes,
-                            itemStatus,
-                            blockTimestamp: blockTimestamp,
-                        },
-                    });
+                    let item = {
+                        id,
+                        title,
+                        description,
+                        price,
+                        seller,
+                        itemStatus,
+                        blockTimestamp,
+                        photosIPFSHashes: hashes
+                    };
+                    dispatchRedux(upsertItem(item))
+                    router.push({pathname: `/item/${id}`});
                 });
             },
             onError: (error) => {
