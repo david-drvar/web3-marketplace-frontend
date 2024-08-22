@@ -11,7 +11,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {upsertItem} from "@/store/slices/itemsSlice";
 // import Files from "@/pages/components/Files";
 
-export default function Home() {
+export default function ListItem() {
     const {chainId, isWeb3Enabled, account} = useMoralis();
     const dispatch = useNotification();
 

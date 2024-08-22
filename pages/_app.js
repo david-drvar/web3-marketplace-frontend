@@ -20,7 +20,7 @@ function App({Component, pageProps}) {
             <PersistGate loading={null} persistor={persistor}>
                 <div>
                     <Head>
-                        <title>Web3 Marketplace</title>
+                        <title>DecentWear</title>
                         <meta name="description" content="Marketplace dApp"/>
                         <meta name="viewport" content="width=device-width, initial-scale=1"/>
                         <link rel="icon" href="/favicon.ico"/>
