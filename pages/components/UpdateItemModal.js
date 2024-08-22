@@ -30,7 +30,7 @@ export default function UpdateItemModal({
     const [newImages, setNewImages] = useState([]); //new images
     const [buttonsDisabled, setButtonsDisabled] = useState(false); //new images
 
-    const contractAddress = useSelector((state) => state.contract);
+    const marketplaceContractAddress = useSelector((state) => state.contract["marketplaceContractAddress"]);
 
     const {runContractFunction} = useWeb3Contract();
 
@@ -42,7 +42,6 @@ export default function UpdateItemModal({
             position: "topR",
         });
         onClose && onClose();
-        setPriceToUpdateListingWith("0");
     };
 
     const handleChange = (e) => {
@@ -90,7 +89,7 @@ export default function UpdateItemModal({
         console.log(hashes);
         const listOptions = {
             abi: marketplaceAbi,
-            contractAddress: contractAddress,
+            contractAddress: marketplaceContractAddress,
             functionName: "updateItem",
             params: {
                 id: id,

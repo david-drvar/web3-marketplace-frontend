@@ -27,7 +27,7 @@ export default function ItemPage() {
     const itemStatus = item.itemStatus;
     const blockTimestamp = item.blockTimestamp;
 
-    const contractAddress = useSelector((state) => state.contract);
+    const marketplaceContractAddress = useSelector((state) => state.contract["marketplaceContractAddress"]);
 
     const [showModal, setShowModal] = useState(false);
     const hideModal = () => setShowModal(false);
@@ -44,7 +44,7 @@ export default function ItemPage() {
 
     const {runContractFunction: buyItem} = useWeb3Contract({
         abi: marketplaceAbi,
-        contractAddress: contractAddress,
+        contractAddress: marketplaceContractAddress,
         functionName: "buyItem",
         msgValue: price,
         params: {

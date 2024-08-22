@@ -1,19 +1,28 @@
 import {createSlice} from '@reduxjs/toolkit';
 
-const initialState = "";
+const initialState = {
+    marketplaceContractAddress: "",
+    usersContractAddress: "",
+};
 
 const contractSlice = createSlice({
     name: 'contract',
     initialState,
     reducers: {
-        setContractAddress: (state, action) => {
-            return action.payload;
+        setMarketplaceContractAddress: (state, action) => {
+            return {
+                ...state,
+                marketplaceContractAddress: action.payload,
+            }
         },
-        clearContractAddress: (state) => {
-            return '';
-        },
+        setUsersContractAddress: (state, action) => {
+            return {
+                ...state,
+                usersContractAddress: action.payload,
+            }
+        }
     },
 });
 
-export const {setContractAddress, clearContractAddress} = contractSlice.actions;
+export const {setMarketplaceContractAddress, setUsersContractAddress} = contractSlice.actions;
 export default contractSlice.reducer;

@@ -15,7 +15,7 @@ export default function ListItem() {
     const {chainId, isWeb3Enabled, account} = useMoralis();
     const dispatch = useNotification();
 
-    const contractAddress = useSelector((state) => state.contract);
+    const marketplaceContractAddress = useSelector((state) => state.contract["marketplaceContractAddress"]);
     const dispatchRedux = useDispatch();
 
 
@@ -109,7 +109,7 @@ export default function ListItem() {
 
         const listOptions = {
             abi: marketplaceAbi,
-            contractAddress: contractAddress,
+            contractAddress: marketplaceContractAddress,
             functionName: "listNewItem",
             params: {
                 _title: formData.title,

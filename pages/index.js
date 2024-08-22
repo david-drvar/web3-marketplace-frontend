@@ -4,13 +4,14 @@ import networkMapping from "../constants/networkMapping.json";
 import ItemBox from "./components/ItemBox";
 import {useEffect, useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
-import {setContractAddress} from "@/store/slices/contractSlice";
+import {setMarketplaceContractAddress, setUsersContractAddress} from "@/store/slices/contractSlice";
 import {setAllItems} from "@/store/slices/itemsSlice";
 
 export default function Home() {
     const {chainId, isWeb3Enabled} = useMoralis();
     const chainString = chainId ? parseInt(chainId).toString() : null;
-    const contractAddress = chainId ? networkMapping[chainString].Marketplace[0] : null;
+    const marketplaceContractAddress = chainId ? networkMapping[chainString].Marketplace[0] : null;
+    const usersContractAddress = chainId ? networkMapping[chainString].Users[0] : null;
 
     const dispatch = useDispatch();
 
@@ -38,10 +39,11 @@ export default function Home() {
     }); // fetch policy is to not look for cache and take the data from network only
 
     useEffect(() => {
-        if (contractAddress !== undefined && contractAddress !== null) {
-            dispatch(setContractAddress(contractAddress))
+        if (marketplaceContractAddress && usersContractAddress) {
+            dispatch(setMarketplaceContractAddress(marketplaceContractAddress))
+            dispatch(setUsersContractAddress(usersContractAddress))
         }
-    }, []);
+    }, [marketplaceContractAddress, usersContractAddress, dispatch]);
 
     const setItems = (data) => {
         if (data.items === undefined)

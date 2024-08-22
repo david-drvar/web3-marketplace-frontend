@@ -7,7 +7,7 @@ import {useSelector} from "react-redux";
 export default function DeleteItemModal({id, onClose, isVisible, disableButtons}) {
     const dispatch = useNotification();
 
-    const contractAddress = useSelector((state) => state.contract);
+    const marketplaceContractAddress = useSelector((state) => state.contract["marketplaceContractAddress"]);
 
     const {runContractFunction} = useWeb3Contract();
 
@@ -16,7 +16,7 @@ export default function DeleteItemModal({id, onClose, isVisible, disableButtons}
     const handleSubmit = async () => {
         const listOptions = {
             abi: marketplaceAbi,
-            contractAddress: contractAddress,
+            contractAddress: marketplaceContractAddress,
             functionName: "deleteItem",
             params: {
                 id: id,
