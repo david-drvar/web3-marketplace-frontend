@@ -6,7 +6,7 @@ import {useEffect, useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {setMarketplaceContractAddress, setUsersContractAddress} from "@/store/slices/contractSlice";
 import {setAllItems} from "@/store/slices/itemsSlice";
-import {setUser} from "@/store/slices/userSlice";
+import {clearUser, setUser} from "@/store/slices/userSlice";
 
 const getUserQuery = gql`
     query GetUser($userAddress: String!) {
@@ -85,10 +85,14 @@ export default function Home() {
     }
 
     const setUserState = (data) => {
-        if (data.users === undefined || data.users.length === 0)
+        if (data.users === undefined)
             return;
+        else if (data.users.length === 0) {
+            dispatch(clearUser());
+            return;
+        }
 
-        dispatch(setUser({
+        let user = {
             username: data.users[0].username || '',
             firstName: data.users[0].firstName || '',
             lastName: data.users[0].lastName || '',
@@ -97,7 +101,9 @@ export default function Home() {
             country: data.users[0].country || '',
             isModerator: data.users[0].isModerator || false,
             isActive: data.users[0].isActive || false,
-        }));
+        }
+
+        dispatch(setUser(user));
     }
 
     return (
