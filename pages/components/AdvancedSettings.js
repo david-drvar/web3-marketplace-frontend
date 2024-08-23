@@ -1,8 +1,9 @@
 import React, {useState} from 'react';
 import {useNotification} from "web3uikit";
 import {useWeb3Contract} from "react-moralis";
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import usersAbi from "@/constants/Users.json";
+import {clearUser} from "@/store/slices/userSlice";
 
 const AdvancedSettings = () => {
     // State to control modal visibility
@@ -11,6 +12,7 @@ const AdvancedSettings = () => {
     const {runContractFunction} = useWeb3Contract();
     const usersContractAddress = useSelector((state) => state.contract["usersContractAddress"]);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const dispatchState = useDispatch();
 
     const openModal = () => {
         setIsModalOpen(true);
@@ -31,6 +33,7 @@ const AdvancedSettings = () => {
                     handleDeleteSuccess();
                     setIsSubmitting(false);
                     setIsModalOpen(false);
+                    dispatchState(clearUser())
                 });
             },
             onError: (error) => {

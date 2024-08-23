@@ -6,18 +6,27 @@ import {useEffect, useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {setMarketplaceContractAddress, setUsersContractAddress} from "@/store/slices/contractSlice";
 import {setAllItems} from "@/store/slices/itemsSlice";
+import {setUser} from "@/store/slices/userSlice";
 
-export default function Home() {
-    const {chainId, isWeb3Enabled} = useMoralis();
-    const chainString = chainId ? parseInt(chainId).toString() : null;
-    const marketplaceContractAddress = chainId ? networkMapping[chainString].Marketplace[0] : null;
-    const usersContractAddress = chainId ? networkMapping[chainString].Users[0] : null;
+const getUserQuery = gql`
+    query GetUser($userAddress: String!) {
+      users(where: { userAddress: $userAddress, isActive: true }) {
+        id
+        userAddress
+        username
+        firstName
+        lastName
+        country
+        email
+        description
+        isActive
+        avatarHash
+        isModerator
+      }
+    }
+  `;
 
-    const dispatch = useDispatch();
-
-    const items = useSelector((state) => state.items);
-
-    const getItemsQuery = gql`
+const getItemsQuery = gql`
     {
       items {
         id
@@ -33,10 +42,28 @@ export default function Home() {
     }
   `;
 
+
+export default function Home() {
+    const {chainId, isWeb3Enabled, account} = useMoralis();
+    const chainString = chainId ? parseInt(chainId).toString() : null;
+    const marketplaceContractAddress = chainId ? networkMapping[chainString].Marketplace[0] : null;
+    const usersContractAddress = chainId ? networkMapping[chainString].Users[0] : null;
+
+    const dispatch = useDispatch();
+
+    const items = useSelector((state) => state.items);
+
+
     const {loading, error, data} = useQuery(getItemsQuery, {
         fetchPolicy: "network-only",
-        onCompleted: (data) => setItems(data)
+        onCompleted: (data) => setItemsState(data)
     }); // fetch policy is to not look for cache and take the data from network only
+
+    useQuery(getUserQuery, {
+        variables: {userAddress: account},
+        fetchPolicy: "network-only",
+        onCompleted: (data) => setUserState(data)
+    });
 
     useEffect(() => {
         if (marketplaceContractAddress && usersContractAddress) {
@@ -45,7 +72,7 @@ export default function Home() {
         }
     }, [marketplaceContractAddress, usersContractAddress, dispatch]);
 
-    const setItems = (data) => {
+    const setItemsState = (data) => {
         if (data.items === undefined)
             return;
 
@@ -55,6 +82,22 @@ export default function Home() {
         })
 
         dispatch(setAllItems(itemsArray));
+    }
+
+    const setUserState = (data) => {
+        if (data.users === undefined || data.users.length === 0)
+            return;
+
+        dispatch(setUser({
+            username: data.users[0].username || '',
+            firstName: data.users[0].firstName || '',
+            lastName: data.users[0].lastName || '',
+            description: data.users[0].description || '',
+            email: data.users[0].email || '',
+            country: data.users[0].country || '',
+            isModerator: data.users[0].isModerator || false,
+            isActive: data.users[0].isActive || false,
+        }));
     }
 
     return (

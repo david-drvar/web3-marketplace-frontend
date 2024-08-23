@@ -7,7 +7,7 @@ import {persistReducer, persistStore} from "redux-persist"; // default is localS
 const persistConfig = {
     key: 'root', // key for the storage
     storage,    // storage engine (localStorage in this case)
-    whitelist: ['items', 'contract'], // List of reducers to persist
+    whitelist: ['items', 'contract', 'user'], // List of reducers to persist
     debug: true,
 };
 

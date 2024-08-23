@@ -1,78 +1,36 @@
 import {useState} from "react";
 import {useNotification} from "web3uikit";
 import {useMoralis, useWeb3Contract} from "react-moralis";
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import usersAbi from "@/constants/Users.json";
 import {getCountries} from "@/pages/utils/utils";
 import {gql, useQuery} from "@apollo/client";
 import {setAllItems} from "@/store/slices/itemsSlice";
+import {setUser} from "@/store/slices/userSlice";
 
 
 export default function ManageProfile() {
     const {isWeb3Enabled, account} = useMoralis();
 
-    const getUserQuery = gql`
-    query GetUser($userAddress: String!) {
-      users(where: { userAddress: $userAddress, isActive: true }) {
-        id
-        userAddress
-        username
-        firstName
-        lastName
-        country
-        email
-        description
-        isActive
-        avatarHash
-        isModerator
-      }
-    }
-  `;
+    const user = useSelector((state) => state.user);
 
     const [formData, setFormData] = useState({
-        username: '',
-        firstName: '',
-        lastName: '',
-        country: '',
-        description: '',
-        email: '',
-        isModerator: false,
+        username: user.username,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        country: user.country,
+        description: user.description,
+        email: user.email,
+        isModerator: user.isModerator,
     });
     const [emailError, setEmailError] = useState('');
-    const [userExists, setUserExists] = useState(false);
+    const [userExists, setUserExists] = useState(user.isActive);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const dispatch = useNotification();
     const {runContractFunction} = useWeb3Contract();
     const usersContractAddress = useSelector((state) => state.contract["usersContractAddress"]);
+    const dispatchState = useDispatch();
 
-    const {loading, error, data} = useQuery(getUserQuery, {
-        variables: {userAddress: account},
-        fetchPolicy: "network-only",
-        onCompleted: (data) => setUser(data)
-    });
-
-    const setUser = (data) => {
-        console.log("data")
-        console.log(data)
-        if (data.users === undefined)
-            return;
-
-        if (data.users.length === 0) {
-            setUserExists(false);
-            return;
-        }
-
-        setUserExists(true);
-        setFormData({
-            username: data.users[0].username || '',
-            firstName: data.users[0].firstName || '',
-            lastName: data.users[0].lastName || '',
-            description: data.users[0].description || '',
-            email: data.users[0].email || '',
-            country: data.users[0].country || '',
-            isModerator: data.users[0].isModerator || '',
-        });
-    }
 
     const handleChange = (e) => {
         const {name, value, type, checked} = e.target;
@@ -118,6 +76,16 @@ export default function ManageProfile() {
                 tx.wait().then((finalTx) => {
                     handleUserSuccess();
                     setIsSubmitting(false);
+                    dispatchState(setUser({
+                        username: formData.username,
+                        firstName: formData.firstName,
+                        lastName: formData.lastName,
+                        description: formData.description,
+                        email: formData.email,
+                        country: formData.country,
+                        isModerator: formData.isModerator,
+                        isActive: true,
+                    }))
                 });
             },
             onError: (error) => {
