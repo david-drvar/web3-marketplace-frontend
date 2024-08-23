@@ -2,17 +2,12 @@ import "@/styles/globals.css";
 import Head from "next/head";
 import {MoralisProvider} from "react-moralis";
 import Header from "./components/Header";
-import {ApolloClient, ApolloProvider, InMemoryCache} from "@apollo/client";
+import {ApolloProvider} from "@apollo/client";
 import {NotificationProvider} from "web3uikit";
 import {store, persistor} from '@/store/store';
 import {Provider} from "react-redux";
 import {PersistGate} from "redux-persist/integration/react";
-
-
-const client = new ApolloClient({
-    cache: new InMemoryCache(),
-    uri: "https://api.studio.thegraph.com/query/72409/marketplace-dapp/version/latest",
-});
+import {apolloClient} from "./utils/apolloService"
 
 function App({Component, pageProps}) {
     return (
@@ -26,7 +21,7 @@ function App({Component, pageProps}) {
                         <link rel="icon" href="/favicon.ico"/>
                     </Head>
                     <MoralisProvider initializeOnMount={false}>
-                        <ApolloProvider client={client}>
+                        <ApolloProvider client={apolloClient}>
                             <NotificationProvider>
                                 <Header/>
                                 <Component {...pageProps} />

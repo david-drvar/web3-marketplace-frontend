@@ -10,6 +10,7 @@ import {ethers} from "ethers";
 import UpdateItemModal from "../components/UpdateItemModal";
 import DeleteItemModal from "../components/DeleteItemModal";
 import {useSelector} from "react-redux";
+import BuyItemModal from "@/pages/components/BuyItemModal";
 
 export default function ItemPage() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -41,6 +42,9 @@ export default function ItemPage() {
     const [buttonsDisabled, setButtonsDisabled] = useState(false);
 
     const isOwnedByUser = seller === account || seller === undefined;
+
+    const [showBuyModal, setShowBuyModal] = useState(false); // Modal state
+    const hideBuyModal = () => setShowBuyModal(false);
 
     const {runContractFunction: buyItem} = useWeb3Contract({
         abi: marketplaceAbi,
@@ -112,6 +116,12 @@ export default function ItemPage() {
                 <DeleteItemModal isVisible={showModalDelete} id={id} onClose={hideModalDelete}
                                  disableButtons={disableButtons}/>
 
+                <BuyItemModal
+                    isVisible={showBuyModal}
+                    onClose={hideBuyModal}
+                    onBuyItem={handleBuyItem}
+                />
+
                 <div className="text-center">
                     <h1 className="text-2xl font-bold mb-4">{title}</h1>
                     <p className="text-gray-500 mb-2">Item ID: {id}</p>
@@ -159,7 +169,7 @@ export default function ItemPage() {
                         <Button
                             text="Buy item"
                             id="buyButton"
-                            onClick={handleBuyItem}
+                            onClick={() => setShowBuyModal(true)}
                             theme="primary"
                             className="bg-green-500 hover:bg-green-600"
                         />
