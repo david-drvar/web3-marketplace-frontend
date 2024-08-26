@@ -19,8 +19,7 @@ export default function BuyItemModal({isVisible, onClose, onBuyItem}) {
             title="Buy Item"
             okText={"Buy Item"}
             isOkDisabled={useModerator && !selectedModerator}
-            onOk={() => {
-            }}
+            onOk={() => onBuyItem(selectedModerator)}
             onCancel={onClose}
         >
             <div className="p-4">

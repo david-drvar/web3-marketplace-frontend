@@ -46,19 +46,23 @@ export default function ItemPage() {
     const [showBuyModal, setShowBuyModal] = useState(false); // Modal state
     const hideBuyModal = () => setShowBuyModal(false);
 
-    const {runContractFunction: buyItem} = useWeb3Contract({
-        abi: marketplaceAbi,
-        contractAddress: marketplaceContractAddress,
-        functionName: "buyItem",
-        msgValue: price,
-        params: {
-            sellerAddress: seller,
-            id: id,
-        },
-    });
+    const {runContractFunction} = useWeb3Contract();
 
-    const handleBuyItem = () => {
-        buyItem({
+    const handleBuyItem = async (moderator) => {
+        const contractParams = {
+            abi: marketplaceAbi,
+            contractAddress: marketplaceContractAddress,
+            functionName: "buyItem",
+            msgValue: price,
+            params: {
+                sellerAddress: seller,
+                id: id,
+                _moderator: moderator,
+            },
+        };
+
+        await runContractFunction({
+            params: contractParams,
             onSuccess: (tx) => {
                 handleListWaitingConfirmation();
                 tx.wait().then((finalTx) => {
@@ -66,7 +70,7 @@ export default function ItemPage() {
                 })
             },
             onError: (error) => handleBuyItemError(error),
-        })
+        });
     }
 
     async function handleListWaitingConfirmation() {

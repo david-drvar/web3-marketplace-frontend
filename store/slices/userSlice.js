@@ -10,7 +10,8 @@ const initialState = {
     email: '',
     isModerator: false,
     avatarHash: '',
-    isActive: false
+    isActive: false,
+    moderatorFee: 0
 };
 
 const userSlice = createSlice({
@@ -29,6 +30,7 @@ const userSlice = createSlice({
                 isModerator: action.payload.isModerator,
                 avatarHash: action.payload.avatarHash,
                 isActive: action.payload.isActive,
+                moderatorFee: action.payload.moderatorFee
             }
         },
         clearUser: (state) => {
@@ -42,7 +44,8 @@ const userSlice = createSlice({
                 email: '',
                 isModerator: false,
                 avatarHash: '',
-                isActive: false
+                isActive: false,
+                moderatorFee: 0
             }
         }
     },

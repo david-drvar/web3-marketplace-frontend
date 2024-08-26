@@ -4,8 +4,6 @@ import {useMoralis, useWeb3Contract} from "react-moralis";
 import {useDispatch, useSelector} from "react-redux";
 import usersAbi from "@/constants/Users.json";
 import {getCountries} from "@/pages/utils/utils";
-import {gql, useQuery} from "@apollo/client";
-import {setAllItems} from "@/store/slices/itemsSlice";
 import {setUser} from "@/store/slices/userSlice";
 
 
@@ -22,6 +20,7 @@ export default function ManageProfile() {
         description: user.description,
         email: user.email,
         isModerator: user.isModerator,
+        moderatorFee: user.moderatorFee
     });
     const [emailError, setEmailError] = useState('');
     const [userExists, setUserExists] = useState(user.isActive);
@@ -65,7 +64,8 @@ export default function ManageProfile() {
                 _description: formData.description,
                 _email: formData.email,
                 _avatarHash: "testhash",
-                _isModerator: formData.isModerator
+                _isModerator: formData.isModerator,
+                _moderatorFee: formData.moderatorFee
             },
         };
 
@@ -85,6 +85,7 @@ export default function ManageProfile() {
                         country: formData.country,
                         isModerator: formData.isModerator,
                         isActive: true,
+                        moderatorFee: formData.moderatorFee
                     }))
                 });
             },
@@ -247,6 +248,23 @@ export default function ManageProfile() {
                     <label htmlFor="isModerator" className="ml-2 block text-sm text-gray-900">
                         Set as Moderator
                     </label>
+                </div>
+
+                <div hidden={!formData.isModerator}>
+                    <label htmlFor="moderatorFee" className="block text-sm font-medium text-gray-700">
+                        Moderator Fee
+                    </label>
+                    <input
+                        type="number"
+                        step="0.01"
+                        name="moderatorFee"
+                        id="moderatorFee"
+                        value={formData.moderatorFee}
+                        onChange={handleChange}
+                        className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        placeholder="Enter moderator fee"
+                        required={formData.isModerator} // Required if user is a moderator
+                    />
                 </div>
 
                 <div>
