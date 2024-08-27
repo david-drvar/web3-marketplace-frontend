@@ -94,6 +94,8 @@ export default function Home() {
         }
 
         let user = {
+            id: data.users[0].id || '',
+            userAddress: data.users[0].userAddress || '',
             username: data.users[0].username || '',
             firstName: data.users[0].firstName || '',
             lastName: data.users[0].lastName || '',

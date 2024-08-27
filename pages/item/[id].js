@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import {useRouter} from "next/router";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useMoralis, useWeb3Contract} from "react-moralis";
 import {Button, useNotification} from "web3uikit";
 import marketplaceAbi from "../../constants/Marketplace.json";
@@ -11,6 +11,8 @@ import UpdateItemModal from "../components/UpdateItemModal";
 import DeleteItemModal from "../components/DeleteItemModal";
 import {useSelector} from "react-redux";
 import BuyItemModal from "@/pages/components/BuyItemModal";
+import ChatPopup from "@/pages/components/ChatPopup";
+import {fetchUserByAddress} from "@/pages/utils/apolloService";
 
 export default function ItemPage() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -41,12 +43,22 @@ export default function ItemPage() {
 
     const [buttonsDisabled, setButtonsDisabled] = useState(false);
 
-    const isOwnedByUser = seller === account || seller === undefined;
+    const isAccountSeller = seller === account || seller === undefined;
 
     const [showBuyModal, setShowBuyModal] = useState(false); // Modal state
     const hideBuyModal = () => setShowBuyModal(false);
 
+    const [showChat, setShowChat] = useState(false); // State for showing the chat popup
+
     const {runContractFunction} = useWeb3Contract();
+
+    const [otherUser, setOtherUser] = useState({})
+
+    useEffect(() => {
+        fetchUserByAddress(isAccountSeller ? item.buyer : item.seller).then((data) => {
+            setOtherUser(data)
+        });
+    }, []);
 
     const handleBuyItem = async (moderator) => {
         const contractParams = {
@@ -151,7 +163,7 @@ export default function ItemPage() {
                 {itemStatus !== "Bought" ?
                     (
                         <div className="flex justify-center mt-6">
-                            {isOwnedByUser ? (
+                            {isAccountSeller ? (
                                 <div className="flex space-x-4">
                                     <Button
                                         disabled={buttonsDisabled}
@@ -188,9 +200,16 @@ export default function ItemPage() {
                                 id="chatButton"
                                 theme="primary"
                                 className="bg-blue-500 hover:bg-blue-600"
+                                onClick={() => setShowChat(!showChat)} // Toggle chat popup
                             />
                         </div>
                     )}
+                {showChat &&
+                    <ChatPopup onClose={() => setShowChat(false)}
+                               otherUser={otherUser}
+                    />
+                }
+
             </div>) : (
                 <div className="m-4 italic text-center w-full">Please connect your wallet first to use the
                     platform</div>)}
