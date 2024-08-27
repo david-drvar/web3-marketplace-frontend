@@ -39,3 +39,40 @@ export function getCountries() {
         'Vatican City', 'Venezuela', 'Vietnam', 'Yemen', 'Zambia', 'Zimbabwe'
     ];
 }
+
+
+export const uploadFile = async (fileToUpload) => {
+    try {
+        const formData = new FormData();
+        formData.append("file", fileToUpload, {filename: fileToUpload.name});
+        const res = await fetch("/api/upload-file-to-IPFS", {
+            method: "POST",
+            body: formData,
+        });
+        const ipfsHash = await res.text();
+        return ipfsHash;
+    } catch (e) {
+        console.log(e);
+        alert("Trouble uploading file");
+        throw e;
+    }
+};
+
+
+export async function removePinnedImage(hash) {
+    try {
+        const res = await fetch("/api/unpin-file-from-IPFS", {
+            method: "POST",
+            body: JSON.stringify({hash: hash}),
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+        const responseText = await res.text();
+        console.log(responseText);
+    } catch (e) {
+        console.log(e);
+        alert("Trouble removing file");
+        throw e;
+    }
+}

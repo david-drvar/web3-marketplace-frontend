@@ -22,6 +22,7 @@ const getUserQuery = gql`
         isActive
         avatarHash
         isModerator
+        moderatorFee
       }
     }
   `;
@@ -101,6 +102,8 @@ export default function Home() {
             country: data.users[0].country || '',
             isModerator: data.users[0].isModerator || false,
             isActive: data.users[0].isActive || false,
+            moderatorFee: data.users[0].moderatorFee || 0,
+            avatarHash: data.users[0].avatarHash || ''
         }
 
         dispatch(setUser(user));

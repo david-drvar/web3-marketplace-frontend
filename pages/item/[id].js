@@ -148,37 +148,49 @@ export default function ItemPage() {
                     ))}
                 </div>
 
-                {itemStatus !== "Bought" ? (<div className="flex justify-center mt-6">
-                    {isOwnedByUser ? (
-                        <div className="flex space-x-4">
+                {itemStatus !== "Bought" ?
+                    (
+                        <div className="flex justify-center mt-6">
+                            {isOwnedByUser ? (
+                                <div className="flex space-x-4">
+                                    <Button
+                                        disabled={buttonsDisabled}
+                                        text="Update item"
+                                        id="updateButton"
+                                        onClick={() => setShowModal(true)}
+                                        theme="primary"
+                                        className="bg-blue-500 hover:bg-blue-600"
+                                    />
+                                    <Button
+                                        disabled={buttonsDisabled}
+                                        text="Delete item"
+                                        id="deleteButton"
+                                        onClick={() => setShowModalDelete(true)}
+                                        theme="colored"
+                                        color="red"
+                                        className="bg-red-500 hover:bg-red-600"
+                                    />
+                                </div>
+                            ) : (
+                                <Button
+                                    text="Buy item"
+                                    id="buyButton"
+                                    onClick={() => setShowBuyModal(true)}
+                                    theme="primary"
+                                    className="bg-green-500 hover:bg-green-600"
+                                />
+                            )}
+                        </div>) :
+                    (
+                        <div className="flex justify-center mt-6">
                             <Button
-                                disabled={buttonsDisabled}
-                                text="Update item"
-                                id="updateButton"
-                                onClick={() => setShowModal(true)}
+                                text="Send message"
+                                id="chatButton"
                                 theme="primary"
                                 className="bg-blue-500 hover:bg-blue-600"
                             />
-                            <Button
-                                disabled={buttonsDisabled}
-                                text="Delete item"
-                                id="deleteButton"
-                                onClick={() => setShowModalDelete(true)}
-                                theme="colored"
-                                color="red"
-                                className="bg-red-500 hover:bg-red-600"
-                            />
                         </div>
-                    ) : (
-                        <Button
-                            text="Buy item"
-                            id="buyButton"
-                            onClick={() => setShowBuyModal(true)}
-                            theme="primary"
-                            className="bg-green-500 hover:bg-green-600"
-                        />
                     )}
-                </div>) : null}
             </div>) : (
                 <div className="m-4 italic text-center w-full">Please connect your wallet first to use the
                     platform</div>)}

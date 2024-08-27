@@ -1,11 +1,10 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useNotification} from "web3uikit";
 import {useMoralis, useWeb3Contract} from "react-moralis";
 import {useDispatch, useSelector} from "react-redux";
 import usersAbi from "@/constants/Users.json";
-import {getCountries} from "@/pages/utils/utils";
+import {getCountries, removePinnedImage, uploadFile} from "@/pages/utils/utils";
 import {setUser} from "@/store/slices/userSlice";
-
 
 export default function ManageProfile() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -29,7 +28,18 @@ export default function ManageProfile() {
     const {runContractFunction} = useWeb3Contract();
     const usersContractAddress = useSelector((state) => state.contract["usersContractAddress"]);
     const dispatchState = useDispatch();
+    const [avatarImage, setAvatarImage] = useState(null);
+    const [imageURI, setImageURI] = useState("");
+    const [imagePreview, setImagePreview] = useState(null); // State for image preview
 
+
+    useEffect(() => {
+        if (isWeb3Enabled && user.avatarHash !== '') {
+            setImageURI(`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${user.avatarHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`);
+            console.log("imageURI");
+            console.log(imageURI);
+        }
+    }, [isWeb3Enabled]);
 
     const handleChange = (e) => {
         const {name, value, type, checked} = e.target;
@@ -37,6 +47,23 @@ export default function ManageProfile() {
             ...formData,
             [name]: type === 'checkbox' ? checked : value,
         });
+    };
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+        setAvatarImage(file);
+
+        // Generate image preview
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setImagePreview(reader.result); // Set the image preview to the file reader's result
+        };
+        if (file) {
+            reader.readAsDataURL(file);
+        } else {
+            setImagePreview(null); // Reset the preview if no file is selected
+        }
+
     };
 
     const validateEmail = (email) => {
@@ -52,6 +79,21 @@ export default function ManageProfile() {
         }
         setEmailError('');
 
+
+        // Upload the avatar image to IPFS
+        let avatarImageHash = "defaultHash"; // Default hash in case no image is uploaded
+        if (avatarImage) {
+            try {
+                avatarImageHash = await uploadFile(avatarImage);
+            } catch (error) {
+                handleUserError("Image upload failed");
+                await removePinnedImage(avatarImageHash);
+                setIsSubmitting(false);
+                return;
+            }
+        }
+
+
         const callParams = {
             abi: usersAbi,
             contractAddress: usersContractAddress,
@@ -63,7 +105,7 @@ export default function ManageProfile() {
                 _country: formData.country,
                 _description: formData.description,
                 _email: formData.email,
-                _avatarHash: "testhash",
+                _avatarHash: avatarImageHash,
                 _isModerator: formData.isModerator,
                 _moderatorFee: formData.moderatorFee
             },
@@ -85,8 +127,10 @@ export default function ManageProfile() {
                         country: formData.country,
                         isModerator: formData.isModerator,
                         isActive: true,
-                        moderatorFee: formData.moderatorFee
-                    }))
+                        moderatorFee: formData.moderatorFee,
+                        avatarHash: avatarImageHash
+                    }));
+                    setImageURI(`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${avatarImageHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`);
                 });
             },
             onError: (error) => {
@@ -125,8 +169,21 @@ export default function ManageProfile() {
 
     return (
         <div>
-            <h1 className="text-2xl font-bold mb-6">
+            <h1 className="text-4xl font-bold mb-6 flex items-center justify-between">
+            <span>
                 {userExists ? <>Update Your Profile</> : <>Create Your Profile</>}
+            </span>
+                {
+                    imageURI != "" ? (
+                        <div className="ml-4">
+                            <img
+                                src={imageURI}
+                                alt="Avatar Preview"
+                                className="w-32 h-32 object-cover rounded-full"
+                            />
+                        </div>
+                    ) : null
+                }
             </h1>
             <form onSubmit={handleSubmit} className="space-y-3">
                 <div>
@@ -265,6 +322,26 @@ export default function ManageProfile() {
                         placeholder="Enter moderator fee"
                         required={formData.isModerator} // Required if user is a moderator
                     />
+                </div>
+
+                <div>
+                    <label htmlFor="avatar" className="block text-sm font-medium text-gray-700">
+                        Avatar
+                    </label>
+                    <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                        className="mt-1 block w-full"
+                    />
+
+                    {imagePreview && (
+                        <img
+                            src={imagePreview}
+                            alt="Avatar Preview"
+                            className="mt-2 w-32 h-32 object-cover rounded-full"
+                        />
+                    )}
                 </div>
 
                 <div>
