@@ -1,10 +1,9 @@
-export function getChatID(address1, address2) {
-    const lowerAddress1 = address1.toLowerCase();
-    const lowerAddress2 = address2.toLowerCase();
+const crypto = require('crypto');
 
-    if (lowerAddress1 < lowerAddress2) return lowerAddress1 + lowerAddress2;
-
-    return lowerAddress2 + lowerAddress1;
+export function getChatID(address1, address2, address3) {
+    const sortedAddresses = [address1, address2, address3].sort();
+    const concatenatedAddresses = sortedAddresses.join('');
+    return crypto.createHash('sha256').update(concatenatedAddresses).digest('hex');
 }
 
 export function getCountries() {

@@ -12,7 +12,7 @@ import DeleteItemModal from "../components/DeleteItemModal";
 import {useSelector} from "react-redux";
 import BuyItemModal from "@/pages/components/BuyItemModal";
 import ChatPopup from "@/pages/components/ChatPopup";
-import {fetchUserByAddress} from "@/pages/utils/apolloService";
+import {fetchTransactionByItemId} from "@/pages/utils/apolloService";
 
 export default function ItemPage() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -52,12 +52,11 @@ export default function ItemPage() {
 
     const {runContractFunction} = useWeb3Contract();
 
-    const [otherUser, setOtherUser] = useState({})
+    const [transaction, setTransaction] = useState({});
 
     useEffect(() => {
-        fetchUserByAddress(isAccountSeller ? item.buyer : item.seller).then((data) => {
-            setOtherUser(data)
-        });
+        if (item.itemStatus === "Bought")
+            fetchTransactionByItemId(id).then((data) => setTransaction(data))
     }, []);
 
     const handleBuyItem = async (moderator) => {
@@ -206,7 +205,7 @@ export default function ItemPage() {
                     )}
                 {showChat &&
                     <ChatPopup onClose={() => setShowChat(false)}
-                               otherUser={otherUser}
+                               transaction={transaction}
                     />
                 }
 

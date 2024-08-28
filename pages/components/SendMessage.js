@@ -2,12 +2,12 @@ import React, {useState} from "react";
 
 import {addDoc, collection, serverTimestamp} from "firebase/firestore";
 import {firebase_db} from "../firebaseConfig";
-import {getChatID} from "../utils/utils";
+import {useMoralis} from "react-moralis";
 
-const SendMessage = ({scroll, from, to}) => {
+const SendMessage = ({scroll, chatID}) => {
+    const {account} = useMoralis();
+
     const [message, setMessage] = useState("");
-    const idAccountTo = to.id;
-    const account = from.id;
 
     const sendMessage = async (event) => {
         event.preventDefault();
@@ -16,10 +16,9 @@ const SendMessage = ({scroll, from, to}) => {
             return;
         }
 
-        await addDoc(collection(firebase_db, "chats", getChatID(account, idAccountTo), "messages"), {
+        await addDoc(collection(firebase_db, "chats", chatID, "messages"), {
             content: message,
             from: account,
-            to: idAccountTo,
             timestamp: serverTimestamp(),
         });
         setMessage("");

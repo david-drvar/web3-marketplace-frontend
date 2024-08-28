@@ -8,6 +8,7 @@ import {store, persistor} from '@/store/store';
 import {Provider} from "react-redux";
 import {PersistGate} from "redux-persist/integration/react";
 import {apolloClient} from "./utils/apolloService"
+import AccountChangedListener from "@/pages/components/AccountChangedListener";
 
 function App({Component, pageProps}) {
     return (
@@ -21,6 +22,7 @@ function App({Component, pageProps}) {
                         <link rel="icon" href="/favicon.ico"/>
                     </Head>
                     <MoralisProvider initializeOnMount={false}>
+                        <AccountChangedListener/>
                         <ApolloProvider client={apolloClient}>
                             <NotificationProvider>
                                 <Header/>

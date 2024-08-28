@@ -5,17 +5,33 @@ import SendMessage from "./SendMessage";
 import {useMoralis} from "react-moralis";
 import {firebase_db} from "@/pages/firebaseConfig";
 import {getChatID} from "@/pages/utils/utils";
-import {useSelector} from "react-redux";
+import {fetchUserByAddress} from "@/pages/utils/apolloService";
 
-const ChatPopup = ({onClose, otherUser}) => {
+const ChatPopup = ({onClose, transaction}) => {
     const {account} = useMoralis();
     const [messages, setMessages] = useState([]);
     const scrollRef = useRef();
+    const [buyer, setBuyer] = useState({});
+    const [seller, setSeller] = useState({});
+    const [moderator, setModerator] = useState({});
 
-    const user = useSelector((state) => state.user);
 
     useEffect(() => {
-        const chatID = getChatID(account, otherUser.id);
+        // get all users involved in transaction
+        fetchUserByAddress(transaction.seller).then((data) => {
+            setSeller(data);
+        });
+        fetchUserByAddress(transaction.buyer).then((data) => {
+            setBuyer(data);
+        });
+        fetchUserByAddress(transaction.moderator).then((data) => {
+            setModerator(data);
+        });
+    }, []);
+
+    useEffect(() => {
+        const chatID = getChatID(transaction.buyer, transaction.seller, transaction.moderator)
+
         const q = query(collection(firebase_db, "chats", chatID, "messages"), orderBy("timestamp", "desc"), limit(50));
         const unsubscribe = onSnapshot(q, (QuerySnapshot) => {
             const fetchedMessages = [];
@@ -39,12 +55,16 @@ const ChatPopup = ({onClose, otherUser}) => {
             </div>
             <div className="flex-1 p-4 overflow-y-auto">
                 {messages?.map((message) => (
-                    <Message key={message.id} message={message} user={message.from === account ? user : otherUser}/>
+                    <Message key={message.id} message={message}
+                             user={message.from === transaction.seller ? seller : message.from === transaction.buyer ? buyer : moderator}
+                             transaction={transaction}
+                    />
                 ))}
                 <div ref={scrollRef}/>
             </div>
             <div className="p-4">
-                <SendMessage scroll={scrollRef} from={user} to={otherUser}/>
+                <SendMessage scroll={scrollRef}
+                             chatID={getChatID(transaction.buyer, transaction.seller, transaction.moderator)}/>
             </div>
         </div>
     );

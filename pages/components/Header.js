@@ -36,6 +36,9 @@ export default function Header() {
                 <Link href="/my-items" className="mr-4 p-6">
                     My items
                 </Link>
+                <Link href="/moderated-items" className="mr-4 p-6">
+                    Moderated items
+                </Link>
                 <Link href="/profile" className="mr-4 p-6">
                     Profile
                 </Link>

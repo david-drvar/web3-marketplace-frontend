@@ -7,7 +7,7 @@ import {getCountries, removePinnedImage, uploadFile} from "@/pages/utils/utils";
 import {setUser} from "@/store/slices/userSlice";
 
 export default function ManageProfile() {
-    const {isWeb3Enabled, account} = useMoralis();
+    const {isWeb3Enabled} = useMoralis();
 
     const user = useSelector((state) => state.user);
 
@@ -81,7 +81,7 @@ export default function ManageProfile() {
 
 
         // Upload the avatar image to IPFS
-        let avatarImageHash = "defaultHash"; // Default hash in case no image is uploaded
+        let avatarImageHash = ""; // Default hash in case no image is uploaded
         if (avatarImage) {
             try {
                 avatarImageHash = await uploadFile(avatarImage);
@@ -105,7 +105,7 @@ export default function ManageProfile() {
                 _country: formData.country,
                 _description: formData.description,
                 _email: formData.email,
-                _avatarHash: avatarImageHash,
+                _avatarHash: avatarImageHash === "" && userExists ? user.avatarHash : avatarImageHash,
                 _isModerator: formData.isModerator,
                 _moderatorFee: formData.moderatorFee
             },
