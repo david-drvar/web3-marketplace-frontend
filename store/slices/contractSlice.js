@@ -3,6 +3,7 @@ import {createSlice} from '@reduxjs/toolkit';
 const initialState = {
     marketplaceContractAddress: "",
     usersContractAddress: "",
+    escrowContractAddress: "",
 };
 
 const contractSlice = createSlice({
@@ -20,9 +21,15 @@ const contractSlice = createSlice({
                 ...state,
                 usersContractAddress: action.payload,
             }
+        },
+        setEscrowContractAddress: (state, action) => {
+            return {
+                ...state,
+                escrowContractAddress: action.payload,
+            }
         }
     },
 });
 
-export const {setMarketplaceContractAddress, setUsersContractAddress} = contractSlice.actions;
+export const {setMarketplaceContractAddress, setUsersContractAddress, setEscrowContractAddress} = contractSlice.actions;
 export default contractSlice.reducer;

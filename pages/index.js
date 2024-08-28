@@ -4,7 +4,11 @@ import networkMapping from "../constants/networkMapping.json";
 import ItemBox from "./components/ItemBox";
 import {useEffect, useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
-import {setMarketplaceContractAddress, setUsersContractAddress} from "@/store/slices/contractSlice";
+import {
+    setEscrowContractAddress,
+    setMarketplaceContractAddress,
+    setUsersContractAddress
+} from "@/store/slices/contractSlice";
 import {setAllItems} from "@/store/slices/itemsSlice";
 import {clearUser, setUser} from "@/store/slices/userSlice";
 
@@ -49,6 +53,7 @@ export default function Home() {
     const chainString = chainId ? parseInt(chainId).toString() : null;
     const marketplaceContractAddress = chainId ? networkMapping[chainString].Marketplace[0] : null;
     const usersContractAddress = chainId ? networkMapping[chainString].Users[0] : null;
+    const escrowContractAddress = chainId ? networkMapping[chainString].Escrow[0] : null;
 
     const dispatch = useDispatch();
 
@@ -67,11 +72,12 @@ export default function Home() {
     });
 
     useEffect(() => {
-        if (marketplaceContractAddress && usersContractAddress) {
+        if (marketplaceContractAddress && usersContractAddress && escrowContractAddress) {
             dispatch(setMarketplaceContractAddress(marketplaceContractAddress))
             dispatch(setUsersContractAddress(usersContractAddress))
+            dispatch(setEscrowContractAddress(escrowContractAddress))
         }
-    }, [marketplaceContractAddress, usersContractAddress, dispatch]);
+    }, [marketplaceContractAddress, usersContractAddress, escrowContractAddress, dispatch]);
 
     const setItemsState = (data) => {
         if (data.items === undefined)

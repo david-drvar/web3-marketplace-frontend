@@ -75,3 +75,12 @@ export async function removePinnedImage(hash) {
         throw e;
     }
 }
+
+export function handleNotification(dispatch, type, message, title) {
+    dispatch({
+        type: type,
+        message: message,
+        title: title,
+        position: "topR",
+    });
+}

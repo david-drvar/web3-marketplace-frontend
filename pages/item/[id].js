@@ -6,6 +6,7 @@ import {useEffect, useState} from "react";
 import {useMoralis, useWeb3Contract} from "react-moralis";
 import {Button, useNotification} from "web3uikit";
 import marketplaceAbi from "../../constants/Marketplace.json";
+import escrowAbi from "../../constants/Escrow.json";
 import {ethers} from "ethers";
 import UpdateItemModal from "../components/UpdateItemModal";
 import DeleteItemModal from "../components/DeleteItemModal";
@@ -13,6 +14,7 @@ import {useSelector} from "react-redux";
 import BuyItemModal from "@/pages/components/BuyItemModal";
 import ChatPopup from "@/pages/components/ChatPopup";
 import {fetchTransactionByItemId} from "@/pages/utils/apolloService";
+import {handleNotification} from "@/pages/utils/utils";
 
 export default function ItemPage() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -31,6 +33,7 @@ export default function ItemPage() {
     const blockTimestamp = item.blockTimestamp;
 
     const marketplaceContractAddress = useSelector((state) => state.contract["marketplaceContractAddress"]);
+    const escrowContractAddress = useSelector((state) => state.contract["escrowContractAddress"]);
 
     const [showModal, setShowModal] = useState(false);
     const hideModal = () => setShowModal(false);
@@ -53,10 +56,27 @@ export default function ItemPage() {
     const {runContractFunction} = useWeb3Contract();
 
     const [transaction, setTransaction] = useState({});
+    const [showApproveBySeller, setShowApproveBySeller] = useState(false);
+    const [showApproveByBuyer, setShowApproveByBuyer] = useState(false);
+    const [showApproveByModerator, setShowApproveByModerator] = useState(false);
+    const [roleInTransaction, setRoleInTransaction] = useState("");
 
     useEffect(() => {
-        if (item.itemStatus === "Bought")
-            fetchTransactionByItemId(id).then((data) => setTransaction(data))
+        if (item.itemStatus === "Bought") {
+            fetchTransactionByItemId(id).then((data) => {
+                setTransaction(data);
+                if (account === data.buyer && !data.approvedByBuyer) {
+                    setShowApproveByBuyer(true);
+                    setRoleInTransaction("Buyer");
+                } else if (account === data.seller && !data.approvedBySeller) {
+                    setShowApproveBySeller(true);
+                    setRoleInTransaction("Seller");
+                } else if (account === data.moderator && !data.approvedByModerator) {
+                    setShowApproveByModerator(true);
+                    setRoleInTransaction("Moderator");
+                }
+            })
+        }
     }, []);
 
     const handleBuyItem = async (moderator) => {
@@ -111,6 +131,29 @@ export default function ItemPage() {
             position: "topR",
         });
     };
+
+    const handleApprove = async () => {
+        const contractParams = {
+            abi: escrowAbi,
+            contractAddress: escrowContractAddress,
+            functionName: `approveBy${roleInTransaction}`,
+            params: {
+                _itemId: id,
+            },
+        };
+
+        await runContractFunction({
+            params: contractParams,
+            onSuccess: (tx) => {
+                handleNotification(dispatch, "info", "Transaction submitted. Waiting for confirmations.", "Waiting for confirmations");
+                tx.wait().then((finalTx) => {
+                    handleNotification(dispatch, "success", "Item approved successfully", "Item confirmed");
+                })
+            },
+            onError: (error) => handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Approval error"),
+        });
+        return undefined;
+    }
 
     return (
         <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
@@ -200,6 +243,13 @@ export default function ItemPage() {
                                 theme="primary"
                                 className="bg-blue-500 hover:bg-blue-600"
                                 onClick={() => setShowChat(!showChat)} // Toggle chat popup
+                            />
+
+                            <Button
+                                text={`Approve as ${roleInTransaction}`}
+                                id="approveButton"
+                                className="bg-amber-600"
+                                onClick={() => handleApprove()} // Toggle chat popup
                             />
                         </div>
                     )}
