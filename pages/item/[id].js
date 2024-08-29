@@ -15,6 +15,7 @@ import BuyItemModal from "@/pages/components/BuyItemModal";
 import ChatPopup from "@/pages/components/ChatPopup";
 import {fetchTransactionByItemId} from "@/pages/utils/apolloService";
 import {handleNotification} from "@/pages/utils/utils";
+import ApproveItemModal from "@/pages/components/ApproveItemModal";
 
 export default function ItemPage() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -56,24 +57,29 @@ export default function ItemPage() {
     const {runContractFunction} = useWeb3Contract();
 
     const [transaction, setTransaction] = useState({});
-    const [showApproveBySeller, setShowApproveBySeller] = useState(false);
-    const [showApproveByBuyer, setShowApproveByBuyer] = useState(false);
-    const [showApproveByModerator, setShowApproveByModerator] = useState(false);
     const [roleInTransaction, setRoleInTransaction] = useState("");
+    const [approveButtonDisabled, setApproveButtonDisabled] = useState(true);
+    const [showApproveModal, setShowApproveModal] = useState(false); // State for showing the approve modal
+    const hideApproveModal = () => setShowApproveModal(false);
 
     useEffect(() => {
         if (item.itemStatus === "Bought") {
             fetchTransactionByItemId(id).then((data) => {
                 setTransaction(data);
-                if (account === data.buyer && !data.approvedByBuyer) {
-                    setShowApproveByBuyer(true);
+                if (account === data.buyer) {
                     setRoleInTransaction("Buyer");
-                } else if (account === data.seller && !data.approvedBySeller) {
-                    setShowApproveBySeller(true);
+                } else if (account === data.seller) {
                     setRoleInTransaction("Seller");
-                } else if (account === data.moderator && !data.approvedByModerator) {
-                    setShowApproveByModerator(true);
+                } else if (account === data.moderator) {
                     setRoleInTransaction("Moderator");
+                }
+
+                if (account === data.buyer && !data.buyerApproved) {
+                    setApproveButtonDisabled(false);
+                } else if (account === data.seller && !data.sellerApproved) {
+                    setApproveButtonDisabled(false);
+                } else if (account === data.moderator && !data.moderatorApproved) {
+                    setApproveButtonDisabled(false);
                 }
             })
         }
@@ -98,6 +104,7 @@ export default function ItemPage() {
                 handleListWaitingConfirmation();
                 tx.wait().then((finalTx) => {
                     handleBuyItemSuccess();
+                    setShowBuyModal(false);
                 })
             },
             onError: (error) => handleBuyItemError(error),
@@ -142,12 +149,16 @@ export default function ItemPage() {
             },
         };
 
+        console.log("contractParams", contractParams);
+
         await runContractFunction({
             params: contractParams,
             onSuccess: (tx) => {
                 handleNotification(dispatch, "info", "Transaction submitted. Waiting for confirmations.", "Waiting for confirmations");
                 tx.wait().then((finalTx) => {
                     handleNotification(dispatch, "success", "Item approved successfully", "Item confirmed");
+                    setApproveButtonDisabled(true);
+                    setShowApproveModal(false);
                 })
             },
             onError: (error) => handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Approval error"),
@@ -178,6 +189,13 @@ export default function ItemPage() {
                     isVisible={showBuyModal}
                     onClose={hideBuyModal}
                     onBuyItem={handleBuyItem}
+                />
+
+                <ApproveItemModal
+                    isVisible={showApproveModal}
+                    onClose={hideApproveModal}
+                    roleInTransaction={roleInTransaction}
+                    onApprove={handleApprove}
                 />
 
                 <div className="text-center">
@@ -247,9 +265,10 @@ export default function ItemPage() {
 
                             <Button
                                 text={`Approve as ${roleInTransaction}`}
+                                disabled={approveButtonDisabled}
                                 id="approveButton"
                                 className="bg-amber-600"
-                                onClick={() => handleApprove()} // Toggle chat popup
+                                onClick={() => setShowApproveModal(true)}
                             />
                         </div>
                     )}
