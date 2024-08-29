@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 
 import {addDoc, collection, serverTimestamp} from "firebase/firestore";
-import {firebase_db} from "../firebaseConfig";
+import {firebase_db} from "../../firebaseConfig";
 import {useMoralis} from "react-moralis";
 
 const SendMessage = ({scroll, chatID}) => {

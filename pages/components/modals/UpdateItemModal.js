@@ -1,7 +1,7 @@
 import {Modal, Input, useNotification, Upload} from "web3uikit";
 import {useEffect, useState} from "react";
 import {useWeb3Contract} from "react-moralis";
-import marketplaceAbi from "../../constants/Marketplace.json";
+import marketplaceAbi from "../../../constants/Marketplace.json";
 import {ethers} from "ethers";
 import Image from "next/image";
 import {useSelector} from "react-redux";

@@ -8,14 +8,14 @@ import {Button, useNotification} from "web3uikit";
 import marketplaceAbi from "../../constants/Marketplace.json";
 import escrowAbi from "../../constants/Escrow.json";
 import {ethers} from "ethers";
-import UpdateItemModal from "../components/UpdateItemModal";
-import DeleteItemModal from "../components/DeleteItemModal";
+import UpdateItemModal from "../components/modals/UpdateItemModal";
+import DeleteItemModal from "../components/modals/DeleteItemModal";
 import {useSelector} from "react-redux";
-import BuyItemModal from "@/pages/components/BuyItemModal";
-import ChatPopup from "@/pages/components/ChatPopup";
+import BuyItemModal from "@/pages/components/modals/BuyItemModal";
+import ChatPopup from "@/pages/components/chat/ChatPopup";
 import {fetchTransactionByItemId} from "@/pages/utils/apolloService";
 import {handleNotification} from "@/pages/utils/utils";
-import ApproveItemModal from "@/pages/components/ApproveItemModal";
+import ApproveItemModal from "@/pages/components/modals/ApproveItemModal";
 
 export default function ItemPage() {
     const {isWeb3Enabled, account} = useMoralis();
