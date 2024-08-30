@@ -4,8 +4,8 @@ import {useWeb3Contract} from "react-moralis";
 import usersAbi from "@/constants/Users.json";
 import {useSelector} from "react-redux";
 import {useNotification} from "web3uikit";
-import ManageProfile from "@/pages/components/chat/ManageProfile";
-import AdvancedSettings from "@/pages/components/chat/AdvancedSettings";
+import ManageProfile from "@/pages/components/profile/ManageProfile";
+import AdvancedSettings from "@/pages/components/profile/AdvancedSettings";
 
 
 export default function Profile() {

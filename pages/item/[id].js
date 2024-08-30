@@ -78,7 +78,7 @@ export default function ItemPage() {
                     setApproveButtonDisabled(false);
                 } else if (account === data.seller && !data.sellerApproved) {
                     setApproveButtonDisabled(false);
-                } else if (account === data.moderator && !data.moderatorApproved) {
+                } else if (account === data.moderator && data.disputed) {
                     setApproveButtonDisabled(false);
                 }
             })

@@ -12,14 +12,14 @@ export default function ManageProfile() {
     const user = useSelector((state) => state.user);
 
     const [formData, setFormData] = useState({
-        username: user.username,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        country: user.country,
-        description: user.description,
-        email: user.email,
-        isModerator: user.isModerator,
-        moderatorFee: user.moderatorFee
+        username: user.username || "",
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        country: user.country || "",
+        description: user.description || "",
+        email: user.email || "",
+        isModerator: user.isModerator || false,
+        moderatorFee: user.moderatorFee || 0
     });
     const [emailError, setEmailError] = useState('');
     const [userExists, setUserExists] = useState(user.isActive);
@@ -159,6 +159,7 @@ export default function ManageProfile() {
     }
 
     async function handleUserError(error) {
+        console.log(error);
         dispatch({
             type: "error",
             message: userExists ? "Error while updating user. Please try again" : "Error while creating user. Please try again",

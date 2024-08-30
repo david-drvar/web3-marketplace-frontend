@@ -83,17 +83,19 @@ export const fetchTransactionByItemId = async (itemId) => {
         seller
         moderator
         price
-        transactionStatus
+        moderatorFee
         buyerApproved
         sellerApproved
-        moderatorApproved
         disputed
-        disputedBy
+        disputedBySeller
+        disputedByBuyer
         isCompleted
         creationTime
         blockNumber
         blockTimestamp
         transactionHash
+        buyerPercentage
+        sellerPercentage
       }
     }
   `;
@@ -123,17 +125,19 @@ export const fetchAllItemsByModerator = async (moderator) => {
         seller
         moderator
         price
-        transactionStatus
+        moderatorFee
         buyerApproved
         sellerApproved
-        moderatorApproved
         disputed
-        disputedBy
+        disputedBySeller
+        disputedByBuyer
         isCompleted
         creationTime
         blockNumber
         blockTimestamp
         transactionHash
+        buyerPercentage
+        sellerPercentage
       }
     }
   `;
