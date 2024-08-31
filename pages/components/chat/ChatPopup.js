@@ -3,7 +3,7 @@ import {query, collection, orderBy, onSnapshot, limit} from "firebase/firestore"
 import Message from "./Message";
 import SendMessage from "./SendMessage";
 import {useMoralis} from "react-moralis";
-import {firebase_db} from "@/pages/firebaseConfig";
+import {firebase_db} from "@/pages/utils/firebaseConfig";
 import {getChatID} from "@/pages/utils/utils";
 import {fetchUserByAddress} from "@/pages/utils/apolloService";
 
