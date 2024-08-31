@@ -1,8 +1,7 @@
-import {gql, useQuery} from "@apollo/client";
 import {useMoralis} from "react-moralis";
 import networkMapping from "../constants/networkMapping.json";
 import ItemBox from "./components/ItemBox";
-import {useEffect} from "react";
+import {useEffect, useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {
     setEscrowContractAddress,
@@ -12,41 +11,7 @@ import {
 import {setAllItems} from "@/store/slices/itemsSlice";
 import {clearUser, setUser} from "@/store/slices/userSlice";
 import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
-
-const getUserQuery = gql`
-    query GetUser($userAddress: String!) {
-      users(where: { userAddress: $userAddress, isActive: true }) {
-        id
-        userAddress
-        username
-        firstName
-        lastName
-        country
-        email
-        description
-        isActive
-        avatarHash
-        isModerator
-        moderatorFee
-      }
-    }
-  `;
-
-const getItemsQuery = gql`
-    {
-      items {
-        id
-        buyer
-        seller
-        price
-        title
-        description
-        blockTimestamp
-        itemStatus
-        photosIPFSHashes
-      }
-    }
-  `;
+import {fetchAllItems, fetchUserByAddress} from "@/pages/utils/apolloService";
 
 
 export default function Home() {
@@ -59,18 +24,8 @@ export default function Home() {
     const dispatch = useDispatch();
 
     const items = useSelector((state) => state.items).filter((item) => item.itemStatus === "Listed")
+    const [isLoading, setIsLoading] = useState(true);
 
-
-    const {loading, error, data} = useQuery(getItemsQuery, {
-        fetchPolicy: "network-only",
-        onCompleted: (data) => setItemsState(data)
-    }); // fetch policy is to not look for cache and take the data from network only
-
-    useQuery(getUserQuery, {
-        variables: {userAddress: account},
-        fetchPolicy: "network-only",
-        onCompleted: (data) => setUserState(data)
-    });
 
     useEffect(() => {
         if (marketplaceContractAddress && usersContractAddress && escrowContractAddress) {
@@ -78,6 +33,9 @@ export default function Home() {
             dispatch(setUsersContractAddress(usersContractAddress))
             dispatch(setEscrowContractAddress(escrowContractAddress))
         }
+
+        fetchUserByAddress(account).then((data) => setUserState(data)).then(() => setIsLoading(false));
+        fetchAllItems().then((data) => setItemsState(data)).then(() => setIsLoading(false));
     }, [marketplaceContractAddress, usersContractAddress, escrowContractAddress, dispatch]);
 
     const setItemsState = (data) => {
@@ -121,7 +79,7 @@ export default function Home() {
     return (
         <>
             {isWeb3Enabled ? (
-                loading ? (
+                isLoading ? (
                     <LoadingAnimation/>
                 ) : (
                     <div className="container mx-auto px-4 py-8">

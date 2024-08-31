@@ -6,6 +6,38 @@ export const apolloClient = new ApolloClient({
 });
 
 
+export const fetchAllItems = async () => {
+    const getItemsQuery = gql`
+    {
+      items {
+        id
+        buyer
+        seller
+        price
+        title
+        description
+        blockTimestamp
+        itemStatus
+        photosIPFSHashes
+      }
+    }
+  `;
+
+
+    try {
+        const {data} = await apolloClient.query({
+            query: getItemsQuery,
+            fetchPolicy: 'network-only', // ensures fresh data
+        });
+
+        return data.items || [];
+    } catch (error) {
+        console.error("Error fetching items", error);
+        return [];
+    }
+}
+
+
 export const fetchModerators = async () => {
     const getModeratorsQuery = gql`
     {
