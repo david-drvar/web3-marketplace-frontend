@@ -5,6 +5,7 @@ import {useDispatch, useSelector} from "react-redux";
 import usersAbi from "@/constants/Users.json";
 import {getCountries, removePinnedImage, uploadFile} from "@/pages/utils/utils";
 import {setUser} from "@/store/slices/userSlice";
+import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
 
 export default function ManageProfile() {
     const {isWeb3Enabled} = useMoralis();
@@ -32,10 +33,15 @@ export default function ManageProfile() {
     const [imageURI, setImageURI] = useState("");
     const [imagePreview, setImagePreview] = useState(null); // State for image preview
 
+    const [isLoading, setIsLoading] = useState(true);
+
 
     useEffect(() => {
-        if (isWeb3Enabled && user.avatarHash !== '')
+        if (isWeb3Enabled && user.avatarHash !== '') {
             setImageURI(`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${user.avatarHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`);
+            setIsLoading(false);
+        }
+        setIsLoading(false);
     }, [isWeb3Enabled]);
 
     const handleChange = (e) => {
@@ -167,193 +173,200 @@ export default function ManageProfile() {
     }
 
     return (
-        <div>
-            <h1 className="text-4xl font-bold mb-6 flex items-center justify-between">
-            <span>
-                {userExists ? <>Update Your Profile</> : <>Create Your Profile</>}
-            </span>
-                {
-                    imageURI != "" ? (
-                        <div className="ml-4">
-                            <img
-                                src={imageURI}
-                                alt="Avatar Preview"
-                                className="w-32 h-32 object-cover rounded-full"
+        <>
+            {isLoading ? (
+                <LoadingAnimation/>
+            ) : (
+                <div>
+                    <h1 className="text-4xl font-bold mb-6 flex items-center justify-between">
+                <span>
+                    {userExists ? <>Update Your Profile</> : <>Create Your Profile</>}
+                </span>
+                        {
+                            imageURI != "" ? (
+                                <div className="ml-4">
+                                    <img
+                                        src={imageURI}
+                                        alt="Avatar Preview"
+                                        className="w-32 h-32 object-cover rounded-full"
+                                    />
+                                </div>
+                            ) : null
+                        }
+                    </h1>
+                    <form onSubmit={handleSubmit} className="space-y-3">
+                        <div>
+                            <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                                Username
+                            </label>
+                            <input
+                                type="text"
+                                name="username"
+                                id="username"
+                                value={formData.username}
+                                onChange={handleChange}
+                                className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                placeholder="Your username"
+                                required
                             />
                         </div>
-                    ) : null
-                }
-            </h1>
-            <form onSubmit={handleSubmit} className="space-y-3">
-                <div>
-                    <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-                        Username
-                    </label>
-                    <input
-                        type="text"
-                        name="username"
-                        id="username"
-                        value={formData.username}
-                        onChange={handleChange}
-                        className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        placeholder="Your username"
-                        required
-                    />
+
+                        <div className="flex space-x-4">
+                            <div className="w-1/2">
+                                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
+                                    First Name
+                                </label>
+                                <input
+                                    type="text"
+                                    name="firstName"
+                                    id="firstName"
+                                    value={formData.firstName}
+                                    onChange={handleChange}
+                                    className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                    placeholder="First name"
+                                    required
+                                />
+                            </div>
+                            <div className="w-1/2">
+                                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
+                                    Last Name
+                                </label>
+                                <input
+                                    type="text"
+                                    name="lastName"
+                                    id="lastName"
+                                    value={formData.lastName}
+                                    onChange={handleChange}
+                                    className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                    placeholder="Last name"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label htmlFor="country" className="block text-sm font-medium text-gray-700">
+                                Country
+                            </label>
+                            <select
+                                name="country"
+                                id="country"
+                                value={formData.country}
+                                onChange={handleChange}
+                                className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                required
+                            >
+                                <option value="">Select your country</option>
+                                {
+                                    getCountries().map((country) => (
+                                        <option key={country} value={country}>
+                                            {country}
+                                        </option>
+                                    ))
+                                }
+                            </select>
+                        </div>
+
+                        <div>
+                            <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                                Description
+                            </label>
+                            <textarea
+                                name="description"
+                                id="description"
+                                value={formData.description}
+                                onChange={handleChange}
+                                className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                placeholder="Tell us about yourself"
+                                rows={4}
+                                required
+                            ></textarea>
+                        </div>
+
+                        <div>
+                            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                                Email
+                            </label>
+                            <input
+                                type="email"
+                                name="email"
+                                id="email"
+                                value={formData.email}
+                                onChange={handleChange}
+                                className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                placeholder="Your email"
+                                required
+                            />
+                            {emailError && (
+                                <p className="mt-2 text-sm text-red-600">{emailError}</p>
+                            )}
+                        </div>
+
+                        <div className="flex items-center">
+                            <input
+                                id="isModerator"
+                                name="isModerator"
+                                type="checkbox"
+                                checked={formData.isModerator}
+                                onChange={handleChange}
+                                className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                            />
+                            <label htmlFor="isModerator" className="ml-2 block text-sm text-gray-900">
+                                Set as Moderator
+                            </label>
+                        </div>
+
+                        <div hidden={!formData.isModerator}>
+                            <label htmlFor="moderatorFee" className="block text-sm font-medium text-gray-700">
+                                Moderator Fee
+                            </label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                name="moderatorFee"
+                                id="moderatorFee"
+                                value={formData.moderatorFee}
+                                onChange={handleChange}
+                                className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                placeholder="Enter moderator fee"
+                                required={formData.isModerator} // Required if user is a moderator
+                            />
+                        </div>
+
+                        <div>
+                            <label htmlFor="avatar" className="block text-sm font-medium text-gray-700">
+                                Avatar
+                            </label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleImageChange}
+                                className="mt-1 block w-full"
+                            />
+
+                            {imagePreview && (
+                                <img
+                                    src={imagePreview}
+                                    alt="Avatar Preview"
+                                    className="mt-2 w-32 h-32 object-cover rounded-full"
+                                />
+                            )}
+                        </div>
+
+                        <div>
+                            <button
+                                disabled={isSubmitting}
+                                type="submit"
+                                className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md shadow-sm text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                            >
+                                {userExists ? <>update profile</> : <>create profile</>}
+                            </button>
+                        </div>
+                    </form>
                 </div>
 
-                <div className="flex space-x-4">
-                    <div className="w-1/2">
-                        <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">
-                            First Name
-                        </label>
-                        <input
-                            type="text"
-                            name="firstName"
-                            id="firstName"
-                            value={formData.firstName}
-                            onChange={handleChange}
-                            className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                            placeholder="First name"
-                            required
-                        />
-                    </div>
-                    <div className="w-1/2">
-                        <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">
-                            Last Name
-                        </label>
-                        <input
-                            type="text"
-                            name="lastName"
-                            id="lastName"
-                            value={formData.lastName}
-                            onChange={handleChange}
-                            className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                            placeholder="Last name"
-                            required
-                        />
-                    </div>
-                </div>
-
-                <div>
-                    <label htmlFor="country" className="block text-sm font-medium text-gray-700">
-                        Country
-                    </label>
-                    <select
-                        name="country"
-                        id="country"
-                        value={formData.country}
-                        onChange={handleChange}
-                        className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        required
-                    >
-                        <option value="">Select your country</option>
-                        {
-                            getCountries().map((country) => (
-                                <option key={country} value={country}>
-                                    {country}
-                                </option>
-                            ))
-                        }
-                    </select>
-                </div>
-
-                <div>
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                        Description
-                    </label>
-                    <textarea
-                        name="description"
-                        id="description"
-                        value={formData.description}
-                        onChange={handleChange}
-                        className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        placeholder="Tell us about yourself"
-                        rows={4}
-                        required
-                    ></textarea>
-                </div>
-
-                <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                        Email
-                    </label>
-                    <input
-                        type="email"
-                        name="email"
-                        id="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        placeholder="Your email"
-                        required
-                    />
-                    {emailError && (
-                        <p className="mt-2 text-sm text-red-600">{emailError}</p>
-                    )}
-                </div>
-
-                <div className="flex items-center">
-                    <input
-                        id="isModerator"
-                        name="isModerator"
-                        type="checkbox"
-                        checked={formData.isModerator}
-                        onChange={handleChange}
-                        className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                    />
-                    <label htmlFor="isModerator" className="ml-2 block text-sm text-gray-900">
-                        Set as Moderator
-                    </label>
-                </div>
-
-                <div hidden={!formData.isModerator}>
-                    <label htmlFor="moderatorFee" className="block text-sm font-medium text-gray-700">
-                        Moderator Fee
-                    </label>
-                    <input
-                        type="number"
-                        step="0.01"
-                        name="moderatorFee"
-                        id="moderatorFee"
-                        value={formData.moderatorFee}
-                        onChange={handleChange}
-                        className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        placeholder="Enter moderator fee"
-                        required={formData.isModerator} // Required if user is a moderator
-                    />
-                </div>
-
-                <div>
-                    <label htmlFor="avatar" className="block text-sm font-medium text-gray-700">
-                        Avatar
-                    </label>
-                    <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="mt-1 block w-full"
-                    />
-
-                    {imagePreview && (
-                        <img
-                            src={imagePreview}
-                            alt="Avatar Preview"
-                            className="mt-2 w-32 h-32 object-cover rounded-full"
-                        />
-                    )}
-                </div>
-
-                <div>
-                    <button
-                        disabled={isSubmitting}
-                        type="submit"
-                        className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md shadow-sm text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    >
-                        {userExists ? <>update profile</> : <>create profile</>}
-                    </button>
-                </div>
-            </form>
-        </div>
+            )}
+        </>
 
     );
 }

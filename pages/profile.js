@@ -1,9 +1,4 @@
 import {useState} from 'react';
-import {getCountries} from "@/pages/utils/utils";
-import {useWeb3Contract} from "react-moralis";
-import usersAbi from "@/constants/Users.json";
-import {useSelector} from "react-redux";
-import {useNotification} from "web3uikit";
 import ManageProfile from "@/pages/components/profile/ManageProfile";
 import AdvancedSettings from "@/pages/components/profile/AdvancedSettings";
 
