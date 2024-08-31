@@ -35,38 +35,29 @@ export default function ItemPage() {
     const itemStatus = item.itemStatus;
     const blockTimestamp = item.blockTimestamp;
 
-    const marketplaceContractAddress = useSelector((state) => state.contract["marketplaceContractAddress"]);
-    const escrowContractAddress = useSelector((state) => state.contract["escrowContractAddress"]);
-
-    const [showModal, setShowModal] = useState(false);
-    const hideModal = () => setShowModal(false);
-    const disableButtons = () => setButtonsDisabled(true);
-
+    const [showBuyModal, setShowBuyModal] = useState(false);
+    const [showUpdateModal, setShowUpdateModal] = useState(false);
     const [showModalDelete, setShowModalDelete] = useState(false);
-    const hideModalDelete = () => setShowModalDelete(false);
-
-    const dispatch = useNotification();
-
-    const [buttonsDisabled, setButtonsDisabled] = useState(false);
-
-    const isAccountSeller = seller === account || seller === undefined;
-
-    const [showBuyModal, setShowBuyModal] = useState(false); // Modal state
-    const hideBuyModal = () => setShowBuyModal(false);
-
-    const [showChat, setShowChat] = useState(false); // State for showing the chat popup
-
-    const {runContractFunction} = useWeb3Contract();
-
-    const [transaction, setTransaction] = useState({});
-    const [roleInTransaction, setRoleInTransaction] = useState("");
-    const [approveButtonDisabled, setApproveButtonDisabled] = useState(true);
-    const [disputeButtonDisabled, setDisputeButtonDisabled] = useState(false);
     const [showApproveModal, setShowApproveModal] = useState(false);
     const [showDisputeModal, setShowDisputeModal] = useState(false);
     const [showFinalizeModal, setShowFinalizeModal] = useState(false);
-    const hideApproveModal = () => setShowApproveModal(false);
-    const hideDisputeModal = () => setShowDisputeModal(false);
+    const [showChat, setShowChat] = useState(false);
+
+
+    const [buttonsDisabled, setButtonsDisabled] = useState(false);
+    const [approveButtonDisabled, setApproveButtonDisabled] = useState(true);
+    const [disputeButtonDisabled, setDisputeButtonDisabled] = useState(false);
+
+    const isAccountSeller = seller === account || seller === undefined;
+    const {runContractFunction} = useWeb3Contract();
+    const marketplaceContractAddress = useSelector((state) => state.contract["marketplaceContractAddress"]);
+    const escrowContractAddress = useSelector((state) => state.contract["escrowContractAddress"]);
+
+    const [transaction, setTransaction] = useState({});
+    const [roleInTransaction, setRoleInTransaction] = useState("");
+
+    const dispatch = useNotification();
+
 
     useEffect(() => {
         if (item.itemStatus === "Bought") {
@@ -177,7 +168,6 @@ export default function ItemPage() {
             },
             onError: (error) => handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Approval error"),
         });
-        return undefined;
     }
 
     const handleDispute = async () => {
@@ -236,37 +226,37 @@ export default function ItemPage() {
         <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
             {isWeb3Enabled ? (<div>
                 <UpdateItemModal
-                    isVisible={showModal}
+                    isVisible={showUpdateModal}
                     id={id}
                     title={title}
                     price={price}
                     description={description}
                     photosIPFSHashes={photosIPFSHashes}
-                    onClose={hideModal}
+                    onClose={() => setShowUpdateModal(false)}
                     setPrice={setPrice}
                     setDescription={setDescription}
                     setTitle={setTitle}
                     setPhotosIPFSHashes={setPhotosIPFSHashes}
                 />
-                <DeleteItemModal isVisible={showModalDelete} id={id} onClose={hideModalDelete}
-                                 disableButtons={disableButtons}/>
+                <DeleteItemModal isVisible={showModalDelete} id={id} onClose={() => setShowModalDelete(false)}
+                                 disableButtons={() => setButtonsDisabled(true)}/>
 
                 <BuyItemModal
                     isVisible={showBuyModal}
-                    onClose={hideBuyModal}
+                    onClose={() => setShowBuyModal(false)}
                     onBuyItem={handleBuyItem}
                 />
 
                 <ApproveItemModal
                     isVisible={showApproveModal}
-                    onClose={hideApproveModal}
+                    onClose={() => setShowApproveModal(false)}
                     roleInTransaction={roleInTransaction}
                     onApprove={handleApprove}
                 />
 
                 <DisputeItemModal
                     isVisible={showDisputeModal}
-                    onClose={hideDisputeModal}
+                    onClose={() => setShowDisputeModal(false)}
                     roleInTransaction={roleInTransaction}
                     onDispute={handleDispute}
                 />
@@ -308,7 +298,7 @@ export default function ItemPage() {
                                         disabled={buttonsDisabled}
                                         text="Update item"
                                         id="updateButton"
-                                        onClick={() => setShowModal(true)}
+                                        onClick={() => setShowUpdateModal(true)}
                                         theme="primary"
                                         className="bg-blue-500 hover:bg-blue-600"
                                     />
@@ -339,10 +329,10 @@ export default function ItemPage() {
                                 id="chatButton"
                                 theme="primary"
                                 className="bg-blue-500 hover:bg-blue-600"
-                                onClick={() => setShowChat(!showChat)} // Toggle chat popup
+                                onClick={() => setShowChat(!showChat)}
                             />
 
-                            {roleInTransaction !== "Moderator"
+                            {(roleInTransaction === "Buyer" || roleInTransaction === "Seller")
                                 &&
                                 <Button
                                     text={`Approve as ${roleInTransaction}`}
@@ -353,7 +343,7 @@ export default function ItemPage() {
                                 />
                             }
 
-                            {roleInTransaction !== "Moderator"
+                            {(roleInTransaction === "Buyer" || roleInTransaction === "Seller")
                                 &&
                                 <Button
                                     text={`Dispute as ${roleInTransaction}`}
