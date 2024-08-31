@@ -16,6 +16,7 @@ import ChatPopup from "@/pages/components/chat/ChatPopup";
 import {fetchTransactionByItemId} from "@/pages/utils/apolloService";
 import {handleNotification} from "@/pages/utils/utils";
 import ApproveItemModal from "@/pages/components/modals/ApproveItemModal";
+import DisputeItemModal from "@/pages/components/modals/DisputeItemModal";
 
 export default function ItemPage() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -59,8 +60,11 @@ export default function ItemPage() {
     const [transaction, setTransaction] = useState({});
     const [roleInTransaction, setRoleInTransaction] = useState("");
     const [approveButtonDisabled, setApproveButtonDisabled] = useState(true);
-    const [showApproveModal, setShowApproveModal] = useState(false); // State for showing the approve modal
+    const [disputeButtonDisabled, setDisputeButtonDisabled] = useState(false);
+    const [showApproveModal, setShowApproveModal] = useState(false);
+    const [showDisputeModal, setShowDisputeModal] = useState(false);
     const hideApproveModal = () => setShowApproveModal(false);
+    const hideDisputeModal = () => setShowDisputeModal(false);
 
     useEffect(() => {
         if (item.itemStatus === "Bought") {
@@ -76,6 +80,14 @@ export default function ItemPage() {
 
                 if (account === data.buyer && !data.buyerApproved) {
                     setApproveButtonDisabled(false);
+                } else if (account === data.seller && !data.sellerApproved) {
+                    setApproveButtonDisabled(false);
+                } else if (account === data.moderator && data.disputed) {
+                    setApproveButtonDisabled(false);
+                }
+
+                if (account === data.buyer && data.disputedByBuyer) {
+                    setDisputeButtonDisabled(false);
                 } else if (account === data.seller && !data.sellerApproved) {
                     setApproveButtonDisabled(false);
                 } else if (account === data.moderator && data.disputed) {
@@ -166,6 +178,31 @@ export default function ItemPage() {
         return undefined;
     }
 
+    const handleDispute = async () => {
+        const contractParams = {
+            abi: escrowAbi,
+            contractAddress: escrowContractAddress,
+            functionName: `raiseDispute`,
+            params: {
+                _itemId: id,
+                disputer: account,
+            },
+        };
+
+        await runContractFunction({
+            params: contractParams,
+            onSuccess: (tx) => {
+                handleNotification(dispatch, "info", "Transaction submitted. Waiting for confirmations.", "Waiting for confirmations");
+                tx.wait().then((finalTx) => {
+                    handleNotification(dispatch, "success", "Item disputed successfully", "Item disputed");
+                    setDisputeButtonDisabled(true);
+                    setShowDisputeModal(false);
+                })
+            },
+            onError: (error) => handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Dispute error"),
+        });
+    }
+
     return (
         <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
             {isWeb3Enabled ? (<div>
@@ -196,6 +233,13 @@ export default function ItemPage() {
                     onClose={hideApproveModal}
                     roleInTransaction={roleInTransaction}
                     onApprove={handleApprove}
+                />
+
+                <DisputeItemModal
+                    isVisible={showDisputeModal}
+                    onClose={hideDisputeModal}
+                    roleInTransaction={roleInTransaction}
+                    onDispute={handleDispute}
                 />
 
                 <div className="text-center">
@@ -267,8 +311,16 @@ export default function ItemPage() {
                                 text={`Approve as ${roleInTransaction}`}
                                 disabled={approveButtonDisabled}
                                 id="approveButton"
-                                className="bg-amber-600"
+                                className="bg-cyan-600 hover:bg-emerald-600"
                                 onClick={() => setShowApproveModal(true)}
+                            />
+
+                            <Button
+                                text={`Dispute as ${roleInTransaction}`}
+                                disabled={disputeButtonDisabled}
+                                id="disputeButton"
+                                className="bg-amber-400 hover:bg-amber-600"
+                                onClick={() => setShowDisputeModal(true)}
                             />
                         </div>
                     )}
