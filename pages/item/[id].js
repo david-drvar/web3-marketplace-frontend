@@ -17,6 +17,7 @@ import {fetchTransactionByItemId} from "@/pages/utils/apolloService";
 import {handleNotification} from "@/pages/utils/utils";
 import ApproveItemModal from "@/pages/components/modals/ApproveItemModal";
 import DisputeItemModal from "@/pages/components/modals/DisputeItemModal";
+import FinalizeTransactionModal from "@/pages/components/modals/FinalizeTransactionModal";
 
 export default function ItemPage() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -63,6 +64,7 @@ export default function ItemPage() {
     const [disputeButtonDisabled, setDisputeButtonDisabled] = useState(false);
     const [showApproveModal, setShowApproveModal] = useState(false);
     const [showDisputeModal, setShowDisputeModal] = useState(false);
+    const [showFinalizeModal, setShowFinalizeModal] = useState(false);
     const hideApproveModal = () => setShowApproveModal(false);
     const hideDisputeModal = () => setShowDisputeModal(false);
 
@@ -203,6 +205,33 @@ export default function ItemPage() {
         });
     }
 
+
+    const handleFinalize = async (percentageSeller, percentageBuyer) => {
+        const contractParams = {
+            abi: escrowAbi,
+            contractAddress: escrowContractAddress,
+            functionName: `finalizeTransactionByModerator`,
+            params: {
+                _itemId: id,
+                percentageSeller: percentageSeller,
+                percentageBuyer: percentageBuyer,
+            },
+        };
+
+        await runContractFunction({
+            params: contractParams,
+            onSuccess: (tx) => {
+                handleNotification(dispatch, "info", "Transaction submitted. Waiting for confirmations.", "Waiting for confirmations");
+                tx.wait().then((finalTx) => {
+                    handleNotification(dispatch, "success", "Item finalized successfully", "Item finalized");
+                    // setDisputeButtonDisabled(true);
+                    setShowFinalizeModal(false);
+                })
+            },
+            onError: (error) => handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Finalize error"),
+        });
+    }
+
     return (
         <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
             {isWeb3Enabled ? (<div>
@@ -240,6 +269,12 @@ export default function ItemPage() {
                     onClose={hideDisputeModal}
                     roleInTransaction={roleInTransaction}
                     onDispute={handleDispute}
+                />
+
+                <FinalizeTransactionModal
+                    isVisible={showFinalizeModal}
+                    onClose={() => setShowFinalizeModal(false)}
+                    onFinalize={handleFinalize}
                 />
 
                 <div className="text-center">
@@ -307,21 +342,36 @@ export default function ItemPage() {
                                 onClick={() => setShowChat(!showChat)} // Toggle chat popup
                             />
 
-                            <Button
-                                text={`Approve as ${roleInTransaction}`}
-                                disabled={approveButtonDisabled}
-                                id="approveButton"
-                                className="bg-cyan-600 hover:bg-emerald-600"
-                                onClick={() => setShowApproveModal(true)}
-                            />
+                            {roleInTransaction !== "Moderator"
+                                &&
+                                <Button
+                                    text={`Approve as ${roleInTransaction}`}
+                                    disabled={approveButtonDisabled}
+                                    id="approveButton"
+                                    className="bg-cyan-300 hover:bg-emerald-600"
+                                    onClick={() => setShowApproveModal(true)}
+                                />
+                            }
 
-                            <Button
-                                text={`Dispute as ${roleInTransaction}`}
-                                disabled={disputeButtonDisabled}
-                                id="disputeButton"
-                                className="bg-amber-400 hover:bg-amber-600"
-                                onClick={() => setShowDisputeModal(true)}
-                            />
+                            {roleInTransaction !== "Moderator"
+                                &&
+                                <Button
+                                    text={`Dispute as ${roleInTransaction}`}
+                                    disabled={disputeButtonDisabled}
+                                    id="disputeButton"
+                                    className="bg-amber-400 hover:bg-amber-600"
+                                    onClick={() => setShowDisputeModal(true)}
+                                />
+                            }
+
+                            {roleInTransaction === "Moderator" && transaction.disputed && !transaction.isCompleted &&
+                                <Button
+                                    text="Finalize transaction"
+                                    id="finalizeButton"
+                                    className="bg-fuchsia-400 hover:bg-fuchsia-600"
+                                    onClick={() => setShowFinalizeModal(true)}
+                                />
+                            }
                         </div>
                     )}
                 {showChat &&
