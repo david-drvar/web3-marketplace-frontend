@@ -34,11 +34,8 @@ export default function ManageProfile() {
 
 
     useEffect(() => {
-        if (isWeb3Enabled && user.avatarHash !== '') {
+        if (isWeb3Enabled && user.avatarHash !== '')
             setImageURI(`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${user.avatarHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`);
-            console.log("imageURI");
-            console.log(imageURI);
-        }
     }, [isWeb3Enabled]);
 
     const handleChange = (e) => {
@@ -131,6 +128,7 @@ export default function ManageProfile() {
                         avatarHash: avatarImageHash
                     }));
                     setImageURI(`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${avatarImageHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`);
+                    setUserExists(true);
                 });
             },
             onError: (error) => {

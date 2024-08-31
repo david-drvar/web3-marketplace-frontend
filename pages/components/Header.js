@@ -31,7 +31,7 @@ export default function Header() {
                     List item
                 </Link>
                 <Link href="/my-orders" className="mr-4 p-6">
-                    My orders
+                    My purchases
                 </Link>
                 <Link href="/my-items" className="mr-4 p-6">
                     My items
