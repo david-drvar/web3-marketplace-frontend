@@ -11,6 +11,7 @@ export default function MyItems() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        setIsLoading(true);
         if (isWeb3Enabled && items) {
             setIsLoading(false);
         }

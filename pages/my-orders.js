@@ -11,10 +11,11 @@ export default function MyOrders() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        setIsLoading(true);
         if (isWeb3Enabled && items) {
             setIsLoading(false);
         }
-    }, [isWeb3Enabled, items]);
+    }, [isWeb3Enabled, items, account]);
 
     return (
         <>

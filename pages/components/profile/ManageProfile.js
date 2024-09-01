@@ -40,9 +40,24 @@ export default function ManageProfile() {
         if (isWeb3Enabled && user.avatarHash !== '') {
             setImageURI(`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${user.avatarHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`);
             setIsLoading(false);
+            setUserExists(user.isActive);
         }
         setIsLoading(false);
-    }, [isWeb3Enabled]);
+    }, [isWeb3Enabled, user]);
+
+    // for case when user refreshes meantime (metamask account switch)
+    useEffect(() => {
+        setFormData({
+            username: user.username || "",
+            firstName: user.firstName || "",
+            lastName: user.lastName || "",
+            country: user.country || "",
+            description: user.description || "",
+            email: user.email || "",
+            isModerator: user.isModerator || false,
+            moderatorFee: user.moderatorFee || 0
+        })
+    }, [user])
 
     const handleChange = (e) => {
         const {name, value, type, checked} = e.target;

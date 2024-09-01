@@ -12,11 +12,12 @@ export default function ModeratedItems() {
 
 
     useEffect(() => {
+        setIsLoading(true);
         fetchAllItemsByModerator(account).then((data) => {
             setItems(data);
             setIsLoading(false);
         }).catch(() => setIsLoading(false));
-    }, []);
+    }, [account]);
 
 
     return (
