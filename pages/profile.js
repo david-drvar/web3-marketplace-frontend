@@ -1,6 +1,7 @@
 import {useState} from 'react';
 import ManageProfile from "@/pages/components/profile/ManageProfile";
 import AdvancedSettings from "@/pages/components/profile/AdvancedSettings";
+import ManageAddresses from "@/pages/components/profile/ManageAddresses";
 
 
 export default function Profile() {
@@ -15,6 +16,10 @@ export default function Profile() {
                     <li className={`py-2 cursor-pointer ${activeTab === 'manageProfile' ? 'text-blue-600 font-bold' : 'text-gray-600'}`}
                         onClick={() => setActiveTab('manageProfile')}>
                         Manage Profile
+                    </li>
+                    <li className={`py-2 cursor-pointer ${activeTab === 'manageAddresses' ? 'text-blue-600 font-bold' : 'text-gray-600'}`}
+                        onClick={() => setActiveTab('manageAddresses')}>
+                        Manage Addresses
                     </li>
                     <li className={`py-2 cursor-pointer ${activeTab === 'notifications' ? 'text-blue-600 font-bold' : 'text-gray-600'}`}
                         onClick={() => setActiveTab('notifications')}>
@@ -32,6 +37,12 @@ export default function Profile() {
                 {activeTab === 'manageProfile' && (
                     <div className="bg-white p-8 shadow-lg rounded-lg">
                         <ManageProfile/>
+                    </div>
+                )}
+
+                {activeTab === 'manageAddresses' && (
+                    <div className="bg-white p-8 shadow-lg rounded-lg">
+                        <ManageAddresses/>
                     </div>
                 )}
 
