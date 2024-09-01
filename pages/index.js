@@ -9,7 +9,7 @@ import {
     setUsersContractAddress
 } from "@/store/slices/contractSlice";
 import {setAllItems} from "@/store/slices/itemsSlice";
-import {clearUser, setUser} from "@/store/slices/userSlice";
+import {setUser} from "@/store/slices/userSlice";
 import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
 import {fetchAllItems, fetchUserByAddress} from "@/pages/utils/apolloService";
 
@@ -34,47 +34,10 @@ export default function Home() {
             dispatch(setEscrowContractAddress(escrowContractAddress))
         }
 
-        fetchUserByAddress(account).then((data) => setUserState(data)).then(() => setIsLoading(false));
-        fetchAllItems().then((data) => setItemsState(data)).then(() => setIsLoading(false));
+        fetchUserByAddress(account).then((data) => dispatch(setUser(data))).then(() => setIsLoading(false));
+        fetchAllItems().then((data) => dispatch(setAllItems(data))).then(() => setIsLoading(false));
     }, [marketplaceContractAddress, usersContractAddress, escrowContractAddress, dispatch]);
 
-    const setItemsState = (data) => {
-        if (data.items === undefined)
-            return;
-
-        let itemsArray = []
-        data.items.forEach((item) => {
-            itemsArray.push(item);
-        })
-
-        dispatch(setAllItems(itemsArray));
-    }
-
-    const setUserState = (data) => {
-        if (data.users === undefined)
-            return;
-        else if (data.users.length === 0) {
-            dispatch(clearUser());
-            return;
-        }
-
-        let user = {
-            id: data.users[0].id || '',
-            userAddress: data.users[0].userAddress || '',
-            username: data.users[0].username || '',
-            firstName: data.users[0].firstName || '',
-            lastName: data.users[0].lastName || '',
-            description: data.users[0].description || '',
-            email: data.users[0].email || '',
-            country: data.users[0].country || '',
-            isModerator: data.users[0].isModerator || false,
-            isActive: data.users[0].isActive || false,
-            moderatorFee: data.users[0].moderatorFee || 0,
-            avatarHash: data.users[0].avatarHash || ''
-        }
-
-        dispatch(setUser(user));
-    }
 
     return (
         <>
