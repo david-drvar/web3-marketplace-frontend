@@ -19,6 +19,7 @@ import ApproveItemModal from "@/pages/components/modals/ApproveItemModal";
 import DisputeItemModal from "@/pages/components/modals/DisputeItemModal";
 import FinalizeTransactionModal from "@/pages/components/modals/FinalizeTransactionModal";
 import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
+import {addAddressToOrder} from "@/pages/utils/firebaseService";
 
 export default function ItemPage() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -96,7 +97,8 @@ export default function ItemPage() {
         }
     }, []);
 
-    const handleBuyItem = async (moderator) => {
+    const handleBuyItem = async (moderator, address) => {
+
         const contractParams = {
             abi: marketplaceAbi,
             contractAddress: marketplaceContractAddress,
@@ -114,6 +116,7 @@ export default function ItemPage() {
             onSuccess: (tx) => {
                 handleListWaitingConfirmation();
                 tx.wait().then((finalTx) => {
+                    addAddressToOrder(id, address);
                     handleBuyItemSuccess();
                     setShowBuyModal(false);
                 })

@@ -5,6 +5,7 @@ import {getCountries} from "@/pages/utils/utils";
 import {useMoralis} from "react-moralis";
 import {firebase_db} from "@/pages/utils/firebaseConfig";
 import {doc, getDoc, setDoc, updateDoc} from "firebase/firestore";
+import {getUserAddresses} from "@/pages/utils/firebaseService";
 
 
 export default function ManageAddresses() {
@@ -25,24 +26,7 @@ export default function ManageAddresses() {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
-        const fetchAddresses = async () => {
-            try {
-                const userDocRef = doc(firebase_db, "addresses", account);
-                const userDoc = await getDoc(userDocRef);
-
-                if (userDoc.exists()) {
-                    const fetchedAddresses = userDoc.data().addresses || [];
-                    setAddresses(fetchedAddresses);
-                } else {
-                    console.log("No addresses found for this user.");
-                    setAddresses([]);
-                }
-            } catch (error) {
-                console.error("Error fetching addresses: ", error);
-            }
-        };
-
-        fetchAddresses();
+        getUserAddresses(account).then((data) => setAddresses(data));
     }, [account]);  // Dependency array to ensure it runs only when walletAddress is available
 
 

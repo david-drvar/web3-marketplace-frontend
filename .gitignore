@@ -318,3 +318,5 @@ fabric.properties
 # .pnp.*
 
 # End of https://www.toptal.com/developers/gitignore/api/nextjs,react,node,webstorm,yarn
+/package-lock.json
+/randomstuff.txt
