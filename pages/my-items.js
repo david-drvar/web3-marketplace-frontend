@@ -17,19 +17,20 @@ export default function MyItems() {
     }, [isWeb3Enabled, items]);
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <>
             {isWeb3Enabled ? (
                 isLoading ? (
                     <LoadingAnimation/>
                 ) : (
-                    items.length === 0 ? (
-                        <div className="text-center w-full">You don't have any items.</div>
-                    ) : (
-                        <>
-                            <h1 className="text-3xl font-bold text-gray-800 mb-8">My Items (listed & bought)</h1>
+                    <div className="container mx-auto px-4 py-8">
+                        <h1 className="text-3xl font-bold text-gray-800 mb-8">My items (listed & bought)</h1>
+                        {items.length === 0 ? (
+                            <div className="text-center text-gray-500 italic">
+                                You don't have any items.
+                            </div>
+                        ) : (
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                                 {items.map((item) => {
-                                    if (item.itemStatus === "Deleted") return null;
                                     const {
                                         price,
                                         title,
@@ -55,14 +56,14 @@ export default function MyItems() {
                                     );
                                 })}
                             </div>
-                        </>
-                    )
+                        )}
+                    </div>
                 )
             ) : (
                 <div className="flex justify-center items-center h-screen">
                     <div className="m-4 italic text-center">Please connect your wallet first to use the platform</div>
                 </div>
             )}
-        </div>
+        </>
     );
 }
