@@ -1,11 +1,17 @@
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {setUser} from "@/store/slices/userSlice";
 import {getCountries} from "@/pages/utils/utils";
+import {useMoralis} from "react-moralis";
+import {firebase_db} from "@/pages/utils/firebaseConfig";
+import {doc, getDoc, setDoc, updateDoc} from "firebase/firestore";
+
 
 export default function ManageAddresses() {
     const user = useSelector((state) => state.user);
     const dispatchState = useDispatch();
+    const {account} = useMoralis();
+
 
     const [addresses, setAddresses] = useState(user.addresses || []);
     const [formData, setFormData] = useState({
@@ -18,6 +24,28 @@ export default function ManageAddresses() {
     const [editingIndex, setEditingIndex] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    useEffect(() => {
+        const fetchAddresses = async () => {
+            try {
+                const userDocRef = doc(firebase_db, "addresses", account);
+                const userDoc = await getDoc(userDocRef);
+
+                if (userDoc.exists()) {
+                    const fetchedAddresses = userDoc.data().addresses || [];
+                    setAddresses(fetchedAddresses);
+                } else {
+                    console.log("No addresses found for this user.");
+                    setAddresses([]);
+                }
+            } catch (error) {
+                console.error("Error fetching addresses: ", error);
+            }
+        };
+
+        fetchAddresses();
+    }, [account]);  // Dependency array to ensure it runs only when walletAddress is available
+
+
     const handleInputChange = (e) => {
         const {name, value} = e.target;
         setFormData({
@@ -26,37 +54,69 @@ export default function ManageAddresses() {
         });
     };
 
-    const handleSaveAddress = () => {
-        if (editingIndex !== null) {
-            // Update existing address
-            const updatedAddresses = addresses.map((address, index) =>
-                index === editingIndex ? formData : address
-            );
-            setAddresses(updatedAddresses);
-        } else {
-            // Add new address
-            setAddresses([...addresses, formData]);
-        }
-        setFormData({country: "", city: "", street: "", zipCode: "", phoneNumber: ""});
-        setEditingIndex(null);
-        setIsSubmitting(false);
+    const handleSaveAddress = async () => {
+        if (isSubmitting) return;  // Prevent double submissions
+        setIsSubmitting(true);
 
-        // Save addresses to the state/store
+        try {
+            const userDocRef = doc(firebase_db, "addresses", account);
+            const userDoc = await getDoc(userDocRef);
+
+            let updatedAddresses = [];
+
+            if (userDoc.exists()) {
+                // Get the existing addresses
+                updatedAddresses = userDoc.data().addresses || [];
+            }
+
+            if (editingIndex !== null) {
+                // Update existing address in Firestore
+                updatedAddresses[editingIndex] = formData;
+            } else {
+                // Add new address to Firestore
+                updatedAddresses.push(formData);
+            }
+
+            // Save updated addresses back to Firestore
+            await setDoc(userDocRef, {addresses: updatedAddresses});
+
+            // Update local state
+            setAddresses(updatedAddresses);
+            setEditingIndex(null);
+            setFormData({country: "", city: "", street: "", zipCode: "", phoneNumber: ""});
+        } catch (error) {
+            console.error("Error saving address: ", error);
+        } finally {
+            setIsSubmitting(false);
+        }
+
+        // Save addresses to the Redux state/store
         dispatchState(setUser({...user, addresses}));
     };
+
 
     const handleEditAddress = (index) => {
         setEditingIndex(index);
         setFormData(addresses[index]);
     };
 
-    const handleDeleteAddress = (index) => {
+    const handleDeleteAddress = async (index) => {
         const updatedAddresses = addresses.filter((_, i) => i !== index);
         setAddresses(updatedAddresses);
 
-        // Update the store
-        dispatchState(setUser({...user, addresses: updatedAddresses}));
+        try {
+            const userDocRef = doc(firebase_db, "addresses", account);
+
+            // Update Firestore
+            await updateDoc(userDocRef, {addresses: updatedAddresses});
+
+            // Update the store
+            dispatchState(setUser({...user, addresses: updatedAddresses}));
+        } catch (error) {
+            console.error("Error deleting address: ", error);
+        }
     };
+
 
     const handleSubmit = (e) => {
         e.preventDefault();
