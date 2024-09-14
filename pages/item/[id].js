@@ -1,23 +1,14 @@
-//item/[itemId].js
-
 import Image from "next/image";
 import {useRouter} from "next/router";
 import {useEffect, useState} from "react";
 import {useMoralis, useWeb3Contract} from "react-moralis";
 import {Button, useNotification} from "web3uikit";
 import marketplaceAbi from "../../constants/Marketplace.json";
-import escrowAbi from "../../constants/Escrow.json";
 import {ethers} from "ethers";
 import UpdateItemModal from "../components/modals/UpdateItemModal";
 import DeleteItemModal from "../components/modals/DeleteItemModal";
 import {useSelector} from "react-redux";
 import BuyItemModal from "@/pages/components/modals/BuyItemModal";
-import ChatPopup from "@/pages/components/chat/ChatPopup";
-import {fetchTransactionByItemId} from "@/pages/utils/apolloService";
-import {handleNotification} from "@/pages/utils/utils";
-import ApproveItemModal from "@/pages/components/modals/ApproveItemModal";
-import DisputeItemModal from "@/pages/components/modals/DisputeItemModal";
-import FinalizeTransactionModal from "@/pages/components/modals/FinalizeTransactionModal";
 import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
 import {addAddressToOrder} from "@/pages/utils/firebaseService";
 
@@ -40,65 +31,23 @@ export default function ItemPage() {
     const [showBuyModal, setShowBuyModal] = useState(false);
     const [showUpdateModal, setShowUpdateModal] = useState(false);
     const [showModalDelete, setShowModalDelete] = useState(false);
-    const [showApproveModal, setShowApproveModal] = useState(false);
-    const [showDisputeModal, setShowDisputeModal] = useState(false);
-    const [showFinalizeModal, setShowFinalizeModal] = useState(false);
-    const [showChat, setShowChat] = useState(false);
-
 
     const [buttonsDisabled, setButtonsDisabled] = useState(false);
-    const [approveButtonDisabled, setApproveButtonDisabled] = useState(true);
-    const [disputeButtonDisabled, setDisputeButtonDisabled] = useState(false);
 
     const isAccountSeller = seller === account || seller === undefined;
     const {runContractFunction} = useWeb3Contract();
     const marketplaceContractAddress = useSelector((state) => state.contract["marketplaceContractAddress"]);
-    const escrowContractAddress = useSelector((state) => state.contract["escrowContractAddress"]);
 
-    const [transaction, setTransaction] = useState({});
-    const [roleInTransaction, setRoleInTransaction] = useState("");
 
     const dispatch = useNotification();
 
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        if (item.itemStatus === "Bought") {
-            fetchTransactionByItemId(id).then((data) => {
-                setTransaction(data);
-                if (account === data.buyer) {
-                    setRoleInTransaction("Buyer");
-                } else if (account === data.seller) {
-                    setRoleInTransaction("Seller");
-                } else if (account === data.moderator) {
-                    setRoleInTransaction("Moderator");
-                }
-
-                if (account === data.buyer && !data.buyerApproved) {
-                    setApproveButtonDisabled(false);
-                } else if (account === data.seller && !data.sellerApproved) {
-                    setApproveButtonDisabled(false);
-                } else if (account === data.moderator && data.disputed) {
-                    setApproveButtonDisabled(false);
-                }
-
-                if (account === data.buyer && data.disputedByBuyer) {
-                    setDisputeButtonDisabled(false);
-                } else if (account === data.seller && !data.sellerApproved) {
-                    setApproveButtonDisabled(false);
-                } else if (account === data.moderator && data.disputed) {
-                    setApproveButtonDisabled(false);
-                }
-
-                setIsLoading(false);
-            }).catch(() => setIsLoading(false));
-        } else {
-            setIsLoading(false);
-        }
+        setIsLoading(false);
     }, []);
 
     const handleBuyItem = async (moderator, address) => {
-
         const contractParams = {
             abi: marketplaceAbi,
             contractAddress: marketplaceContractAddress,
@@ -153,83 +102,6 @@ export default function ItemPage() {
         });
     };
 
-    const handleApprove = async () => {
-        const contractParams = {
-            abi: escrowAbi,
-            contractAddress: escrowContractAddress,
-            functionName: `approveBy${roleInTransaction}`,
-            params: {
-                _itemId: id,
-            },
-        };
-
-        console.log("contractParams", contractParams);
-
-        await runContractFunction({
-            params: contractParams,
-            onSuccess: (tx) => {
-                handleNotification(dispatch, "info", "Transaction submitted. Waiting for confirmations.", "Waiting for confirmations");
-                tx.wait().then((finalTx) => {
-                    handleNotification(dispatch, "success", "Item approved successfully", "Item confirmed");
-                    setApproveButtonDisabled(true);
-                    setShowApproveModal(false);
-                })
-            },
-            onError: (error) => handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Approval error"),
-        });
-    }
-
-    const handleDispute = async () => {
-        const contractParams = {
-            abi: escrowAbi,
-            contractAddress: escrowContractAddress,
-            functionName: `raiseDispute`,
-            params: {
-                _itemId: id,
-                disputer: account,
-            },
-        };
-
-        await runContractFunction({
-            params: contractParams,
-            onSuccess: (tx) => {
-                handleNotification(dispatch, "info", "Transaction submitted. Waiting for confirmations.", "Waiting for confirmations");
-                tx.wait().then((finalTx) => {
-                    handleNotification(dispatch, "success", "Item disputed successfully", "Item disputed");
-                    setDisputeButtonDisabled(true);
-                    setShowDisputeModal(false);
-                })
-            },
-            onError: (error) => handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Dispute error"),
-        });
-    }
-
-
-    const handleFinalize = async (percentageSeller, percentageBuyer) => {
-        const contractParams = {
-            abi: escrowAbi,
-            contractAddress: escrowContractAddress,
-            functionName: `finalizeTransactionByModerator`,
-            params: {
-                _itemId: id,
-                percentageSeller: percentageSeller,
-                percentageBuyer: percentageBuyer,
-            },
-        };
-
-        await runContractFunction({
-            params: contractParams,
-            onSuccess: (tx) => {
-                handleNotification(dispatch, "info", "Transaction submitted. Waiting for confirmations.", "Waiting for confirmations");
-                tx.wait().then((finalTx) => {
-                    handleNotification(dispatch, "success", "Item finalized successfully", "Item finalized");
-                    // setDisputeButtonDisabled(true);
-                    setShowFinalizeModal(false);
-                })
-            },
-            onError: (error) => handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Finalize error"),
-        });
-    }
 
     return (
         <>
@@ -260,25 +132,6 @@ export default function ItemPage() {
                             onBuyItem={handleBuyItem}
                         />
 
-                        <ApproveItemModal
-                            isVisible={showApproveModal}
-                            onClose={() => setShowApproveModal(false)}
-                            roleInTransaction={roleInTransaction}
-                            onApprove={handleApprove}
-                        />
-
-                        <DisputeItemModal
-                            isVisible={showDisputeModal}
-                            onClose={() => setShowDisputeModal(false)}
-                            roleInTransaction={roleInTransaction}
-                            onDispute={handleDispute}
-                        />
-
-                        <FinalizeTransactionModal
-                            isVisible={showFinalizeModal}
-                            onClose={() => setShowFinalizeModal(false)}
-                            onFinalize={handleFinalize}
-                        />
 
                         <div className="text-center">
                             <h1 className="text-2xl font-bold mb-4">{title}</h1>
@@ -303,86 +156,38 @@ export default function ItemPage() {
                             ))}
                         </div>
 
-                        {itemStatus !== "Bought" ?
-                            (
-                                <div className="flex justify-center mt-6">
-                                    {isAccountSeller ? (
-                                        <div className="flex space-x-4">
-                                            <Button
-                                                disabled={buttonsDisabled}
-                                                text="Update item"
-                                                id="updateButton"
-                                                onClick={() => setShowUpdateModal(true)}
-                                                theme="primary"
-                                                className="bg-blue-500 hover:bg-blue-600"
-                                            />
-                                            <Button
-                                                disabled={buttonsDisabled}
-                                                text="Delete item"
-                                                id="deleteButton"
-                                                onClick={() => setShowModalDelete(true)}
-                                                theme="colored"
-                                                color="red"
-                                                className="bg-red-500 hover:bg-red-600"
-                                            />
-                                        </div>
-                                    ) : (
-                                        <Button
-                                            text="Buy item"
-                                            id="buyButton"
-                                            onClick={() => setShowBuyModal(true)}
-                                            theme="primary"
-                                            className="bg-green-500 hover:bg-green-600"
-                                        />
-                                    )}
-                                </div>) :
-                            (
-                                <div className="flex justify-center mt-6">
+
+                        <div className="flex justify-center mt-6">
+                            {isAccountSeller ? (
+                                <div className="flex space-x-4">
                                     <Button
-                                        text="Send message"
-                                        id="chatButton"
+                                        disabled={buttonsDisabled}
+                                        text="Update item"
+                                        id="updateButton"
+                                        onClick={() => setShowUpdateModal(true)}
                                         theme="primary"
                                         className="bg-blue-500 hover:bg-blue-600"
-                                        onClick={() => setShowChat(!showChat)}
                                     />
-
-                                    {(roleInTransaction === "Buyer" || roleInTransaction === "Seller")
-                                        &&
-                                        <Button
-                                            text={`Approve as ${roleInTransaction}`}
-                                            disabled={approveButtonDisabled}
-                                            id="approveButton"
-                                            className="bg-cyan-300 hover:bg-emerald-600"
-                                            onClick={() => setShowApproveModal(true)}
-                                        />
-                                    }
-
-                                    {(roleInTransaction === "Buyer" || roleInTransaction === "Seller")
-                                        &&
-                                        <Button
-                                            text={`Dispute as ${roleInTransaction}`}
-                                            disabled={disputeButtonDisabled}
-                                            id="disputeButton"
-                                            className="bg-amber-400 hover:bg-amber-600"
-                                            onClick={() => setShowDisputeModal(true)}
-                                        />
-                                    }
-
-                                    {roleInTransaction === "Moderator" && transaction.disputed && !transaction.isCompleted &&
-                                        <Button
-                                            text="Finalize transaction"
-                                            id="finalizeButton"
-                                            className="bg-fuchsia-400 hover:bg-fuchsia-600"
-                                            onClick={() => setShowFinalizeModal(true)}
-                                        />
-                                    }
+                                    <Button
+                                        disabled={buttonsDisabled}
+                                        text="Delete item"
+                                        id="deleteButton"
+                                        onClick={() => setShowModalDelete(true)}
+                                        theme="colored"
+                                        color="red"
+                                        className="bg-red-500 hover:bg-red-600"
+                                    />
                                 </div>
+                            ) : (
+                                <Button
+                                    text="Buy item"
+                                    id="buyButton"
+                                    onClick={() => setShowBuyModal(true)}
+                                    theme="primary"
+                                    className="bg-green-500 hover:bg-green-600"
+                                />
                             )}
-                        {showChat &&
-                            <ChatPopup onClose={() => setShowChat(false)}
-                                       transaction={transaction}
-                            />
-                        }
+                        </div>
 
                     </div>) : (
                         <div className="m-4 italic text-center w-full">Please connect your wallet first to use the

@@ -4,7 +4,6 @@ import Image from "next/image";
 import {Card, Skeleton, useNotification} from "web3uikit";
 import {ethers} from "ethers";
 import Link from "next/link";
-// import UpdateItemModal from "./UpdateItemModal";
 
 const truncateStr = (fullStr, strLen) => {
     if (fullStr.length <= strLen) return fullStr;
@@ -33,7 +32,7 @@ export default function ItemBox({id, price, title, description, seller, photosIP
         <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
             <div className="m-4">
                 {imageURI ? (
-                    <Link href={`/item/${id}`}>
+                    <Link href={itemStatus === "Bought" ? `/order/${id}` : `/item/${id}`}>
                         <div className="cursor-pointer">
                             <div className="relative w-full h-48 mb-4">
                                 {imageURI == "" ? (
