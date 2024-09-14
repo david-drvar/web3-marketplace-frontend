@@ -7,15 +7,15 @@ export default function Header() {
     const {isWeb3Enabled} = useMoralis();
     const router = useRouter();
 
-    const handleChange = (event) => {
-        if (event.id === "orders") {
-            router.push("/my-orders");
-        } else if (event.id === "home") {
-            router.push("/");
-        } else if (event.id === "items") {
-            router.push("/my-items");
-        }
-    };
+    // const handleChange = (event) => {
+    //     if (event.id === "orders") {
+    //         router.push("/my-orders");
+    //     } else if (event.id === "home") {
+    //         router.push("/");
+    //     } else if (event.id === "items") {
+    //         router.push("/my-items");
+    //     }
+    // };
 
     return (
         <nav className="p-5 border-b-2 flex flex-row justify-between items-center">
@@ -31,10 +31,10 @@ export default function Header() {
                     List item
                 </Link>
                 <Link href="/my-orders" className="mr-4 p-6">
-                    My purchases
+                    My orders
                 </Link>
-                <Link href="/my-items" className="mr-4 p-6">
-                    My items
+                <Link href="/my-ads" className="mr-4 p-6">
+                    My ads
                 </Link>
                 <Link href="/moderated-items" className="mr-4 p-6">
                     Moderated items

@@ -24,7 +24,7 @@ export default function MyOrders() {
                     <LoadingAnimation/>
                 ) : (
                     <div className="container mx-auto px-4 py-8">
-                        <h1 className="text-3xl font-bold text-gray-800 mb-8">My purchases</h1>
+                        <h1 className="text-3xl font-bold text-gray-800 mb-8">My orders</h1>
                         {items.length === 0 ? (
                             <div className="text-center text-gray-500 italic">
                                 You made no purchases.

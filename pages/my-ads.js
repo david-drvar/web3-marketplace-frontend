@@ -4,7 +4,7 @@ import {useSelector} from "react-redux";
 import {useEffect, useState} from "react";
 import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
 
-export default function MyItems() {
+export default function MyAds() {
     const {isWeb3Enabled, account} = useMoralis();
 
     const items = useSelector((state) => state.items).filter(item => item.seller === account && item.itemStatus !== "Deleted");
@@ -24,7 +24,7 @@ export default function MyItems() {
                     <LoadingAnimation/>
                 ) : (
                     <div className="container mx-auto px-4 py-8">
-                        <h1 className="text-3xl font-bold text-gray-800 mb-8">My items (listed & bought)</h1>
+                        <h1 className="text-3xl font-bold text-gray-800 mb-8">My ads (listed & bought)</h1>
                         {items.length === 0 ? (
                             <div className="text-center text-gray-500 italic">
                                 You don't have any items.
