@@ -19,6 +19,24 @@ export const getUserAddresses = async (userId) => {
     }
 }
 
+export const getOrderAddress = async (orderId) => {
+    try {
+        const orderDocRef = doc(collection(firebase_db, "orders"), orderId);
+        const orderDocSnap = await getDoc(orderDocRef);
+
+        if (orderDocSnap.exists()) {
+            const orderData = orderDocSnap.data();
+            return (orderData.address || []);
+        } else {
+            console.log("No address found for this order.");
+            return [];
+        }
+    } catch (error) {
+        console.error("Error fetching order address:", error);
+        throw error;
+    }
+}
+
 
 export const addAddressToOrder = async (itemId, address) => {
     try {

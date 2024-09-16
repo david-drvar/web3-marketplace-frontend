@@ -13,6 +13,7 @@ import ApproveItemModal from "@/pages/components/modals/ApproveItemModal";
 import DisputeItemModal from "@/pages/components/modals/DisputeItemModal";
 import FinalizeTransactionModal from "@/pages/components/modals/FinalizeTransactionModal";
 import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
+import {getOrderAddress} from "@/pages/utils/firebaseService";
 
 export default function OrderPage() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -37,7 +38,7 @@ export default function OrderPage() {
 
 
     const [approveButtonDisabled, setApproveButtonDisabled] = useState(true);
-    const [disputeButtonDisabled, setDisputeButtonDisabled] = useState(false);
+    const [disputeButtonDisabled, setDisputeButtonDisabled] = useState(true);
 
     const isAccountSeller = seller === account || seller === undefined;
     const {runContractFunction} = useWeb3Contract();
@@ -45,6 +46,7 @@ export default function OrderPage() {
     const escrowContractAddress = useSelector((state) => state.contract["escrowContractAddress"]);
 
     const [transaction, setTransaction] = useState({});
+    const [address, setAddress] = useState({});
     const [roleInTransaction, setRoleInTransaction] = useState("");
 
     const dispatch = useNotification();
@@ -54,29 +56,31 @@ export default function OrderPage() {
     useEffect(() => {
         fetchTransactionByItemId(id).then((data) => {
             setTransaction(data);
-            if (account === data.buyer) {
+            if (account === data.buyer)
                 setRoleInTransaction("Buyer");
-            } else if (account === data.seller) {
+            else if (account === data.seller)
                 setRoleInTransaction("Seller");
-            } else if (account === data.moderator) {
+            else if (account === data.moderator)
                 setRoleInTransaction("Moderator");
-            }
 
-            if (account === data.buyer && !data.buyerApproved) {
-                setApproveButtonDisabled(false);
-            } else if (account === data.seller && !data.sellerApproved) {
-                setApproveButtonDisabled(false);
-            } else if (account === data.moderator && data.disputed) {
-                setApproveButtonDisabled(false);
-            }
 
-            if (account === data.buyer && data.disputedByBuyer) {
+            if (account === data.buyer && !data.buyerApproved)
+                setApproveButtonDisabled(false);
+            else if (account === data.seller && !data.sellerApproved)
+                setApproveButtonDisabled(false);
+
+            if (account === data.buyer && !data.disputedByBuyer)
                 setDisputeButtonDisabled(false);
-            } else if (account === data.seller && !data.sellerApproved) {
-                setApproveButtonDisabled(false);
-            } else if (account === data.moderator && data.disputed) {
-                setApproveButtonDisabled(false);
+            else if (account === data.seller && !data.disputedBySeller)
+                setDisputeButtonDisabled(false);
+
+
+            if (transaction.isCompleted) {
+                setDisputeButtonDisabled(true);
+                setApproveButtonDisabled(true);
             }
+
+            getOrderAddress(id).then((data) => setAddress(data));
 
             setIsLoading(false);
         }).catch(() => setIsLoading(false));
@@ -167,7 +171,7 @@ export default function OrderPage() {
             {isLoading ? (
                 <LoadingAnimation/>
             ) : (
-                <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
+                <div className="max-w-4xl mx-auto p-8 bg-white shadow-md rounded-lg">
                     {isWeb3Enabled ? (
                         <div>
                             <ApproveItemModal
@@ -196,31 +200,54 @@ export default function OrderPage() {
                                 />
                             }
 
-                            <div className="text-center">
-                                <h1 className="text-2xl font-bold mb-4">{title}</h1>
-                                <p className="text-gray-500 mb-2">Item ID: {id}</p>
-                                <p className="text-lg mb-4">{description}</p>
-                                <p className="text-xl font-semibold text-green-600 mb-2">Price: {ethers.utils.formatEther(price)} ETH</p>
-                                <p className="text-gray-400">Date
-                                    posted: {new Date(blockTimestamp * 1000).toDateString()}</p>
+                            {/* Item and Transaction Details */}
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                <div>
+                                    <h1 className="text-3xl font-bold text-gray-800 mb-4">{title}</h1>
+                                    <p className="text-lg mb-4">{description}</p>
+                                    <p className="text-xl font-semibold text-green-600 mb-2">Price: {ethers.utils.formatEther(price)} ETH</p>
+                                    <p className="text-gray-400 mb-2">Date
+                                        posted: {new Date(blockTimestamp * 1000).toDateString()}</p>
+                                </div>
+
+                                <div className="flex justify-center items-center">
+                                    <div className="grid grid-cols-2 gap-4">
+                                        {photosIPFSHashes.map((photoHash) => (
+                                            <Image
+                                                key={photoHash}
+                                                loader={() => `${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
+                                                src={`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
+                                                height="200"
+                                                width="200"
+                                                alt="item image"
+                                                className="rounded-lg shadow-md"
+                                            />
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4 mt-6">
-                                {photosIPFSHashes.map((photoHash) => (
-                                    <Image
-                                        key={photoHash}
-                                        loader={() => `${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
-                                        src={`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
-                                        height="200"
-                                        width="200"
-                                        alt="item image"
-                                        className="rounded-lg shadow-md"
-                                    />
-                                ))}
+                            {/* Transaction Details */}
+                            <div className="mt-6 p-4 border-t border-gray-200">
+                                <h2 className="text-2xl font-semibold mb-4">Order details</h2>
+                                <p className="mb-4"><strong>Date
+                                    purchased:</strong> {new Date(transaction.blockTimestamp * 1000).toDateString()}</p>
+
+                                <p className="mb-4"><strong>Moderator's fee:</strong> {transaction.moderatorFee}%</p>
+
+                                <p className="mb-4"><strong>Address:</strong> {`${address.street},${address.city},${address.zipCode},${address.country}`}</p>
+
+                                <p><strong>Approved by buyer:</strong> {transaction.buyerApproved ? "Yes" : "No"}</p>
+                                <p className="mb-4"><strong>Approved by seller:</strong> {transaction.sellerApproved ? "Yes" : "No"}</p>
+
+                                <p><strong>Disputed by buyer:</strong> {transaction.disputedByBuyer ? "Yes" : "No"}</p>
+                                <p className="mb-4"><strong>Disputed by seller:</strong> {transaction.disputedBySeller ? "Yes" : "No"}</p>
+
+                                <p><strong>Is completed:</strong> {transaction.isCompleted ? "Yes" : "No"}</p>
                             </div>
 
-
-                            <div className="flex justify-center mt-6">
+                            {/* Buttons */}
+                            <div className="flex justify-center mt-6 space-x-4">
                                 <Button
                                     text="Send message"
                                     id="chatButton"
@@ -229,47 +256,43 @@ export default function OrderPage() {
                                     onClick={() => setShowChat(!showChat)}
                                 />
 
-                                {(roleInTransaction === "Buyer" || roleInTransaction === "Seller")
-                                    &&
+                                {(roleInTransaction === "Buyer" || roleInTransaction === "Seller") && (
                                     <Button
                                         text={`Approve as ${roleInTransaction}`}
                                         disabled={approveButtonDisabled}
                                         id="approveButton"
-                                        className="bg-cyan-300 hover:bg-emerald-600"
+                                        className="bg-green-500 hover:bg-green-600"
                                         onClick={() => setShowApproveModal(true)}
                                     />
-                                }
+                                )}
 
-                                {(roleInTransaction === "Buyer" || roleInTransaction === "Seller")
-                                    &&
+                                {(roleInTransaction === "Buyer" || roleInTransaction === "Seller") && (
                                     <Button
                                         text={`Dispute as ${roleInTransaction}`}
                                         disabled={disputeButtonDisabled}
                                         id="disputeButton"
-                                        className="bg-amber-400 hover:bg-amber-600"
+                                        className="bg-red-500 hover:bg-red-600"
                                         onClick={() => setShowDisputeModal(true)}
                                     />
-                                }
+                                )}
 
-                                {roleInTransaction === "Moderator" && transaction.disputed && !transaction.isCompleted &&
+                                {roleInTransaction === "Moderator" && transaction.disputed && !transaction.isCompleted && (
                                     <Button
                                         text="Finalize transaction"
                                         id="finalizeButton"
-                                        className="bg-fuchsia-400 hover:bg-fuchsia-600"
+                                        className="bg-purple-500 hover:bg-purple-600"
                                         onClick={() => setShowFinalizeModal(true)}
                                     />
-                                }
+                                )}
                             </div>
-
-                        </div>) : (
+                        </div>
+                    ) : (
                         <div className="m-4 italic text-center w-full">Please connect your wallet first to use the
-                            platform</div>)}
-
-
+                            platform</div>
+                    )}
                 </div>
             )}
         </>
-
     );
 }
 
