@@ -62,6 +62,7 @@ export default function ModeratedItems() {
                                                 photosIPFSHashes={photosIPFSHashes}
                                                 itemStatus={itemStatus}
                                                 blockTimestamp={blockTimestamp}
+                                                displayOwnedStatus={false}
                                             />
                                         );
                                     })}

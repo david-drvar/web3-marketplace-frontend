@@ -2,20 +2,18 @@ import {useMoralis} from "react-moralis";
 import networkMapping from "../constants/networkMapping.json";
 import ItemBox from "./components/ItemBox";
 import {useEffect, useState} from "react";
-import {useDispatch, useSelector} from "react-redux";
+import {useDispatch} from "react-redux";
 import {
     setEscrowContractAddress,
     setMarketplaceContractAddress,
     setUsersContractAddress
 } from "@/store/slices/contractSlice";
-import {setAllItems} from "@/store/slices/itemsSlice";
-import {setUser} from "@/store/slices/userSlice";
 import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
-import {fetchAllItems, fetchUserByAddress} from "@/pages/utils/apolloService";
+import {fetchAllItemsListed} from "@/pages/utils/apolloService";
 
 
 export default function Home() {
-    const {chainId, isWeb3Enabled, account} = useMoralis();
+    const {chainId, isWeb3Enabled} = useMoralis();
     const chainString = chainId ? parseInt(chainId).toString() : null;
     const marketplaceContractAddress = chainId ? networkMapping[chainString].Marketplace[0] : null;
     const usersContractAddress = chainId ? networkMapping[chainString].Users[0] : null;
@@ -23,7 +21,7 @@ export default function Home() {
 
     const dispatch = useDispatch();
 
-    const items = useSelector((state) => state.items).filter((item) => item.itemStatus === "Listed")
+    const [items, setItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
 
@@ -34,8 +32,7 @@ export default function Home() {
             dispatch(setEscrowContractAddress(escrowContractAddress))
         }
 
-        fetchUserByAddress(account).then((data) => dispatch(setUser(data))).then(() => setIsLoading(false));
-        fetchAllItems().then((data) => dispatch(setAllItems(data))).then(() => setIsLoading(false));
+        fetchAllItemsListed().then((data) => setItems(data)).then(() => setIsLoading(false));
     }, [marketplaceContractAddress, usersContractAddress, escrowContractAddress, dispatch]);
 
 
@@ -75,6 +72,7 @@ export default function Home() {
                                             photosIPFSHashes={photosIPFSHashes}
                                             itemStatus={itemStatus}
                                             blockTimestamp={blockTimestamp}
+                                            displayOwnedStatus={true}
                                         />
                                     );
                                 })}

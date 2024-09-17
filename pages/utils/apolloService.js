@@ -6,10 +6,10 @@ export const apolloClient = new ApolloClient({
 });
 
 
-export const fetchAllItems = async () => {
+export const fetchAllItemsListed = async () => {
     const getItemsQuery = gql`
     {
-      items {
+      items (where : { itemStatus: "Listed" }) {
         id
         buyer
         seller
@@ -23,7 +23,6 @@ export const fetchAllItems = async () => {
     }
   `;
 
-
     try {
         const {data} = await apolloClient.query({
             query: getItemsQuery,
@@ -33,6 +32,101 @@ export const fetchAllItems = async () => {
         return data.items || [];
     } catch (error) {
         console.error("Error fetching items", error);
+        return [];
+    }
+}
+
+
+export const fetchItemById = async (id) => {
+    const getItemByIdQuery = gql`
+    query GetItemById($id: String!) {
+      items(where: { id: $id }) {
+        id
+        buyer
+        seller
+        price
+        title
+        description
+        blockTimestamp
+        itemStatus
+        photosIPFSHashes
+      }
+    }
+  `;
+
+    try {
+        const {data} = await apolloClient.query({
+            query: getItemByIdQuery,
+            variables: {id: id},
+            fetchPolicy: 'network-only', // ensures fresh data
+        });
+
+        return data.items || [];
+    } catch (error) {
+        console.error("Error fetching item by id", error);
+        return [];
+    }
+}
+
+export const fetchOrdersByUser = async (userAddress) => {
+    const getItemsQuery = gql`
+    query GetOrders($userAddress: String!) {
+      items(where: { buyer: $userAddress }) {
+        id
+        buyer
+        seller
+        price
+        title
+        description
+        blockTimestamp
+        itemStatus
+        photosIPFSHashes
+      }
+    }
+  `;
+
+    try {
+        const {data} = await apolloClient.query({
+            query: getItemsQuery,
+            variables: {userAddress: userAddress},
+            fetchPolicy: 'network-only', // ensures fresh data
+        });
+
+        return data.items || [];
+    } catch (error) {
+        console.error("Error fetching orders by user", error);
+        return [];
+    }
+}
+
+
+export const fetchActiveAdsByUser = async (userAddress) => {
+    const getItemsQuery = gql`
+    query GetActiveAddsByUser($userAddress: String!) {
+      items(where: { seller: $userAddress, itemStatus_not: "Deleted" }) {
+        id
+        buyer
+        seller
+        price
+        title
+        description
+        blockTimestamp
+        itemStatus
+        photosIPFSHashes
+      }
+    }
+  `;
+
+    try {
+        const {data} = await apolloClient.query({
+            query: getItemsQuery,
+            variables: {userAddress: userAddress},
+            fetchPolicy: 'network-only', // ensures fresh data
+        });
+
+        return data.items || [];
+    } catch (error) {
+        console.error("Error fetching active ads by user", error);
         return [];
     }
 }

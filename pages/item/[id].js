@@ -11,6 +11,7 @@ import {useSelector} from "react-redux";
 import BuyItemModal from "@/pages/components/modals/BuyItemModal";
 import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
 import {addAddressToOrder} from "@/pages/utils/firebaseService";
+import {fetchItemById} from "@/pages/utils/apolloService";
 
 export default function ItemPage() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -18,15 +19,15 @@ export default function ItemPage() {
 
     const id = router.query.id;
 
-    const item = useSelector((state) => state.items).find(item => item.id === id);
+    const [item, setItem] = useState({});
 
-    const [title, setTitle] = useState(item.title);
-    const [price, setPrice] = useState(item.price);
-    const seller = item.seller;
-    const [description, setDescription] = useState(item.description);
-    const [photosIPFSHashes, setPhotosIPFSHashes] = useState(typeof item.photosIPFSHashes == "string" ? [item.photosIPFSHashes] : item.photosIPFSHashes);
-    const itemStatus = item.itemStatus;
-    const blockTimestamp = item.blockTimestamp;
+    const [title, setTitle] = useState("");
+    const [price, setPrice] = useState("");
+    const [seller, setSeller] = useState("");
+    const [description, setDescription] = useState("");
+    const [photosIPFSHashes, setPhotosIPFSHashes] = useState([]);
+    const [itemStatus, setItemStatus] = useState("");
+    const [blockTimestamp, setBlockTimestamp] = useState("");
 
     const [showBuyModal, setShowBuyModal] = useState(false);
     const [showUpdateModal, setShowUpdateModal] = useState(false);
@@ -34,7 +35,7 @@ export default function ItemPage() {
 
     const [buttonsDisabled, setButtonsDisabled] = useState(false);
 
-    const isAccountSeller = seller === account || seller === undefined;
+    const [isAccountSeller, setIsAccountSeller] = useState(false);
     const {runContractFunction} = useWeb3Contract();
     const marketplaceContractAddress = useSelector((state) => state.contract["marketplaceContractAddress"]);
 
@@ -44,7 +45,17 @@ export default function ItemPage() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        setIsLoading(false);
+        fetchItemById(id).then((data) => {
+            setItem(data[0]);
+            setTitle(data[0].title);
+            setDescription(data[0].description);
+            setPrice(data[0].price);
+            setPhotosIPFSHashes(typeof data[0].photosIPFSHashes == "string" ? [data[0].photosIPFSHashes] : data[0].photosIPFSHashes);
+            setItemStatus(data[0].itemStatus);
+            setBlockTimestamp(data[0].blockTimestamp);
+            setSeller(data[0].seller);
+            setIsAccountSeller(data[0].seller === account || data[0].seller === undefined)
+        }).then(() => setIsLoading(false));
     }, []);
 
     const handleBuyItem = async (moderator, address) => {

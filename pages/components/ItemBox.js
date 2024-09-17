@@ -1,7 +1,7 @@
 import {useState, useEffect} from "react";
-import {useWeb3Contract, useMoralis} from "react-moralis";
+import {useMoralis} from "react-moralis";
 import Image from "next/image";
-import {Card, Skeleton, useNotification} from "web3uikit";
+import {Card, Skeleton} from "web3uikit";
 import {ethers} from "ethers";
 import Link from "next/link";
 
@@ -15,7 +15,7 @@ const truncateStr = (fullStr, strLen) => {
     return fullStr.substring(0, frontChars) + separator + fullStr.substring(fullStr.length - backChars);
 };
 
-export default function ItemBox({id, price, title, description, seller, photosIPFSHashes, itemStatus, blockTimestamp}) {
+export default function ItemBox({id, price, title, description, seller, photosIPFSHashes, itemStatus, blockTimestamp, displayOwnedStatus}) {
     const {isWeb3Enabled, account} = useMoralis();
     const [imageURI, setImageURI] = useState("");
 
@@ -48,7 +48,7 @@ export default function ItemBox({id, price, title, description, seller, photosIP
                                     />
                                 )}
                                 {/* Overlay for owner information */}
-                                {isOwnedByUser ?
+                                {displayOwnedStatus && isOwnedByUser ?
                                     (<div
                                         className="absolute top-0 right-0 m-2 bg-gray-800 bg-opacity-75 text-white text-xs px-2 py-1 rounded-lg">
                                         Owned by you

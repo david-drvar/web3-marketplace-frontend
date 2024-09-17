@@ -7,7 +7,7 @@ import escrowAbi from "../../constants/Escrow.json";
 import {ethers} from "ethers";
 import {useSelector} from "react-redux";
 import ChatPopup from "@/pages/components/chat/ChatPopup";
-import {fetchTransactionByItemId} from "@/pages/utils/apolloService";
+import {fetchItemById, fetchTransactionByItemId} from "@/pages/utils/apolloService";
 import {handleNotification} from "@/pages/utils/utils";
 import ApproveItemModal from "@/pages/components/modals/ApproveItemModal";
 import DisputeItemModal from "@/pages/components/modals/DisputeItemModal";
@@ -21,26 +21,23 @@ export default function OrderPage() {
 
     const id = router.query.id;
 
-    const item = useSelector((state) => state.items).find(item => item.id === id);
+    const [item, setItem] = useState({});
 
-    const [title, setTitle] = useState(item.title);
-    const [price, setPrice] = useState(item.price);
-    const seller = item.seller;
-    const [description, setDescription] = useState(item.description);
-    const [photosIPFSHashes, setPhotosIPFSHashes] = useState(typeof item.photosIPFSHashes == "string" ? [item.photosIPFSHashes] : item.photosIPFSHashes);
-    const itemStatus = item.itemStatus;
-    const blockTimestamp = item.blockTimestamp;
+    const [title, setTitle] = useState("");
+    const [price, setPrice] = useState("");
+    const [description, setDescription] = useState("");
+    const [photosIPFSHashes, setPhotosIPFSHashes] = useState([]);
+    const [itemStatus, setItemStatus] = useState("");
+    const [blockTimestamp, setBlockTimestamp] = useState("");
 
     const [showApproveModal, setShowApproveModal] = useState(false);
     const [showDisputeModal, setShowDisputeModal] = useState(false);
     const [showFinalizeModal, setShowFinalizeModal] = useState(false);
     const [showChat, setShowChat] = useState(false);
 
-
     const [approveButtonDisabled, setApproveButtonDisabled] = useState(true);
     const [disputeButtonDisabled, setDisputeButtonDisabled] = useState(true);
 
-    const isAccountSeller = seller === account || seller === undefined;
     const {runContractFunction} = useWeb3Contract();
     const marketplaceContractAddress = useSelector((state) => state.contract["marketplaceContractAddress"]);
     const escrowContractAddress = useSelector((state) => state.contract["escrowContractAddress"]);
@@ -54,38 +51,69 @@ export default function OrderPage() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        fetchTransactionByItemId(id).then((data) => {
-            setTransaction(data);
-            if (account === data.buyer)
-                setRoleInTransaction("Buyer");
-            else if (account === data.seller)
-                setRoleInTransaction("Seller");
-            else if (account === data.moderator)
-                setRoleInTransaction("Moderator");
+        // Wrap all fetches in a Promise.all to handle them together
+        const fetchData = async () => {
+            try {
+                // Start loading
+                setIsLoading(true);
 
+                // Fetch all data simultaneously
+                const [itemData, transactionData, orderAddressData] = await Promise.all([
+                    fetchItemById(id),
+                    fetchTransactionByItemId(id),
+                    getOrderAddress(id),
+                ]);
 
-            if (account === data.buyer && !data.buyerApproved)
-                setApproveButtonDisabled(false);
-            else if (account === data.seller && !data.sellerApproved)
-                setApproveButtonDisabled(false);
+                // Handle item data
+                const item = itemData[0];
+                setItem(item);
+                setTitle(item.title);
+                setDescription(item.description);
+                setPrice(item.price);
+                setPhotosIPFSHashes(typeof item.photosIPFSHashes === "string" ? [item.photosIPFSHashes] : item.photosIPFSHashes);
+                setBlockTimestamp(item.blockTimestamp);
+                setItemStatus(item.itemStatus);
 
-            if (account === data.buyer && !data.disputedByBuyer)
-                setDisputeButtonDisabled(false);
-            else if (account === data.seller && !data.disputedBySeller)
-                setDisputeButtonDisabled(false);
+                // Handle transaction data
+                setTransaction(transactionData);
+                if (account === transactionData.buyer) {
+                    setRoleInTransaction("Buyer");
+                } else if (account === transactionData.seller) {
+                    setRoleInTransaction("Seller");
+                } else if (account === transactionData.moderator) {
+                    setRoleInTransaction("Moderator");
+                }
 
+                if (account === transactionData.buyer && !transactionData.buyerApproved) {
+                    setApproveButtonDisabled(false);
+                } else if (account === transactionData.seller && !transactionData.sellerApproved) {
+                    setApproveButtonDisabled(false);
+                }
 
-            if (transaction.isCompleted) {
-                setDisputeButtonDisabled(true);
-                setApproveButtonDisabled(true);
+                if (account === transactionData.buyer && !transactionData.disputedByBuyer) {
+                    setDisputeButtonDisabled(false);
+                } else if (account === transactionData.seller && !transactionData.disputedBySeller) {
+                    setDisputeButtonDisabled(false);
+                }
+
+                if (transactionData.isCompleted) {
+                    setDisputeButtonDisabled(true);
+                    setApproveButtonDisabled(true);
+                }
+
+                // Handle order address
+                setAddress(orderAddressData);
+
+            } catch (error) {
+                console.error("Error fetching data: ", error);
+            } finally {
+                // Set loading to false after all data is fetched or if an error occurs
+                setIsLoading(false);
             }
+        };
 
-            getOrderAddress(id).then((data) => setAddress(data));
-
-            setIsLoading(false);
-        }).catch(() => setIsLoading(false));
-
-    }, []);
+        fetchData();
+    }, [id, account]); // Add account to dependency array if used in conditions
 
 
     const handleApprove = async () => {

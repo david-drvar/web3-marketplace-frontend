@@ -1,20 +1,17 @@
 import {useMoralis} from "react-moralis";
 import ItemBox from "./components/ItemBox";
 import {useEffect, useState} from "react";
-import {useSelector} from "react-redux";
 import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
+import {fetchOrdersByUser} from "@/pages/utils/apolloService";
 
 export default function MyOrders() {
     const {isWeb3Enabled, account} = useMoralis();
 
-    const items = useSelector((state) => state.items).filter(item => item.buyer === account);
+    const [items, setItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        setIsLoading(true);
-        if (isWeb3Enabled && items) {
-            setIsLoading(false);
-        }
+        fetchOrdersByUser(account).then((data) => setItems(data)).then(() => setIsLoading(false));
     }, [isWeb3Enabled, items, account]);
 
     return (
@@ -53,6 +50,7 @@ export default function MyOrders() {
                                             photosIPFSHashes={photosIPFSHashes}
                                             itemStatus={itemStatus}
                                             blockTimestamp={blockTimestamp}
+                                            displayOwnedStatus={false}
                                         />
                                     );
                                 })}

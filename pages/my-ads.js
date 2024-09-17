@@ -1,20 +1,17 @@
 import {useMoralis} from "react-moralis";
 import ItemBox from "./components/ItemBox";
-import {useSelector} from "react-redux";
 import {useEffect, useState} from "react";
 import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
+import {fetchActiveAdsByUser} from "@/pages/utils/apolloService";
 
 export default function MyAds() {
     const {isWeb3Enabled, account} = useMoralis();
 
-    const items = useSelector((state) => state.items).filter(item => item.seller === account && item.itemStatus !== "Deleted");
+    const [items, setItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        setIsLoading(true);
-        if (isWeb3Enabled && items) {
-            setIsLoading(false);
-        }
+        fetchActiveAdsByUser(account).then((data) => setItems(data)).then(() => setIsLoading(false));
     }, [isWeb3Enabled, items]);
 
     return (
@@ -53,6 +50,7 @@ export default function MyAds() {
                                             photosIPFSHashes={photosIPFSHashes}
                                             itemStatus={itemStatus}
                                             blockTimestamp={blockTimestamp}
+                                            displayOwnedStatus={false}
                                         />
                                     );
                                 })}
