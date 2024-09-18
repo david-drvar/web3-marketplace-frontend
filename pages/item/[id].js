@@ -12,6 +12,7 @@ import BuyItemModal from "@/pages/components/modals/BuyItemModal";
 import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
 import {addAddressToOrder} from "@/pages/utils/firebaseService";
 import {fetchItemById} from "@/pages/utils/apolloService";
+import ChatPopup from "@/pages/components/chat/ChatPopup";
 
 export default function ItemPage() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -32,6 +33,7 @@ export default function ItemPage() {
     const [showBuyModal, setShowBuyModal] = useState(false);
     const [showUpdateModal, setShowUpdateModal] = useState(false);
     const [showModalDelete, setShowModalDelete] = useState(false);
+    const [showChat, setShowChat] = useState(false);
 
     const [buttonsDisabled, setButtonsDisabled] = useState(false);
 
@@ -143,6 +145,12 @@ export default function ItemPage() {
                             onBuyItem={handleBuyItem}
                         />
 
+                        {showChat &&
+                            <ChatPopup onClose={() => setShowChat(false)}
+                                       transaction={{seller: item.seller, buyer: account, itemId: id, moderator: ""}}
+                            />
+                        }
+
 
                         <div className="text-center">
                             <h1 className="text-2xl font-bold mb-4">{title}</h1>
@@ -190,13 +198,23 @@ export default function ItemPage() {
                                     />
                                 </div>
                             ) : (
-                                <Button
-                                    text="Buy item"
-                                    id="buyButton"
-                                    onClick={() => setShowBuyModal(true)}
-                                    theme="primary"
-                                    className="bg-green-500 hover:bg-green-600"
-                                />
+                                <div className="flex space-x-4">
+                                    <Button
+                                        text="Send message"
+                                        id="chatButton"
+                                        theme="primary"
+                                        className="bg-blue-500 hover:bg-blue-600"
+                                        onClick={() => setShowChat(!showChat)}
+                                    />
+
+                                    <Button
+                                        text="Buy item"
+                                        id="buyButton"
+                                        onClick={() => setShowBuyModal(true)}
+                                        theme="primary"
+                                        className="bg-green-500 hover:bg-green-600"
+                                    />
+                                </div>
                             )}
                         </div>
 

@@ -69,6 +69,10 @@ export const fetchItemById = async (id) => {
 }
 
 export const fetchOrdersByUser = async (userAddress) => {
+    if (!userAddress) {
+        console.error("No user address provided");
+        return [];
+    }
     const getItemsQuery = gql`
     query GetOrders($userAddress: String!) {
       items(where: { buyer: $userAddress }) {
@@ -101,6 +105,10 @@ export const fetchOrdersByUser = async (userAddress) => {
 
 
 export const fetchActiveAdsByUser = async (userAddress) => {
+    if (!userAddress) {
+        console.error("No user address provided");
+        return [];
+    }
     const getItemsQuery = gql`
     query GetActiveAddsByUser($userAddress: String!) {
       items(where: { seller: $userAddress, itemStatus_not: "Deleted" }) {
@@ -166,6 +174,10 @@ export const fetchModerators = async () => {
 
 
 export const fetchUserByAddress = async (userAddress) => {
+    if (!userAddress) {
+        console.error("No user address provided");
+        return [];
+    }
     const getUserQuery = gql`
     query GetUser($userAddress: String!) {
       users(where: { userAddress: $userAddress, isActive: true }) {

@@ -1,7 +1,7 @@
 const crypto = require('crypto');
 
-export function getChatID(address1, address2, address3) {
-    const sortedAddresses = [address1, address2, address3].sort();
+export function getChatID(itemId, address1, address2, address3) {
+    const sortedAddresses = [itemId, address1, address2, address3].sort();
     const concatenatedAddresses = sortedAddresses.join('');
     return crypto.createHash('sha256').update(concatenatedAddresses).digest('hex');
 }

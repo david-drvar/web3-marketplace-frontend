@@ -1,10 +1,10 @@
 import React, {useState} from "react";
 
-import {addDoc, collection, serverTimestamp} from "firebase/firestore";
+import {addDoc, collection, doc, getDoc, serverTimestamp, setDoc} from "firebase/firestore";
 import {firebase_db} from "../../utils/firebaseConfig";
 import {useMoralis} from "react-moralis";
 
-const SendMessage = ({scroll, chatID}) => {
+const SendMessage = ({scroll, chatID, participants, itemId}) => {
     const {account} = useMoralis();
 
     const [message, setMessage] = useState("");
@@ -15,6 +15,19 @@ const SendMessage = ({scroll, chatID}) => {
             alert("Enter valid message");
             return;
         }
+
+
+        // if chat does not exist yet, add participants and itemId to it
+        const chatDocRef = doc(firebase_db, "chats", chatID);
+        const chatDocSnapshot = await getDoc(chatDocRef);
+
+        if (!chatDocSnapshot.exists()) {
+            await setDoc(chatDocRef, {
+                participants: participants,
+                itemId: itemId
+            });
+        }
+        //
 
         await addDoc(collection(firebase_db, "chats", chatID, "messages"), {
             content: message,

@@ -1,5 +1,5 @@
 import React, {useEffect, useRef, useState} from "react";
-import {query, collection, orderBy, onSnapshot, limit} from "firebase/firestore";
+import {query, collection, orderBy, onSnapshot, limit, doc, getDoc, setDoc, deleteDoc, getDocs} from "firebase/firestore";
 import Message from "./Message";
 import SendMessage from "./SendMessage";
 import {useMoralis} from "react-moralis";
@@ -30,8 +30,29 @@ const ChatPopup = ({onClose, transaction}) => {
     }, []);
 
     useEffect(() => {
-        const chatID = getChatID(transaction.buyer, transaction.seller, transaction.moderator)
 
+        const cleanupOldChat = async () => {
+            // proveri da li transaction ima moderatora
+            // ako ima, onda proveri da li postoji chat bez moderatora (da su se buyer i seller dopisivali pre toga)
+            // ako postoji onda izbrisi stari i kopiraj sve u novi sa moderatorom
+
+            if (transaction.moderator !== "") {
+                // proveri da li postoji chat bez moderatora
+                const oldChatID = getChatID(transaction.itemId, transaction.buyer, transaction.seller, "")
+                const chatDocRef = doc(firebase_db, "chats", oldChatID);
+                const chatDocSnapshot = await getDoc(chatDocRef);
+
+                // Check if chat document exists
+                if (chatDocSnapshot.exists()) {
+                    // copy old one into new chatId and delete old one
+                    console.log('old chat exists, creating a new one')
+                    const newChatID = getChatID(transaction.itemId, transaction.buyer, transaction.seller, transaction.moderator);
+                    await changeDocumentId(oldChatID, newChatID);
+                }
+            }
+        }
+
+        const chatID = getChatID(transaction.itemId, transaction.buyer, transaction.seller, transaction.moderator);
         const q = query(collection(firebase_db, "chats", chatID, "messages"), orderBy("timestamp", "desc"), limit(50));
         const unsubscribe = onSnapshot(q, (QuerySnapshot) => {
             const fetchedMessages = [];
@@ -40,12 +61,61 @@ const ChatPopup = ({onClose, transaction}) => {
             });
             setMessages(fetchedMessages.sort((a, b) => a.timestamp - b.timestamp));
         });
+
+        cleanupOldChat();
+
         return () => unsubscribe();
     }, [account]);
 
     useEffect(() => {
         scrollRef.current?.scrollIntoView({behavior: "smooth"});
     }, [messages]);
+
+
+    async function changeDocumentId(oldId, newId) {
+        try {
+            // 1. Fetch the original document data
+            const oldChatRef = doc(firebase_db, "chats", oldId);
+            const oldChatSnapshot = await getDoc(oldChatRef);
+
+            const oldChatData = oldChatSnapshot.data();  // Get the document data
+
+            // 2. Create a new document with the new ID
+            const newChatRef = doc(firebase_db, "chats", newId);
+            await setDoc(newChatRef, {
+                ...oldChatData, // Copy existing data (participants, itemId, etc.)
+                participants: [oldChatData.participants[0], oldChatData.participants[1], transaction.moderator],
+            });
+
+            // 3. Copy the messages subcollection from the old chat to the new one
+            await copyMessages(oldId, newId);
+
+            // 4. Delete the old document
+            await deleteDoc(oldChatRef);
+
+            console.log("Document ID changed successfully!");
+        } catch (error) {
+            console.error("Error changing document ID:", error);
+        }
+    }
+
+
+    // Helper to copy messages from the old chat to the new one
+    async function copyMessages(oldChatId, newChatId) {
+        const oldMessagesRef = collection(firebase_db, "chats", oldChatId, "messages");
+        const newMessagesRef = collection(firebase_db, "chats", newChatId, "messages");
+
+        // Fetch all messages from the old chat
+        const oldMessagesSnapshot = await getDocs(oldMessagesRef);
+
+        // Iterate over each message document and copy to the new chat's subcollection
+        for (const docSnapshot of oldMessagesSnapshot.docs) {
+            const messageData = docSnapshot.data();
+            const newMessageDocRef = doc(newMessagesRef, docSnapshot.id); // Use the same message ID
+
+            await setDoc(newMessageDocRef, messageData);
+        }
+    }
 
     return (
         <div className="fixed bottom-0 right-10 bg-white rounded-lg shadow-lg w-[512px] max-h-[512px] flex flex-col">
@@ -64,7 +134,10 @@ const ChatPopup = ({onClose, transaction}) => {
             </div>
             <div className="p-4">
                 <SendMessage scroll={scrollRef}
-                             chatID={getChatID(transaction.buyer, transaction.seller, transaction.moderator)}/>
+                             chatID={getChatID(transaction.itemId, transaction.buyer, transaction.seller, transaction.moderator)}
+                             itemId={transaction.itemId}
+                             participants={[transaction.buyer, transaction.seller, transaction.moderator]}
+                />
             </div>
         </div>
     );
