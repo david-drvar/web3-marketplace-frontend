@@ -84,7 +84,7 @@ const ChatPopup = ({onClose, transaction}) => {
             const newChatRef = doc(firebase_db, "chats", newId);
             await setDoc(newChatRef, {
                 ...oldChatData, // Copy existing data (participants, itemId, etc.)
-                participants: [oldChatData.participants[0], oldChatData.participants[1], transaction.moderator],
+                participants: {buyer: oldChatData.participants.buyer, seller: oldChatData.participants.seller, moderator: transaction.moderator},
             });
 
             // 3. Copy the messages subcollection from the old chat to the new one
@@ -136,7 +136,7 @@ const ChatPopup = ({onClose, transaction}) => {
                 <SendMessage scroll={scrollRef}
                              chatID={getChatID(transaction.itemId, transaction.buyer, transaction.seller, transaction.moderator)}
                              itemId={transaction.itemId}
-                             participants={[transaction.buyer, transaction.seller, transaction.moderator]}
+                             participants={{buyer: transaction.buyer, seller: transaction.seller, moderator: transaction.moderator}}
                 />
             </div>
         </div>
