@@ -42,6 +42,9 @@ export default function Header() {
                 <Link href="/profile" className="mr-4 p-6">
                     Profile
                 </Link>
+                <Link href="/chats" className="mr-4 p-6">
+                    Chats
+                </Link>
                 <div>
                     <ConnectButton moralisAuth={false}/>
                 </div>

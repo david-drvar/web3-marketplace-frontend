@@ -1,4 +1,4 @@
-import {collection, doc, getDoc, setDoc} from "firebase/firestore";
+import {collection, doc, getDoc, query, setDoc, where, getDocs} from "firebase/firestore";
 import {firebase_db} from "@/pages/utils/firebaseConfig";
 
 export const getUserAddresses = async (userId) => {
@@ -46,4 +46,45 @@ export const addAddressToOrder = async (itemId, address) => {
     } catch (error) {
         console.error("Error adding address to order: ", error);
     }
+};
+
+export const getChatsByUser = async (userId) => {
+    // Reference to the chats collection
+    const chatsRef = collection(firebase_db, "chats");
+
+    // Create three separate queries for each participant role (seller, buyer, moderator)
+    const sellerQuery = query(chatsRef, where("participants.seller", "==", userId));
+    const buyerQuery = query(chatsRef, where("participants.buyer", "==", userId));
+    const moderatorQuery = query(chatsRef, where("participants.moderator", "==", userId));
+
+    // Run all three queries in parallel
+    const [sellerSnapshot, buyerSnapshot, moderatorSnapshot] = await Promise.all([
+        getDocs(sellerQuery),
+        getDocs(buyerQuery),
+        getDocs(moderatorQuery),
+    ]);
+
+    // Combine results from all queries into a single array
+    const chats = [];
+    sellerSnapshot.forEach((doc) => chats.push({id: doc.id, ...doc.data()}));
+    buyerSnapshot.forEach((doc) => chats.push({id: doc.id, ...doc.data()}));
+    moderatorSnapshot.forEach((doc) => chats.push({id: doc.id, ...doc.data()}));
+
+// Fetch messages for each chat
+    const chatsWithMessages = await Promise.all(
+        chats.map(async (chat) => {
+            const messagesRef = collection(firebase_db, "chats", chat.id, "messages");
+            const messagesSnapshot = await getDocs(messagesRef);
+
+            // Add messages to the chat object
+            const messages = messagesSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+
+            return {...chat, messages};
+        })
+    );
+
+    return chatsWithMessages;
 };
