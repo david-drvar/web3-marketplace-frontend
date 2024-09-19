@@ -58,7 +58,7 @@ export default function ItemPage() {
             setSeller(data[0].seller);
             setIsAccountSeller(data[0].seller === account || data[0].seller === undefined)
         }).then(() => setIsLoading(false));
-    }, []);
+    }, [account]);
 
     const handleBuyItem = async (moderator, address) => {
         const contractParams = {
@@ -174,49 +174,51 @@ export default function ItemPage() {
                                 />
                             ))}
                         </div>
+                        {
+                            itemStatus === "Listed" &&
+                            <div className="flex justify-center mt-6">
+                                {isAccountSeller ? (
+                                    <div className="flex space-x-4">
+                                        <Button
+                                            disabled={buttonsDisabled}
+                                            text="Update item"
+                                            id="updateButton"
+                                            onClick={() => setShowUpdateModal(true)}
+                                            theme="primary"
+                                            className="bg-blue-500 hover:bg-blue-600"
+                                        />
+                                        <Button
+                                            disabled={buttonsDisabled}
+                                            text="Delete item"
+                                            id="deleteButton"
+                                            onClick={() => setShowModalDelete(true)}
+                                            theme="colored"
+                                            color="red"
+                                            className="bg-red-500 hover:bg-red-600"
+                                        />
+                                    </div>
+                                ) : (
+                                    <div className="flex space-x-4">
+                                        <Button
+                                            text="Send message"
+                                            id="chatButton"
+                                            theme="primary"
+                                            className="bg-blue-500 hover:bg-blue-600"
+                                            onClick={() => setShowChat(!showChat)}
+                                        />
 
+                                        <Button
+                                            text="Buy item"
+                                            id="buyButton"
+                                            onClick={() => setShowBuyModal(true)}
+                                            theme="primary"
+                                            className="bg-green-500 hover:bg-green-600"
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        }
 
-                        <div className="flex justify-center mt-6">
-                            {isAccountSeller ? (
-                                <div className="flex space-x-4">
-                                    <Button
-                                        disabled={buttonsDisabled}
-                                        text="Update item"
-                                        id="updateButton"
-                                        onClick={() => setShowUpdateModal(true)}
-                                        theme="primary"
-                                        className="bg-blue-500 hover:bg-blue-600"
-                                    />
-                                    <Button
-                                        disabled={buttonsDisabled}
-                                        text="Delete item"
-                                        id="deleteButton"
-                                        onClick={() => setShowModalDelete(true)}
-                                        theme="colored"
-                                        color="red"
-                                        className="bg-red-500 hover:bg-red-600"
-                                    />
-                                </div>
-                            ) : (
-                                <div className="flex space-x-4">
-                                    <Button
-                                        text="Send message"
-                                        id="chatButton"
-                                        theme="primary"
-                                        className="bg-blue-500 hover:bg-blue-600"
-                                        onClick={() => setShowChat(!showChat)}
-                                    />
-
-                                    <Button
-                                        text="Buy item"
-                                        id="buyButton"
-                                        onClick={() => setShowBuyModal(true)}
-                                        theme="primary"
-                                        className="bg-green-500 hover:bg-green-600"
-                                    />
-                                </div>
-                            )}
-                        </div>
 
                     </div>) : (
                         <div className="m-4 italic text-center w-full">Please connect your wallet first to use the

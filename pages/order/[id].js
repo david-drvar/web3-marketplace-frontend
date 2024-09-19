@@ -82,6 +82,8 @@ export default function OrderPage() {
                     setRoleInTransaction("Seller");
                 } else if (account === transactionData.moderator) {
                     setRoleInTransaction("Moderator");
+                } else {
+                    router.push('/unauthorized')
                 }
 
                 if (account === transactionData.buyer && !transactionData.buyerApproved) {

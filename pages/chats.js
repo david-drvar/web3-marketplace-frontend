@@ -12,6 +12,7 @@ const Chats = () => {
 
     useEffect(() => {
         getAllChats();
+        setSelectedChat(null);
     }, [account])
 
     const getAllChats = async () => {
