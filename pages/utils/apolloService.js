@@ -38,6 +38,9 @@ export const fetchAllItemsListed = async () => {
 
 
 export const fetchItemById = async (id) => {
+    if (!id) {
+        return [];
+    }
     const getItemByIdQuery = gql`
     query GetItemById($id: String!) {
       items(where: { id: $id }) {
@@ -70,7 +73,6 @@ export const fetchItemById = async (id) => {
 
 export const fetchOrdersByUser = async (userAddress) => {
     if (!userAddress) {
-        console.error("No user address provided");
         return [];
     }
     const getItemsQuery = gql`
@@ -106,7 +108,6 @@ export const fetchOrdersByUser = async (userAddress) => {
 
 export const fetchActiveAdsByUser = async (userAddress) => {
     if (!userAddress) {
-        console.error("No user address provided");
         return [];
     }
     const getItemsQuery = gql`
@@ -175,7 +176,6 @@ export const fetchModerators = async () => {
 
 export const fetchUserByAddress = async (userAddress) => {
     if (!userAddress) {
-        console.error("No user address provided");
         return [];
     }
     const getUserQuery = gql`
@@ -212,6 +212,9 @@ export const fetchUserByAddress = async (userAddress) => {
 }
 
 export const fetchTransactionByItemId = async (itemId) => {
+    if (!itemId) {
+        return [];
+    }
     const getTransactionByItemId = gql`
     query GetTransactionByItemId($itemId: BigInt!) {
       transactions(where: { itemId: $itemId }) {
@@ -254,6 +257,9 @@ export const fetchTransactionByItemId = async (itemId) => {
 
 
 export const fetchAllItemsByModerator = async (moderator) => {
+    if (!moderator) {
+        return [];
+    }
     const getTransactionByModerator = gql`
     query getTransactionByModerator($moderator: String!) {
       transactions(where: { moderator: $moderator }) {
