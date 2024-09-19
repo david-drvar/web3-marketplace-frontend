@@ -41,10 +41,13 @@ export default function ItemBox({id, price, title, description, seller, photosIP
                                     <Image
                                         loader={() => imageURI}
                                         src={imageURI}
-                                        layout="fill"
-                                        objectFit="cover"
+                                        fill
+                                        unoptimized
                                         alt="item image"
                                         className="rounded-t-lg"
+                                        style={{objectFit: 'cover'}}
+                                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                        priority
                                     />
                                 )}
                                 {/* Overlay for owner information */}

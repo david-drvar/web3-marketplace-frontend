@@ -168,6 +168,8 @@ export default function ItemPage() {
                                     loader={() => `${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
                                     src={`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
                                     height="200"
+                                    unoptimized
+                                    priority
                                     width="200"
                                     alt="item image"
                                     className="rounded-lg shadow-md"

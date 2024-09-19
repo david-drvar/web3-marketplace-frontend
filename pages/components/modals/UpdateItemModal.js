@@ -306,9 +306,12 @@ export default function UpdateItemModal({
                                 loader={() => `${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
                                 src={`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
                                 alt="Image"
-                                layout="fill"
-                                objectFit="cover"
+                                fill
+                                unoptimized
+                                style={{objectFit: 'cover'}}
                                 className="rounded-lg"
+                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                priority
                             />
                             <button
                                 className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 focus:outline-none hover:bg-red-600"

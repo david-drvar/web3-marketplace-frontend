@@ -251,6 +251,8 @@ export default function OrderPage() {
                                                 width="200"
                                                 alt="item image"
                                                 className="rounded-lg shadow-md"
+                                                unoptimized
+                                                priority
                                             />
                                         ))}
                                     </div>
