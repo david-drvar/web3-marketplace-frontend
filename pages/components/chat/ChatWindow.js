@@ -52,8 +52,8 @@ const ChatWindow = ({chat}) => {
                     </div>
                 )}
 
-                {/* Participant 2 */}
-                {chat.participants[1] && (
+                {/* Participant 2 - moderator won't have id if not present */}
+                {chat.participants[1].id && (
                     <div className="flex items-center space-x-2">
                         <div className="w-10 h-10 rounded-full bg-gray-400">
                             <img
