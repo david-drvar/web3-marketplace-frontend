@@ -25,7 +25,7 @@ const ChatWindow = ({chat}) => {
         });
 
         return () => unsubscribe();
-    }, [account]);
+    }, [account, chat]);
 
 
     // Scroll to the bottom of messages when they load

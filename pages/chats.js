@@ -12,7 +12,7 @@ const Chats = () => {
 
     useEffect(() => {
         getAllChats();
-    }, [])
+    }, [account])
 
     const getAllChats = async () => {
         let myChats = await getChatsByUser(account);

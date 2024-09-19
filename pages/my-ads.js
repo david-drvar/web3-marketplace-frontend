@@ -12,7 +12,7 @@ export default function MyAds() {
 
     useEffect(() => {
         fetchActiveAdsByUser(account).then((data) => setItems(data)).then(() => setIsLoading(false));
-    }, [isWeb3Enabled, items]);
+    }, [isWeb3Enabled, items, account]);
 
     return (
         <>
