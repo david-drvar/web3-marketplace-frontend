@@ -1,13 +1,13 @@
-import React, {useState, useEffect, useRef} from "react";
+import React, {useState, useEffect} from "react";
 import {getChatsByUser} from "@/pages/utils/firebaseService";
 import {useMoralis} from "react-moralis";
 import {fetchItemById, fetchUserByAddress} from "@/pages/utils/apolloService";
+import ChatWindow from "@/pages/components/chat/ChatWindow";
 
 const Chats = () => {
     const {account} = useMoralis();
 
     const [selectedChat, setSelectedChat] = useState(null);
-    const scrollRef = useRef(null);
     const [myChats, setMyChats] = useState([]);
 
     useEffect(() => {
@@ -31,9 +31,9 @@ const Chats = () => {
 
                 // Store the results in the finalOneChat object
                 finalOneChat["item"] = item[0];
-                // finalOneChat["seller"] = seller;
-                // finalOneChat["buyer"] = buyer;
-                // finalOneChat["moderator"] = moderator;
+                finalOneChat["seller"] = seller;
+                finalOneChat["buyer"] = buyer;
+                finalOneChat["moderator"] = moderator;
                 finalOneChat["messages"] = chat.messages;
                 finalOneChat["id"] = chat.id;
 
@@ -58,26 +58,6 @@ const Chats = () => {
         setMyChats(chatDetails);
         return chatDetails;
     }
-
-    // Dummy data for chats
-    const chats = [
-        {id: 1, name: "John Doe", lastMessage: "Hey! How are you doing?"},
-        {id: 2, name: "Jane Smith", lastMessage: "Let's catch up later today..."},
-        {id: 3, name: "Alice Johnson", lastMessage: "What's the status on the project?"},
-        {id: 4, name: "Bob Brown", lastMessage: "I'll send over the files soon."}
-    ];
-
-    // Dummy data for messages
-    const messages = [
-        {id: 1, from: "John Doe", text: "Hello! How are you?", isSentByMe: false},
-        {id: 2, from: "Me", text: "I'm good, thanks! How about you?", isSentByMe: true},
-        {id: 3, from: "John Doe", text: "I'm doing great!", isSentByMe: false}
-    ];
-
-    // Scroll to the bottom of messages when they load
-    useEffect(() => {
-        scrollRef.current?.scrollIntoView({behavior: "smooth"});
-    }, [selectedChat]);
 
     return (
         <div className="flex h-screen">
@@ -124,69 +104,7 @@ const Chats = () => {
             <div className="flex-1 flex flex-col bg-white">
                 {selectedChat ? (
                     <>
-                        {/* Chat Header */}
-                        <div className="p-4 border-b border-gray-300 flex items-center space-x-4">
-                            {/* Participant 1 */}
-                            {selectedChat.participants[0] && (
-                                <div className="flex items-center space-x-2">
-                                    <div className="w-10 h-10 rounded-full bg-gray-400">
-                                        <img
-                                            src={`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${selectedChat.participants[0].avatarHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
-                                            alt={selectedChat.participants[0].firstName} className="w-full h-full rounded-full object-cover"/>
-                                    </div>
-                                    <div className="flex-1">
-                                        <h3 className="text-lg font-semibold">{selectedChat.participants[0].firstName} {selectedChat.participants[0].lastName}</h3>
-                                        <p className="text-sm text-gray-500">{selectedChat.participants[0].role}</p>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Participant 2 */}
-                            {selectedChat.participants[1] && (
-                                <div className="flex items-center space-x-2">
-                                    <div className="w-10 h-10 rounded-full bg-gray-400">
-                                        <img
-                                            src={`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${selectedChat.participants[1].avatarHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
-                                            alt={selectedChat.participants[1].firstName} className="w-full h-full rounded-full object-cover"/>
-                                    </div>
-                                    <div className="flex-1">
-                                        <h3 className="text-lg font-semibold">{selectedChat.participants[1].firstName} {selectedChat.participants[1].lastName}</h3>
-                                        <p className="text-sm text-gray-500">{selectedChat.participants[1].role}</p>
-                                    </div>
-                                </div>
-                            )}
-                        </div>
-                        {/* Messages Section */}
-                        <div className="flex-1 p-6 space-y-4 overflow-y-auto bg-gray-50">
-                            {selectedChat.messages.map((msg) => (
-                                <div
-                                    key={msg.id}
-                                    className={`flex ${msg.isSentByMe ? "justify-end" : "justify-start"}`}
-                                >
-                                    <div
-                                        className={`max-w-xl px-4 py-2 rounded-lg shadow-md ${
-                                            msg.isSentByMe ? "bg-indigo-500 text-white" : "bg-gray-200"
-                                        }`}
-                                    >
-                                        <p>{msg.content}</p>
-                                    </div>
-                                </div>
-                            ))}
-                            {/* Scroll to this div to ensure scrolling works */}
-                            <div ref={scrollRef}></div>
-                        </div>
-
-                        {/* Message Input */}
-                        <div className="p-4 border-t border-gray-300 flex items-center space-x-4">
-                            <input
-                                type="text"
-                                placeholder="Type a message..."
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            />
-                            <button className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                Send
-                            </button>
-                        </div>
+                        <ChatWindow chat={selectedChat}/>
                     </>
                 ) : (
                     <div className="flex-1 flex items-center justify-center">
