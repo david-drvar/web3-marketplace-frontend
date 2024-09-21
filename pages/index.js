@@ -10,6 +10,7 @@ import {
 } from "@/store/slices/contractSlice";
 import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
 import {fetchAllItemsListed} from "@/pages/utils/apolloService";
+import SearchFilterBar from "@/pages/components/SearchFilterBar";
 
 
 export default function Home() {
@@ -22,9 +23,28 @@ export default function Home() {
     const dispatch = useDispatch();
 
     const [items, setItems] = useState([]);
+    const [filteredItems, setFilteredItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
+    const handleFilter = (filter) => {
+        const filtered = items.filter(item => {
+            return (
+                (filter.searchQuery === '' || item.title.toLowerCase().includes(filter.searchQuery.toLowerCase()) || item.description.toLowerCase().includes(filter.searchQuery.toLowerCase())) &&
+                (filter.category === '' || item.category === filter.category) &&
+                (filter.subcategory === '' || item.subcategory === filter.subcategory) &&
+                (filter.priceRange.min === '' || item.price >= filter.priceRange.min) &&
+                (filter.priceRange.max === '' || item.price <= filter.priceRange.max) &&
+                (filter.condition === '' || item.condition === filter.condition) &&
+                (filter.country === '' || item.country === filter.country)
+            );
+        });
+        setFilteredItems(filtered);
+    };
 
+    const handleReset = () => {
+        setFilteredItems(items);
+    }
+    
     useEffect(() => {
         if (marketplaceContractAddress && usersContractAddress && escrowContractAddress) {
             dispatch(setMarketplaceContractAddress(marketplaceContractAddress))
@@ -32,7 +52,10 @@ export default function Home() {
             dispatch(setEscrowContractAddress(escrowContractAddress))
         }
 
-        fetchAllItemsListed().then((data) => setItems(data)).then(() => setIsLoading(false));
+        fetchAllItemsListed().then((data) => {
+            setItems(data);
+            setFilteredItems(data);
+        }).then(() => setIsLoading(false));
     }, [marketplaceContractAddress, usersContractAddress, escrowContractAddress, dispatch]);
 
 
@@ -43,14 +66,14 @@ export default function Home() {
                     <LoadingAnimation/>
                 ) : (
                     <div className="container mx-auto px-4 py-8">
-                        <h1 className="text-3xl font-bold text-gray-800 mb-8">Recently Listed</h1>
-                        {items.length === 0 ? (
+                        <SearchFilterBar onFilter={handleFilter} onReset={handleReset}/>
+                        {filteredItems.length === 0 ? (
                             <div className="text-center text-gray-500 italic">
                                 No listed items available at the moment.
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                                {items.map((item) => {
+                                {filteredItems.map((item) => {
                                     const {
                                         price,
                                         title,
