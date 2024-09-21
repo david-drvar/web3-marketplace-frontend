@@ -84,3 +84,19 @@ export function handleNotification(dispatch, type, message, title) {
         position: "topR",
     });
 }
+
+
+export function getCategories() {
+    return {
+        "Electronics": ["Mobile Phones", "Laptops", "Cameras", "Headphones", "Smart Watches", "Other"],
+        "Clothing": ["Men's Apparel", "Women's Apparel", "Kids' Apparel", "Accessories", "Man's shoes", "Women's shoes", "Other"],
+        "Furniture": ["Living Room", "Bedroom", "Office", "Outdoor", "Other"],
+        "Toys": ["Educational", "Outdoor", "Action Figures", "Building Sets", "Other"],
+        "Books": ["Fiction", "Non-Fiction", "Children's Books", "Textbooks", "Other"],
+        "Sports": ["Equipment", "Apparel", "Footwear", "Accessories", "Other"],
+        "Home Appliances": ["Kitchen", "Laundry", "Heating & Cooling", "Other"],
+        "Beauty": ["Skincare", "Makeup", "Fragrances", "Hair Care", "Other"],
+        "Automotive": ["Parts", "Accessories", "Tools", "Other"],
+        "Collectibles": ["Coins", "Stamps", "Trading Cards", "Art", "Other"],
+    };
+}

@@ -1,15 +1,11 @@
-import {Form, useNotification, Button} from "web3uikit";
+import {useNotification} from "web3uikit";
 import {useMoralis, useWeb3Contract} from "react-moralis";
 import {ethers} from "ethers";
 import marketplaceAbi from "../constants/Marketplace.json";
-import networkMapping from "../constants/networkMapping.json";
-import {useEffect, useRef, useState} from "react";
-import Image from "next/image";
+import {useState} from "react";
 import {useRouter} from "next/router";
-import {query} from "firebase/firestore";
 import {useDispatch, useSelector} from "react-redux";
-import {upsertItem} from "@/store/slices/itemsSlice";
-// import Files from "@/pages/components/Files";
+import {getCategories, getCountries} from "@/pages/utils/utils";
 
 export default function ListItem() {
     const {chainId, isWeb3Enabled, account} = useMoralis();
@@ -27,6 +23,11 @@ export default function ListItem() {
         title: "",
         description: "",
         price: "",
+        condition: "0",
+        category: "",
+        subcategory: "",
+        country: "",
+        isGift: false,
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,6 +45,15 @@ export default function ListItem() {
             return;
         }
         setImages([...images, null]); // Add a new empty image input
+    };
+
+    const handleCategoryChange = (e) => {
+        const selectedCategory = e.target.value;
+        setFormData((prevState) => ({
+            ...prevState,
+            category: selectedCategory,
+            subcategory: "",
+        }));
     };
 
     const handleRemoveImage = (index) => {
@@ -116,6 +126,11 @@ export default function ListItem() {
                 _description: formData.description,
                 _price: ethers.utils.parseEther(formData.price).toString(),
                 photosIPFSHashes: hashes,
+                _condition: formData.condition,
+                _category: formData.category,
+                _subcategory: formData.subcategory,
+                _country: formData.country,
+                _isGift: formData.isGift,
             },
         };
 
@@ -126,31 +141,13 @@ export default function ListItem() {
                 tx.wait().then((finalTx) => {
                     handleListSuccess();
                     setIsSubmitting(false);
-                    console.log("finalTx");
-                    console.log(finalTx);
-
-                    console.log(finalTx.logs[0].topics[1])
-                    console.log(Number(finalTx.logs[0].topics[1]))
+                    // console.log("finalTx");
+                    // console.log(finalTx);
+                    //
+                    // console.log(finalTx.logs[0].topics[1])
+                    // console.log(Number(finalTx.logs[0].topics[1]))
 
                     let id = BigInt(finalTx.logs[0].topics[1]).toString();
-                    let title = formData.title;
-                    let description = formData.description;
-                    let price = ethers.utils.parseEther(formData.price);
-                    let seller = account;
-                    let itemStatus = "Listed";
-                    let blockTimestamp = finalTx.blockNumber;
-
-                    let item = {
-                        id,
-                        title,
-                        description,
-                        price,
-                        seller,
-                        itemStatus,
-                        blockTimestamp,
-                        photosIPFSHashes: hashes
-                    };
-                    dispatchRedux(upsertItem(item))
                     router.push({pathname: `/item/${id}`});
                 });
             },
@@ -202,6 +199,7 @@ export default function ListItem() {
     }
 
     async function handleListError(error) {
+        console.log("error", error)
         dispatch({
             type: "error",
             message: error.data.message,
@@ -319,9 +317,90 @@ export default function ListItem() {
                                 Add Image
                             </button>
                         </div>
+                        <div>
+                            <label htmlFor="condition" className="block text-sm font-medium text-gray-700">Condition</label>
+                            <select
+                                id="condition"
+                                name="condition"
+                                value={formData.condition}
+                                onChange={handleChange}
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            >
+                                <option value="0">New</option>
+                                <option value="1">Like New</option>
+                                <option value="2">Excellent</option>
+                                <option value="3">Good</option>
+                                <option value="4">Damaged</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label htmlFor="category" className="block text-sm font-medium text-gray-700">Category</label>
+                            <select
+                                id="category"
+                                name="category"
+                                value={formData.category}
+                                onChange={handleCategoryChange}
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            >
+                                <option value="">Select a category</option>
+                                {Object.keys(getCategories()).map((category, index) => (
+                                    <option key={index} value={category}>{category}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label htmlFor="subcategory" className="block text-sm font-medium text-gray-700">Subcategory</label>
+                            <select
+                                id="subcategory"
+                                name="subcategory"
+                                value={formData.subcategory}
+                                onChange={handleChange}
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                disabled={!formData.category} // Disable if no category is selected
+                            >
+                                <option value="">Select a subcategory</option>
+                                {formData.category && getCategories()[formData.category].map((subcategory, index) => (
+                                    <option key={index} value={subcategory}>{subcategory}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label htmlFor="country" className="block text-sm font-medium text-gray-700">Country</label>
+                            <select
+                                id="country"
+                                name="country"
+                                value={formData.country}
+                                onChange={handleChange}
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            >
+                                <option value="">Select a country</option>
+                                {getCountries().map((country, index) => (
+                                    <option key={index} value={country}>{country}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label htmlFor="isGift" className="block text-sm font-medium text-gray-700">Is this a gift?</label>
+                            <input
+                                type="checkbox"
+                                id="isGift"
+                                name="isGift"
+                                checked={formData.isGift}
+                                onChange={() => setFormData((prevState) => ({
+                                    ...prevState,
+                                    isGift: !prevState.isGift,
+                                }))}
+                                className="mt-1 block w-4 h-4"
+                            />
+                        </div>
 
                         <button
-                            disabled={!formData.title || !formData.description || !formData.price || isSubmitting || images.length === 0 || images.includes(null)}
+                            disabled={!formData.title || !formData.description || !formData.price || isSubmitting || images.length === 0 || images.includes(null)
+                                || !formData.category || !formData.subcategory || !formData.country}
                             type="submit"
                             className="w-full py-2 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
                         >
