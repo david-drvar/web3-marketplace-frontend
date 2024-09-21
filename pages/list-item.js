@@ -274,49 +274,7 @@ export default function ListItem() {
                             />
                         </div>
 
-                        <div className="space-y-4">
-                            {images.map((image, index) => (
-                                <div key={index} className="flex items-center space-x-4">
-                                    <input
-                                        type="file"
-                                        id={`img${index}`}
-                                        accept="image/*"
-                                        onChange={(e) => handleImageChange(index, e)}
-                                        className="hidden"
-                                    />
-                                    <label
-                                        htmlFor={`img${index}`}
-                                        className="cursor-pointer px-4 py-2 bg-indigo-600 text-white rounded-md shadow hover:bg-indigo-700"
-                                    >
-                                        Select File
-                                    </label>
-                                    <img
-                                        id={`preview${index}`}
-                                        src="#"
-                                        hidden={true}
-                                        height="100"
-                                        width="100"
-                                        className="border border-gray-300 rounded-md"
-                                    />
-                                    {image && (
-                                        <button
-                                            type="button"
-                                            onClick={() => handleRemoveImage(index)}
-                                            className="text-red-500 hover:text-red-700"
-                                        >
-                                            Remove
-                                        </button>
-                                    )}
-                                </div>
-                            ))}
-                            <button
-                                type="button"
-                                onClick={handleAddImage}
-                                className="w-full py-2 bg-green-500 text-white rounded-md shadow hover:bg-green-600"
-                            >
-                                Add Image
-                            </button>
-                        </div>
+
                         <div>
                             <label htmlFor="condition" className="block text-sm font-medium text-gray-700">Condition</label>
                             <select
@@ -396,6 +354,50 @@ export default function ListItem() {
                                 }))}
                                 className="mt-1 block w-4 h-4"
                             />
+                        </div>
+
+                        <div className="space-y-4">
+                            {images.map((image, index) => (
+                                <div key={index} className="flex items-center space-x-4">
+                                    <input
+                                        type="file"
+                                        id={`img${index}`}
+                                        accept="image/*"
+                                        onChange={(e) => handleImageChange(index, e)}
+                                        className="hidden"
+                                    />
+                                    <label
+                                        htmlFor={`img${index}`}
+                                        className="cursor-pointer px-4 py-2 bg-indigo-600 text-white rounded-md shadow hover:bg-indigo-700"
+                                    >
+                                        Select File
+                                    </label>
+                                    <img
+                                        id={`preview${index}`}
+                                        src="#"
+                                        hidden={true}
+                                        height="100"
+                                        width="100"
+                                        className="border border-gray-300 rounded-md"
+                                    />
+                                    {image && (
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemoveImage(index)}
+                                            className="text-red-500 hover:text-red-700"
+                                        >
+                                            Remove
+                                        </button>
+                                    )}
+                                </div>
+                            ))}
+                            <button
+                                type="button"
+                                onClick={handleAddImage}
+                                className="w-full py-2 bg-green-500 text-white rounded-md shadow hover:bg-green-600"
+                            >
+                                Add Image
+                            </button>
                         </div>
 
                         <button

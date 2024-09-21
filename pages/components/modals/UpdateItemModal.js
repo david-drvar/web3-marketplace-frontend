@@ -5,6 +5,7 @@ import marketplaceAbi from "../../../constants/Marketplace.json";
 import {ethers} from "ethers";
 import Image from "next/image";
 import {useSelector} from "react-redux";
+import {getCategories, getCountries} from "@/pages/utils/utils";
 
 export default function UpdateItemModal({
                                             id,
@@ -14,10 +15,11 @@ export default function UpdateItemModal({
                                             onClose,
                                             isVisible,
                                             photosIPFSHashes,
-                                            setPrice,
-                                            setTitle,
-                                            setDescription,
-                                            setPhotosIPFSHashes
+                                            condition,
+                                            category,
+                                            subcategory,
+                                            country,
+                                            isGift,
                                         }) {
     const dispatch = useNotification();
 
@@ -25,7 +27,17 @@ export default function UpdateItemModal({
         title: title,
         description: description,
         price: ethers.utils.formatEther(price),
+        condition: condition,
+        category: category,
+        subcategory: subcategory,
+        country: country,
+        isGift: isGift,
     });
+
+    useEffect(() => {
+        setConditionProperly(); // from the graph we get string so we have to convert it back to numerical value for the dropbox
+    }, []);
+
     const [imageURIs, setImageURIs] = useState([]); //item images, ipfs hashes
     const [newImages, setNewImages] = useState([]); //new images
     const [buttonsDisabled, setButtonsDisabled] = useState(false); //new images
@@ -33,6 +45,24 @@ export default function UpdateItemModal({
     const marketplaceContractAddress = useSelector((state) => state.contract["marketplaceContractAddress"]);
 
     const {runContractFunction} = useWeb3Contract();
+
+    const setConditionProperly = () => {
+        let newCondition = "";
+        if (condition === "NEW")
+            newCondition = "0";
+        else if (condition === "LIKE_NEW")
+            newCondition = "1";
+        else if (condition === "EXCELLENT")
+            newCondition = "2";
+        else if (condition === "GOOD")
+            newCondition = "3";
+        else if (condition === "DAMAGED")
+            newCondition = "4";
+        setFormData((prevState) => ({
+            ...prevState,
+            condition: newCondition,
+        }));
+    }
 
     const handleUpdateListingSuccess = () => {
         dispatch({
@@ -97,6 +127,11 @@ export default function UpdateItemModal({
                 _description: formData.description,
                 _price: ethers.utils.parseEther(formData.price).toString(),
                 photosIPFSHashes: newItemImageHashes,
+                _condition: formData.condition,
+                _category: formData.category,
+                _subcategory: formData.subcategory,
+                _country: formData.country,
+                _isGift: formData.isGift,
             },
         };
         await runContractFunction({
@@ -105,10 +140,6 @@ export default function UpdateItemModal({
                 setButtonsDisabled(true);
                 handleListWaitingConfirmation();
                 tx.wait().then((finalTx) => {
-                    setPrice(ethers.utils.parseEther(formData.price).toString());
-                    setDescription(formData.description);
-                    setTitle(formData.title);
-                    setPhotosIPFSHashes(newItemImageHashes);
                     handleListSuccess();
                     onClose();
                     setButtonsDisabled(false);
@@ -229,6 +260,15 @@ export default function UpdateItemModal({
         setNewImages([]);
     };
 
+    const handleCategoryChange = (e) => {
+        const selectedCategory = e.target.value;
+        setFormData((prevState) => ({
+            ...prevState,
+            category: selectedCategory,
+            subcategory: "",
+        }));
+    };
+
     return (
         <Modal
 
@@ -257,30 +297,130 @@ export default function UpdateItemModal({
             title="Update Item"
         >
             <div className="p-4 space-y-4">
-                <Input
-                    label="Title"
-                    name="title"
-                    value={formData.title}
-                    type="text"
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                />
-                <Input
-                    label="Description"
-                    name="description"
-                    value={formData.description}
-                    type="text"
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                />
-                <Input
-                    label="Price"
-                    name="price"
-                    value={formData.price}
-                    type="number"
-                    onChange={handleChange}
-                    className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                />
+                <div>
+                    <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                        Title
+                    </label>
+                    <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        value={formData.title}
+                        onChange={handleChange}
+                        required
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    />
+                </div>
+                <div>
+                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                        Description
+                    </label>
+                    <input
+                        type="text"
+                        id="description"
+                        name="description"
+                        value={formData.description}
+                        onChange={handleChange}
+                        required
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    />
+                </div>
+                <div>
+                    <label htmlFor="price" className="block text-sm font-medium text-gray-700">
+                        Price (ETH)
+                    </label>
+                    <input
+                        type="number"
+                        id="price"
+                        name="price"
+                        value={formData.price}
+                        onChange={handleChange}
+                        required
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    />
+                </div>
+
+                <div>
+                    <label htmlFor="condition" className="block text-sm font-medium text-gray-700">Condition</label>
+                    <select
+                        id="condition"
+                        name="condition"
+                        value={formData.condition}
+                        onChange={handleChange}
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    >
+                        <option value="0">New</option>
+                        <option value="1">Like New</option>
+                        <option value="2">Excellent</option>
+                        <option value="3">Good</option>
+                        <option value="4">Damaged</option>
+                    </select>
+                </div>
+
+
+                <div>
+                    <label htmlFor="category" className="block text-sm font-medium text-gray-700">Category</label>
+                    <select
+                        id="category"
+                        name="category"
+                        value={formData.category}
+                        onChange={handleCategoryChange}
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    >
+                        <option value="">Select a category</option>
+                        {Object.keys(getCategories()).map((category, index) => (
+                            <option key={index} value={category}>{category}</option>
+                        ))}
+                    </select>
+                </div>
+
+                <div>
+                    <label htmlFor="subcategory" className="block text-sm font-medium text-gray-700">Subcategory</label>
+                    <select
+                        id="subcategory"
+                        name="subcategory"
+                        value={formData.subcategory}
+                        onChange={handleChange}
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    >
+                        <option value="">Select a subcategory</option>
+                        {formData.category && getCategories()[formData.category].map((subcategory, index) => (
+                            <option key={index} value={subcategory}>{subcategory}</option>
+                        ))}
+                    </select>
+                </div>
+
+                <div>
+                    <label htmlFor="country" className="block text-sm font-medium text-gray-700">Country</label>
+                    <select
+                        id="country"
+                        name="country"
+                        value={formData.country}
+                        onChange={handleChange}
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    >
+                        <option value="">Select a country</option>
+                        {getCountries().map((country, index) => (
+                            <option key={index} value={country}>{country}</option>
+                        ))}
+                    </select>
+                </div>
+
+                <div>
+                    <label htmlFor="isGift" className="block text-sm font-medium text-gray-700">Is this a gift?</label>
+                    <input
+                        type="checkbox"
+                        id="isGift"
+                        name="isGift"
+                        checked={formData.isGift}
+                        onChange={() => setFormData((prevState) => ({
+                            ...prevState,
+                            isGift: !prevState.isGift,
+                        }))}
+                        className="mt-1 block w-4 h-4"
+                    />
+                </div>
+
 
                 {newImages.map((newImage, index) => (
                     <Upload

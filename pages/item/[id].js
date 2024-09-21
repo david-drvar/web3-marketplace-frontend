@@ -52,6 +52,10 @@ export default function ItemPage() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
+        fetchItem();
+    }, [account]);
+
+    const fetchItem = async () => {
         fetchItemById(id).then((data) => {
             setItem(data[0]);
             setTitle(data[0].title);
@@ -68,7 +72,7 @@ export default function ItemPage() {
             setSeller(data[0].seller);
             setIsAccountSeller(data[0].seller === account || data[0].seller === undefined)
         }).then(() => setIsLoading(false));
-    }, [account]);
+    }
 
     const handleBuyItemWithModerator = async (moderator, address) => {
         const contractParams = {
@@ -168,7 +172,16 @@ export default function ItemPage() {
                             price={price}
                             description={description}
                             photosIPFSHashes={photosIPFSHashes}
-                            onClose={() => setShowUpdateModal(false)}
+                            condition={condition}
+                            category={category}
+                            subcategory={subcategory}
+                            isGift={isGift}
+                            country={country}
+
+                            onClose={() => {
+                                fetchItem().then(() => setShowUpdateModal(false))
+
+                            }}
                             setPrice={setPrice}
                             setDescription={setDescription}
                             setTitle={setTitle}
