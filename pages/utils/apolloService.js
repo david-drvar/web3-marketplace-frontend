@@ -19,6 +19,11 @@ export const fetchAllItemsListed = async () => {
         blockTimestamp
         itemStatus
         photosIPFSHashes
+        condition
+        category
+        subcategory
+        country
+        isGift
       }
     }
   `;
@@ -53,6 +58,11 @@ export const fetchItemById = async (id) => {
         blockTimestamp
         itemStatus
         photosIPFSHashes
+        condition
+        category
+        subcategory
+        country
+        isGift
       }
     }
   `;
@@ -87,6 +97,11 @@ export const fetchOrdersByUser = async (userAddress) => {
         blockTimestamp
         itemStatus
         photosIPFSHashes
+        condition
+        category
+        subcategory
+        country
+        isGift
       }
     }
   `;
@@ -122,6 +137,11 @@ export const fetchActiveAdsByUser = async (userAddress) => {
         blockTimestamp
         itemStatus
         photosIPFSHashes
+        condition
+        category
+        subcategory
+        country
+        isGift
       }
     }
   `;
@@ -298,6 +318,11 @@ export const fetchAllItemsByModerator = async (moderator) => {
           blockTimestamp
           itemStatus
           photosIPFSHashes
+          condition
+            category
+            subcategory
+            country
+            isGift
         }
       }
     `;

@@ -15,7 +15,7 @@ const truncateStr = (fullStr, strLen) => {
     return fullStr.substring(0, frontChars) + separator + fullStr.substring(fullStr.length - backChars);
 };
 
-export default function ItemBox({id, price, title, description, seller, photosIPFSHashes, itemStatus, blockTimestamp, displayOwnedStatus}) {
+export default function ItemBox({id, price, title, description, seller, photosIPFSHashes, itemStatus, blockTimestamp, displayOwnedStatus, category, subcategory, condition}) {
     const {isWeb3Enabled, account} = useMoralis();
     const [imageURI, setImageURI] = useState("");
 
@@ -60,12 +60,20 @@ export default function ItemBox({id, price, title, description, seller, photosIP
                                 }
 
                             </div>
-                            <div className="p-4">
-                                <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
-                                <p className="text-gray-600 text-sm mb-2">{description}</p>
+                            <div className="p-1">
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <h2 className="text-gray-400">{`${category} > ${subcategory}`}</h2>
+                                        <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
+                                        <p className="text-gray-600 text-sm mb-2">{description}</p>
+                                    </div>
+                                    <div className="ml-4">
+                                        <p className="text-gray-600">{condition}</p>
+                                    </div>
+                                </div>
                                 <div className="flex justify-between items-center mt-4">
                                     <div>
-                                        <p className="font-bold text-gray-800">{ethers.utils.formatEther(price)} ETH</p>
+                                        <p className="font-bold text-gray-800">{price === "0" ? "FREE" : `Price : ${ethers.utils.formatEther(price)} ETH`}</p>
                                     </div>
                                 </div>
                             </div>

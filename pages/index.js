@@ -59,7 +59,10 @@ export default function Home() {
                                         id,
                                         photosIPFSHashes,
                                         itemStatus,
-                                        blockTimestamp
+                                        blockTimestamp,
+                                        category,
+                                        subcategory,
+                                        condition
                                     } = item;
                                     return (
                                         <ItemBox
@@ -73,6 +76,9 @@ export default function Home() {
                                             itemStatus={itemStatus}
                                             blockTimestamp={blockTimestamp}
                                             displayOwnedStatus={true}
+                                            category={category}
+                                            subcategory={subcategory}
+                                            condition={condition}
                                         />
                                     );
                                 })}

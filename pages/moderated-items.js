@@ -49,7 +49,10 @@ export default function ModeratedItems() {
                                             id,
                                             photosIPFSHashes,
                                             itemStatus,
-                                            blockTimestamp
+                                            blockTimestamp,
+                                            category,
+                                            subcategory,
+                                            condition
                                         } = item;
                                         return (
                                             <ItemBox
@@ -63,6 +66,9 @@ export default function ModeratedItems() {
                                                 itemStatus={itemStatus}
                                                 blockTimestamp={blockTimestamp}
                                                 displayOwnedStatus={false}
+                                                category={category}
+                                                subcategory={subcategory}
+                                                condition={condition}
                                             />
                                         );
                                     })}

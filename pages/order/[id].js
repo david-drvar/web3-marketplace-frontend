@@ -28,6 +28,11 @@ export default function OrderPage() {
     const [description, setDescription] = useState("");
     const [photosIPFSHashes, setPhotosIPFSHashes] = useState([]);
     const [itemStatus, setItemStatus] = useState("");
+    const [condition, setCondition] = useState("");
+    const [category, setCategory] = useState("");
+    const [subcategory, setSubcategory] = useState("");
+    const [country, setCountry] = useState("");
+    const [isGift, setIsGift] = useState(false);
     const [blockTimestamp, setBlockTimestamp] = useState("");
 
     const [showApproveModal, setShowApproveModal] = useState(false);
@@ -73,6 +78,11 @@ export default function OrderPage() {
                 setPhotosIPFSHashes(typeof item.photosIPFSHashes === "string" ? [item.photosIPFSHashes] : item.photosIPFSHashes);
                 setBlockTimestamp(item.blockTimestamp);
                 setItemStatus(item.itemStatus);
+                setCondition(item.condition);
+                setCategory(item.category);
+                setSubcategory(item.subcategory);
+                setCountry(item.country);
+                setIsGift(item.isGift);
 
                 // Handle transaction data
                 setTransaction(transactionData);
@@ -235,9 +245,13 @@ export default function OrderPage() {
                                 <div>
                                     <h1 className="text-3xl font-bold text-gray-800 mb-4">{title}</h1>
                                     <p className="text-lg mb-4">{description}</p>
-                                    <p className="text-xl font-semibold text-green-600 mb-2">Price: {ethers.utils.formatEther(price)} ETH</p>
+                                    <p className="text-xl font-semibold text-green-600 mb-2">{isGift ? "FREE" : `Price : ${ethers.utils.formatEther(price)} ETH`}</p>
                                     <p className="text-gray-400 mb-2">Date
                                         posted: {new Date(blockTimestamp * 1000).toDateString()}</p>
+                                    <p className="text-lg mb-4">Condition: {condition}</p>
+                                    <p className="text-lg mb-4">Category: {category}</p>
+                                    <p className="text-lg mb-4">Subcategory: {subcategory}</p>
+                                    <p className="text-lg mb-4">Country: {country}</p>
                                 </div>
 
                                 <div className="flex justify-center items-center">

@@ -37,7 +37,10 @@ export default function MyOrders() {
                                         id,
                                         photosIPFSHashes,
                                         itemStatus,
-                                        blockTimestamp
+                                        blockTimestamp,
+                                        category,
+                                        subcategory,
+                                        condition
                                     } = item;
                                     return (
                                         <ItemBox
@@ -51,6 +54,9 @@ export default function MyOrders() {
                                             itemStatus={itemStatus}
                                             blockTimestamp={blockTimestamp}
                                             displayOwnedStatus={false}
+                                            category={category}
+                                            subcategory={subcategory}
+                                            condition={condition}
                                         />
                                     );
                                 })}

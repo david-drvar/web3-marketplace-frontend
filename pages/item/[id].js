@@ -28,6 +28,11 @@ export default function ItemPage() {
     const [description, setDescription] = useState("");
     const [photosIPFSHashes, setPhotosIPFSHashes] = useState([]);
     const [itemStatus, setItemStatus] = useState("");
+    const [condition, setCondition] = useState("");
+    const [category, setCategory] = useState("");
+    const [subcategory, setSubcategory] = useState("");
+    const [country, setCountry] = useState("");
+    const [isGift, setIsGift] = useState(false);
     const [blockTimestamp, setBlockTimestamp] = useState("");
 
     const [showBuyModal, setShowBuyModal] = useState(false);
@@ -54,6 +59,11 @@ export default function ItemPage() {
             setPrice(data[0].price);
             setPhotosIPFSHashes(typeof data[0].photosIPFSHashes == "string" ? [data[0].photosIPFSHashes] : data[0].photosIPFSHashes);
             setItemStatus(data[0].itemStatus);
+            setCondition(data[0].condition);
+            setCategory(data[0].category);
+            setSubcategory(data[0].subcategory);
+            setCountry(data[0].country);
+            setIsGift(data[0].isGift);
             setBlockTimestamp(data[0].blockTimestamp);
             setSeller(data[0].seller);
             setIsAccountSeller(data[0].seller === account || data[0].seller === undefined)
@@ -154,11 +164,14 @@ export default function ItemPage() {
 
                         <div className="text-center">
                             <h1 className="text-2xl font-bold mb-4">{title}</h1>
-                            <p className="text-gray-500 mb-2">Item ID: {id}</p>
                             <p className="text-lg mb-4">{description}</p>
-                            <p className="text-xl font-semibold text-green-600 mb-2">Price: {ethers.utils.formatEther(price)} ETH</p>
-                            <p className="text-gray-400">Date
+                            <p className="text-xl font-semibold text-green-600 mb-2">{isGift ? "FREE" : `Price : ${ethers.utils.formatEther(price)} ETH`}</p>
+                            <p className="text-gray-400 mb-4">Date
                                 posted: {new Date(blockTimestamp * 1000).toDateString()}</p>
+                            <p className="text-lg mb-4">Condition: {condition}</p>
+                            <p className="text-lg mb-4">Category: {category}</p>
+                            <p className="text-lg mb-4">Subcategory: {subcategory}</p>
+                            <p className="text-lg mb-4">Country: {country}</p>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 mt-6">
