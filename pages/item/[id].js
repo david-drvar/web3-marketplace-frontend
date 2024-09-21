@@ -70,7 +70,7 @@ export default function ItemPage() {
         }).then(() => setIsLoading(false));
     }, [account]);
 
-    const handleBuyItem = async (moderator, address) => {
+    const handleBuyItemWithModerator = async (moderator, address) => {
         const contractParams = {
             abi: marketplaceAbi,
             contractAddress: marketplaceContractAddress,
@@ -91,6 +91,34 @@ export default function ItemPage() {
                     addAddressToOrder(id, address);
                     handleBuyItemSuccess();
                     setShowBuyModal(false);
+                    router.push({pathname: `/order/${id}`});
+                })
+            },
+            onError: (error) => handleBuyItemError(error),
+        });
+    }
+
+    const handleBuyItemWithoutModerator = async (address) => {
+        const contractParams = {
+            abi: marketplaceAbi,
+            contractAddress: marketplaceContractAddress,
+            functionName: "buyItemWithoutModerator",
+            msgValue: price,
+            params: {
+                sellerAddress: seller,
+                id: id,
+            },
+        };
+
+        await runContractFunction({
+            params: contractParams,
+            onSuccess: (tx) => {
+                handleListWaitingConfirmation();
+                tx.wait().then((finalTx) => {
+                    addAddressToOrder(id, address);
+                    handleBuyItemSuccess();
+                    setShowBuyModal(false);
+                    router.push({pathname: `/order/${id}`});
                 })
             },
             onError: (error) => handleBuyItemError(error),
@@ -152,7 +180,8 @@ export default function ItemPage() {
                         <BuyItemModal
                             isVisible={showBuyModal}
                             onClose={() => setShowBuyModal(false)}
-                            onBuyItem={handleBuyItem}
+                            onBuyItemWithModerator={handleBuyItemWithModerator}
+                            onBuyItemWithoutModerator={handleBuyItemWithoutModerator}
                         />
 
                         {showChat &&

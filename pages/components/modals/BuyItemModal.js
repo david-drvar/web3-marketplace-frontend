@@ -4,7 +4,7 @@ import {fetchModerators} from "@/pages/utils/apolloService";
 import {getUserAddresses} from "@/pages/utils/firebaseService";
 import {useMoralis} from "react-moralis";
 
-export default function BuyItemModal({isVisible, onClose, onBuyItem}) {
+export default function BuyItemModal({isVisible, onClose, onBuyItemWithModerator, onBuyItemWithoutModerator}) {
     const [useModerator, setUseModerator] = useState(false);
     const [selectedModerator, setSelectedModerator] = useState(null);
     const [moderators, setModerators] = useState([]);
@@ -26,7 +26,12 @@ export default function BuyItemModal({isVisible, onClose, onBuyItem}) {
             title="Buy Item"
             okText={"Buy Item"}
             isOkDisabled={(useModerator && !selectedModerator) || selectedAddress === -1}
-            onOk={() => onBuyItem(selectedModerator, addresses[selectedAddress])}
+            onOk={() => {
+                if (selectedModerator)
+                    onBuyItemWithModerator(selectedModerator, addresses[selectedAddress])
+                else
+                    onBuyItemWithoutModerator(addresses[selectedAddress])
+            }}
             onCancel={onClose}
             size="lg"
         >
