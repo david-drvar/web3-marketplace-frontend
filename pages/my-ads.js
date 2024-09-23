@@ -8,11 +8,26 @@ export default function MyAds() {
     const {isWeb3Enabled, account} = useMoralis();
 
     const [items, setItems] = useState([]);
+    const [filteredItems, setFilteredItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [filter, setFilter] = useState('All'); // New state for filtering
+
 
     useEffect(() => {
-        fetchActiveAdsByUser(account).then((data) => setItems(data)).then(() => setIsLoading(false));
-    }, [isWeb3Enabled, items, account]);
+        fetchActiveAdsByUser(account).then((data) => {
+            setItems(data);
+            setFilteredItems(data);
+        }).then(() => setIsLoading(false));
+    }, [isWeb3Enabled, account]);
+
+    const handleFilterChange = (status) => {
+        setFilter(status);
+        if (status === 'All') {
+            setFilteredItems(items);
+        } else {
+            setFilteredItems(items.filter(item => item.itemStatus === status));
+        }
+    };
 
     return (
         <>
@@ -21,14 +36,36 @@ export default function MyAds() {
                     <LoadingAnimation/>
                 ) : (
                     <div className="container mx-auto px-4 py-8">
-                        <h1 className="text-3xl font-bold text-gray-800 mb-8">My ads (listed & bought)</h1>
-                        {items.length === 0 ? (
+                        <h1 className="text-3xl font-bold text-gray-800 mb-8">My ads</h1>
+
+                        <div className="mb-6">
+                            <button
+                                onClick={() => handleFilterChange('All')}
+                                className={`px-4 py-2 mr-2 rounded ${filter === 'All' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                            >
+                                All
+                            </button>
+                            <button
+                                onClick={() => handleFilterChange('Listed')}
+                                className={`px-4 py-2 mr-2 rounded ${filter === 'Listed' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                            >
+                                Listed
+                            </button>
+                            <button
+                                onClick={() => handleFilterChange('Bought')}
+                                className={`px-4 py-2 rounded ${filter === 'Bought' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                            >
+                                Bought
+                            </button>
+                        </div>
+
+                        {filteredItems.length === 0 ? (
                             <div className="text-center text-gray-500 italic">
                                 You don't have any items.
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                                {items.map((item) => {
+                                {filteredItems.map((item) => {
                                     const {
                                         price,
                                         title,
