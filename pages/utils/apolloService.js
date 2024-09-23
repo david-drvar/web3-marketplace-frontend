@@ -81,7 +81,7 @@ export const fetchItemById = async (id) => {
     }
 }
 
-export const fetchOrdersByUser = async (userAddress) => {
+export const fetchItemsOrderedByUser = async (userAddress) => {
     if (!userAddress) {
         return [];
     }
