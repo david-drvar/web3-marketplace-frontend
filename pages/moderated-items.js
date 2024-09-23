@@ -1,7 +1,7 @@
 import {useMoralis} from "react-moralis";
 import {useEffect, useState} from "react";
 import ItemBox from "./components/ItemBox";
-import {fetchAllItemsByModerator} from "@/pages/utils/apolloService";
+import {fetchAllItemsByModerator, fetchTransactionsByItemIds} from "@/pages/utils/apolloService";
 import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
 
 export default function ModeratedItems() {
@@ -9,16 +9,39 @@ export default function ModeratedItems() {
 
     const [items, setItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-
+    const [filteredItems, setFilteredItems] = useState([]);
+    const [filter, setFilter] = useState('all');
+    const [transactions, setTransactions] = useState([]);
 
     useEffect(() => {
         setIsLoading(true);
-        fetchAllItemsByModerator(account).then((data) => {
-            setItems(data);
+        const loadItems = async () => {
+            const fetchedItems = await fetchAllItemsByModerator(account);
+            setItems(fetchedItems);
+            setFilteredItems(fetchedItems)
+
+            const itemIds = fetchedItems.map(item => item.id);
+            const fetchedTransactions = await fetchTransactionsByItemIds(itemIds);
+            setTransactions(fetchedTransactions);
+
             setIsLoading(false);
-        }).catch(() => setIsLoading(false));
+        };
+        if (isWeb3Enabled && account) {
+            loadItems();
+        }
     }, [account]);
 
+    const handleFilterChange = (status) => {
+        setFilter(status);
+        if (status === 'all')
+            setFilteredItems(items);
+        else if (status === 'completed')
+            setFilteredItems(items.filter(item => transactions.find(tx => tx.itemId === item.id && tx.isCompleted) !== undefined))
+        else if (status === 'inDispute')
+            setFilteredItems(items.filter(item => transactions.find(tx => tx.itemId === item.id && !tx.isCompleted && tx.disputed) !== undefined))
+        else if (status === 'waitingForApproval')
+            setFilteredItems(items.filter(item => transactions.find(tx => tx.itemId === item.id && !tx.isCompleted && !tx.disputed) !== undefined))
+    }
 
     return (
         <>
@@ -33,13 +56,41 @@ export default function ModeratedItems() {
                     ) : (
                         <div className="container mx-auto px-4 py-8">
                             <h1 className="text-3xl font-bold text-gray-800 mb-8">Moderated Items</h1>
-                            {items.length === 0 ? (
+
+                            <div className="mb-6 flex flex-wrap gap-2">
+                                <button
+                                    onClick={() => handleFilterChange('all')}
+                                    className={`px-2 py-1 rounded ${filter === 'all' ? 'bg-blue-400 text-white' : 'bg-gray-200'}`}
+                                >
+                                    All
+                                </button>
+                                <button
+                                    onClick={() => handleFilterChange('completed')}
+                                    className={`px-2 py-1 rounded ${filter === 'completed' ? 'bg-blue-400 text-white' : 'bg-gray-200'}`}
+                                >
+                                    Completed
+                                </button>
+                                <button
+                                    onClick={() => handleFilterChange('inDispute')}
+                                    className={`px-2 py-1 rounded ${filter === 'inDispute' ? 'bg-blue-400 text-white' : 'bg-gray-200'}`}
+                                >
+                                    In Dispute
+                                </button>
+                                <button
+                                    onClick={() => handleFilterChange('waitingForApproval')}
+                                    className={`px-2 py-1 rounded ${filter === 'waitingForApproval' ? 'bg-blue-400 text-white' : 'bg-gray-200'}`}
+                                >
+                                    Waiting for Approval
+                                </button>
+                            </div>
+
+                            {filteredItems.length === 0 ? (
                                 <div className="text-center text-gray-500 italic">
                                     No moderated items available at the moment.
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                                    {items.map((item) => {
+                                    {filteredItems.map((item) => {
                                         if (item.itemStatus === "Deleted") return null;
                                         const {
                                             price,
