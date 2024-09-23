@@ -160,6 +160,50 @@ export const fetchActiveAdsByUser = async (userAddress) => {
     }
 }
 
+export const fetchTransactionsByItemIds = async (itemIds) => {
+    if (!itemIds || itemIds.length === 0) {
+        return [];
+    }
+
+    const getTransactionsQuery = gql`
+        query GetTransactionsByItems($itemIds: [String!]) {
+            transactions(where: { itemId_in: $itemIds }) {
+                id
+                itemId
+                buyer
+                seller
+                moderator
+                price
+                moderatorFee
+                buyerApproved
+                sellerApproved
+                disputed
+                disputedBySeller
+                disputedByBuyer
+                isCompleted
+                creationTime
+                blockNumber
+                blockTimestamp
+                transactionHash
+                buyerPercentage
+                sellerPercentage
+            }
+        }
+    `;
+
+    try {
+        const {data} = await apolloClient.query({
+            query: getTransactionsQuery,
+            variables: {itemIds},
+            fetchPolicy: 'network-only',
+        });
+
+        return data.transactions || [];
+    } catch (error) {
+        console.error("Error fetching transactions with item ids array", error);
+        return [];
+    }
+};
 
 export const fetchModerators = async () => {
     const getModeratorsQuery = gql`

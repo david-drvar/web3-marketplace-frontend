@@ -2,7 +2,7 @@ import {useMoralis} from "react-moralis";
 import ItemBox from "./components/ItemBox";
 import {useEffect, useState} from "react";
 import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
-import {fetchActiveAdsByUser} from "@/pages/utils/apolloService";
+import {fetchActiveAdsByUser, fetchTransactionsByItemIds} from "@/pages/utils/apolloService";
 
 export default function MyAds() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -10,24 +10,48 @@ export default function MyAds() {
     const [items, setItems] = useState([]);
     const [filteredItems, setFilteredItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [filter, setFilter] = useState('All'); // New state for filtering
+    const [filter, setFilter] = useState('all');
+    const [boughtStatusFilter, setBoughtStatusFilter] = useState('');
+    const [transactions, setTransactions] = useState([]);
 
 
     useEffect(() => {
-        fetchActiveAdsByUser(account).then((data) => {
-            setItems(data);
-            setFilteredItems(data);
-        }).then(() => setIsLoading(false));
+        const loadItems = async () => {
+            const fetchedItems = await fetchActiveAdsByUser(account);
+            setItems(fetchedItems);
+            setFilteredItems(fetchedItems)
+
+            const itemIds = fetchedItems.map(item => item.id);
+            const fetchedTransactions = await fetchTransactionsByItemIds(itemIds);
+            setTransactions(fetchedTransactions);
+
+            setIsLoading(false);
+        };
+        if (isWeb3Enabled && account) {
+            loadItems();
+        }
     }, [isWeb3Enabled, account]);
 
     const handleFilterChange = (status) => {
         setFilter(status);
-        if (status === 'All') {
+        if (status === 'all') {
             setFilteredItems(items);
         } else {
-            setFilteredItems(items.filter(item => item.itemStatus === status));
+            setFilteredItems(items.filter(item => item.itemStatus.toLowerCase() === status));
         }
     };
+
+    const handleBoughtFilterChange = (boughtStatus) => {
+        setBoughtStatusFilter(boughtStatus);
+        if (boughtStatus === 'all')
+            setFilteredItems(items.filter(item => item.itemStatus.toLowerCase() === 'bought'));
+        else if (boughtStatus === 'completed')
+            setFilteredItems(items.filter(item => transactions.find(tx => tx.itemId === item.id && tx.isCompleted === true) !== undefined))
+        else if (boughtStatus === 'inDispute')
+            setFilteredItems(items.filter(item => transactions.find(tx => tx.itemId === item.id && tx.isCompleted !== true && tx.disputed === true) !== undefined))
+        else if (boughtStatus === 'waitingForApproval')
+            setFilteredItems(items.filter(item => transactions.find(tx => tx.itemId === item.id && !tx.isCompleted && !tx.disputed) !== undefined))
+    }
 
     return (
         <>
@@ -40,24 +64,52 @@ export default function MyAds() {
 
                         <div className="mb-6">
                             <button
-                                onClick={() => handleFilterChange('All')}
-                                className={`px-4 py-2 mr-2 rounded ${filter === 'All' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                                onClick={() => handleFilterChange('all')}
+                                className={`px-4 py-2 mr-2 rounded ${filter === 'all' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
                             >
                                 All
                             </button>
                             <button
-                                onClick={() => handleFilterChange('Listed')}
-                                className={`px-4 py-2 mr-2 rounded ${filter === 'Listed' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                                onClick={() => handleFilterChange('listed')}
+                                className={`px-4 py-2 mr-2 rounded ${filter === 'listed' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
                             >
                                 Listed
                             </button>
                             <button
-                                onClick={() => handleFilterChange('Bought')}
-                                className={`px-4 py-2 rounded ${filter === 'Bought' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                                onClick={() => handleFilterChange('bought')}
+                                className={`px-4 py-2 rounded ${filter === 'bought' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
                             >
                                 Bought
                             </button>
                         </div>
+                        {filter === 'bought' && (
+                            <div className="mb-6 flex flex-wrap gap-2">
+                                <button
+                                    onClick={() => handleBoughtFilterChange('all')}
+                                    className={`px-2 py-1 rounded ${boughtStatusFilter === 'all' ? 'bg-blue-400 text-white' : 'bg-gray-200'}`}
+                                >
+                                    All
+                                </button>
+                                <button
+                                    onClick={() => handleBoughtFilterChange('completed')}
+                                    className={`px-2 py-1 rounded ${boughtStatusFilter === 'completed' ? 'bg-blue-400 text-white' : 'bg-gray-200'}`}
+                                >
+                                    Completed
+                                </button>
+                                <button
+                                    onClick={() => handleBoughtFilterChange('inDispute')}
+                                    className={`px-2 py-1 rounded ${boughtStatusFilter === 'inDispute' ? 'bg-blue-400 text-white' : 'bg-gray-200'}`}
+                                >
+                                    In Dispute
+                                </button>
+                                <button
+                                    onClick={() => handleBoughtFilterChange('waitingForApproval')}
+                                    className={`px-2 py-1 rounded ${boughtStatusFilter === 'waitingForApproval' ? 'bg-blue-400 text-white' : 'bg-gray-200'}`}
+                                >
+                                    Waiting for Approval
+                                </button>
+                            </div>
+                        )}
 
                         {filteredItems.length === 0 ? (
                             <div className="text-center text-gray-500 italic">
