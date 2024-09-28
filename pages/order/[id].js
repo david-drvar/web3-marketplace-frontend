@@ -4,6 +4,7 @@ import {useEffect, useState} from "react";
 import {useMoralis, useWeb3Contract} from "react-moralis";
 import {Button, useNotification} from "web3uikit";
 import escrowAbi from "../../constants/Escrow.json";
+import usersAbi from "../../constants/Users.json";
 import {ethers} from "ethers";
 import {useSelector} from "react-redux";
 import ChatPopup from "@/pages/components/chat/ChatPopup";
@@ -14,6 +15,7 @@ import DisputeItemModal from "@/pages/components/modals/DisputeItemModal";
 import FinalizeTransactionModal from "@/pages/components/modals/FinalizeTransactionModal";
 import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
 import {getOrderAddress} from "@/pages/utils/firebaseService";
+import ReviewItemModal from "@/pages/components/modals/ReviewItemModal";
 
 export default function OrderPage() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -38,6 +40,7 @@ export default function OrderPage() {
     const [showApproveModal, setShowApproveModal] = useState(false);
     const [showDisputeModal, setShowDisputeModal] = useState(false);
     const [showFinalizeModal, setShowFinalizeModal] = useState(false);
+    const [showReviewItemModal, setShowReviewItemModal] = useState(false);
     const [showChat, setShowChat] = useState(false);
 
     const [approveButtonDisabled, setApproveButtonDisabled] = useState(true);
@@ -46,6 +49,7 @@ export default function OrderPage() {
     const {runContractFunction} = useWeb3Contract();
     const marketplaceContractAddress = useSelector((state) => state.contract["marketplaceContractAddress"]);
     const escrowContractAddress = useSelector((state) => state.contract["escrowContractAddress"]);
+    const usersContractAddress = useSelector((state) => state.contract["usersContractAddress"]);
 
     const [transaction, setTransaction] = useState({});
     const [address, setAddress] = useState({});
@@ -115,6 +119,8 @@ export default function OrderPage() {
 
                 // Handle order address
                 setAddress(orderAddressData);
+
+                //todo - get all reviews for this item and check if current user has any left to give
 
             } catch (error) {
                 console.error("Error fetching data: ", error);
@@ -206,6 +212,34 @@ export default function OrderPage() {
         });
     }
 
+    const handleSubmitReview = async (content, rating, toWhom) => {
+        const contractParams = {
+            abi: usersAbi,
+            contractAddress: usersContractAddress,
+            functionName: `createReview`,
+            params: {
+                _itemId: id,
+                from: account,
+                to: transaction[toWhom], //todo
+                content: content,
+                rating: rating,
+            },
+        };
+
+        // await runContractFunction({
+        //     params: contractParams,
+        //     onSuccess: (tx) => {
+        //         handleNotification(dispatch, "info", "Transaction submitted. Waiting for confirmations.", "Waiting for confirmations");
+        //         tx.wait().then((finalTx) => {
+        //             handleNotification(dispatch, "success", "Item finalized successfully", "Item finalized");
+        //             // setDisputeButtonDisabled(true);
+        //             setShowFinalizeModal(false);
+        //         })
+        //     },
+        //     onError: (error) => handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Finalize error"),
+        // });
+    }
+
     return (
         <>
             {isLoading ? (
@@ -232,6 +266,13 @@ export default function OrderPage() {
                                 isVisible={showFinalizeModal}
                                 onClose={() => setShowFinalizeModal(false)}
                                 onFinalize={handleFinalize}
+                            />
+
+                            <ReviewItemModal
+                                isVisible={showReviewItemModal}
+                                onClose={() => setShowReviewItemModal(false)}
+                                onSubmit={handleSubmitReview}
+                                transaction={transaction}
                             />
 
                             {showChat &&
@@ -330,6 +371,17 @@ export default function OrderPage() {
                                         onClick={() => setShowFinalizeModal(true)}
                                     />
                                 )}
+
+                                {(transaction.isCompleted) && (
+                                    <Button
+                                        text={`Leave a review`}
+                                        id="reviewButton"
+                                        className="bg-yellow-400 hover:bg-yellow-600"
+                                        onClick={() => setShowReviewItemModal(true)}
+                                    />
+                                )}
+
+                                {/*todo - display all reviews for this item*/}
                             </div>
                         </div>
                     ) : (
