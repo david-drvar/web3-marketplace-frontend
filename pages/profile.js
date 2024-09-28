@@ -7,6 +7,7 @@ import {setUser} from "@/store/slices/userSlice";
 import {useMoralis} from "react-moralis";
 import {useDispatch} from "react-redux";
 import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
+import YourReviews from "@/pages/components/profile/YourReviews";
 
 
 export default function Profile() {
@@ -38,6 +39,10 @@ export default function Profile() {
                                     onClick={() => setActiveTab('manageAddresses')}>
                                     Manage Addresses
                                 </li>
+                                <li className={`py-2 cursor-pointer ${activeTab === 'reviews' ? 'text-blue-600 font-bold' : 'text-gray-600'}`}
+                                    onClick={() => setActiveTab('reviews')}>
+                                    Your Reviews
+                                </li>
                                 <li className={`py-2 cursor-pointer ${activeTab === 'notifications' ? 'text-blue-600 font-bold' : 'text-gray-600'}`}
                                     onClick={() => setActiveTab('notifications')}>
                                     Notification Settings
@@ -60,6 +65,12 @@ export default function Profile() {
                             {activeTab === 'manageAddresses' && (
                                 <div className="bg-white p-8 shadow-lg rounded-lg">
                                     <ManageAddresses/>
+                                </div>
+                            )}
+
+                            {activeTab === 'reviews' && (
+                                <div className="bg-white p-8 shadow-lg rounded-lg">
+                                    <YourReviews/>
                                 </div>
                             )}
 
