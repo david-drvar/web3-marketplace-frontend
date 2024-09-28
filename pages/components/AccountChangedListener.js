@@ -3,6 +3,7 @@ import {useDispatch} from 'react-redux';
 import {useMoralis} from "react-moralis";
 import {fetchUserByAddress} from "@/pages/utils/apolloService";
 import {setUser} from "@/store/slices/userSlice";
+import {setLastSeenForUser} from "@/pages/utils/firebaseService";
 
 const AccountChangedListener = () => {
     const dispatch = useDispatch();
@@ -11,6 +12,7 @@ const AccountChangedListener = () => {
     useEffect(() => {
         fetchUserByAddress(account).then((data) => {
             dispatch(setUser(data));
+            setLastSeenForUser(account);
         });
     }, [account]);
 

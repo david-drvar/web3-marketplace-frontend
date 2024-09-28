@@ -88,3 +88,13 @@ export const getChatsByUser = async (userId) => {
 
     return chatsWithMessages;
 };
+
+export const setLastSeenForUser = async (address) => {
+    try {
+        const userRef = doc(firebase_db, "users", address);
+        await setDoc(userRef, {lastSeen: Date.now()});
+        console.log("User set last seen successfully.");
+    } catch (error) {
+        console.error("Error setting last seen for user ", error);
+    }
+};
