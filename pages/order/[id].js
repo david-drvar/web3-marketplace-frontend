@@ -138,7 +138,7 @@ export default function OrderPage() {
         const contractParams = {
             abi: escrowAbi,
             contractAddress: escrowContractAddress,
-            functionName: `approveBy${roleInTransaction}`,
+            functionName: `approve`,
             params: {
                 _itemId: id,
             },
@@ -213,31 +213,34 @@ export default function OrderPage() {
     }
 
     const handleSubmitReview = async (content, rating, toWhom) => {
+        console.log("toWhom", toWhom);
+
         const contractParams = {
             abi: usersAbi,
             contractAddress: usersContractAddress,
             functionName: `createReview`,
             params: {
-                _itemId: id,
-                from: account,
-                to: transaction[toWhom], //todo
+                itemId: id,
+                toWhom: transaction[toWhom], //todo
                 content: content,
                 rating: rating,
             },
         };
 
-        // await runContractFunction({
-        //     params: contractParams,
-        //     onSuccess: (tx) => {
-        //         handleNotification(dispatch, "info", "Transaction submitted. Waiting for confirmations.", "Waiting for confirmations");
-        //         tx.wait().then((finalTx) => {
-        //             handleNotification(dispatch, "success", "Item finalized successfully", "Item finalized");
-        //             // setDisputeButtonDisabled(true);
-        //             setShowFinalizeModal(false);
-        //         })
-        //     },
-        //     onError: (error) => handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Finalize error"),
-        // });
+        console.log("contractParams", contractParams);
+
+        await runContractFunction({
+            params: contractParams,
+            onSuccess: (tx) => {
+                handleNotification(dispatch, "info", "Review submitted. Waiting for confirmations.", "Waiting for confirmations");
+                tx.wait().then((finalTx) => {
+                    handleNotification(dispatch, "success", "User reviewed successfully", "Review finalized");
+                    // setDisputeButtonDisabled(true);
+                    setShowReviewItemModal(false);
+                })
+            },
+            onError: (error) => handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Finalize error"),
+        });
     }
 
     return (

@@ -1,9 +1,9 @@
 import {useEffect, useState} from "react";
-import { Modal, Input, Button, Notification, Icon, Tooltip } from "web3uikit";
-import { Star } from "@web3uikit/icons";
+import {Modal, Input, Button, Notification, Icon, Tooltip} from "web3uikit";
+import {Star} from "@web3uikit/icons";
 import {useMoralis} from "react-moralis";
 
-export default function ReviewItemModal({ isVisible, onClose, onSubmit, transaction }) {
+export default function ReviewItemModal({isVisible, onClose, onSubmit, transaction}) {
     const {account} = useMoralis();
     const [reviewText, setReviewText] = useState("");
     const [rating, setRating] = useState(0);
@@ -19,6 +19,7 @@ export default function ReviewItemModal({ isVisible, onClose, onSubmit, transact
             setToRoles(["buyer", "seller"])
 
         //todo - check additionally if the review has already been submitted
+        //todo - check to whom you can still send
 
 
     }, [])
@@ -42,7 +43,8 @@ export default function ReviewItemModal({ isVisible, onClose, onSubmit, transact
         //     });
         //     return;
         // }
-
+        console.log("calling create review")
+        console.log("toSelected", toSelected)
         onSubmit(reviewText, rating, toSelected);
 
         resetAndCloseForm();
@@ -63,7 +65,7 @@ export default function ReviewItemModal({ isVisible, onClose, onSubmit, transact
             title="Leave a Review"
             okText={"Submit"}
             onOk={handleSubmit}
-            isOkDisabled={rating===0 || reviewText==="" || toSelected==="to"}
+            isOkDisabled={rating === 0 || reviewText === "" || toSelected === "to"}
 
         >
             <div className="flex flex-col space-y-4 mb-4">
@@ -76,7 +78,7 @@ export default function ReviewItemModal({ isVisible, onClose, onSubmit, transact
                     onChange={(e) => setToSelected(e.target.value)}
                     className="border p-2 rounded-md flex-grow min-w-[150px] mb-4"
                 >
-                    <option value="to">to</option>
+                    <option value="to" disabled={true}>to</option>
                     {toRoles.map((toRole) => (
                         <option key={toRole} value={toRole}>
                             {toRole}
