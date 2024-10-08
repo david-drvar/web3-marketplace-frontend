@@ -271,12 +271,12 @@ export default function OrderPage() {
                                 onFinalize={handleFinalize}
                             />
 
-                            <ReviewItemModal
+                            {showReviewItemModal && <ReviewItemModal
                                 isVisible={showReviewItemModal}
                                 onClose={() => setShowReviewItemModal(false)}
                                 onSubmit={handleSubmitReview}
                                 transaction={transaction}
-                            />
+                            />}
 
                             {showChat &&
                                 <ChatPopup onClose={() => setShowChat(false)}

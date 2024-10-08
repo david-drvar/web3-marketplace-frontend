@@ -396,3 +396,44 @@ export const fetchAllItemsByModerator = async (moderator) => {
         return [];
     }
 }
+
+
+export const checkReviewExistence = async (from, to, itemId) => {
+    if (!from || !to || !itemId) {
+        return false;
+    }
+
+    const checkReviewExistenceQuery = gql`
+    query CheckReviewExistence($from: Bytes!, $to: Bytes!, $itemId: String!) {
+      reviews(
+        where: { from: $from, user: $to, itemId: $itemId }
+      ) {
+        id
+        from
+        content
+        rating
+        itemId
+        user {
+          id
+        }
+      }
+    }
+  `;
+
+    try {
+        const {data} = await apolloClient.query({
+            query: checkReviewExistenceQuery,
+            variables: {
+                from: from,
+                to: to,
+                itemId: itemId,
+            },
+            fetchPolicy: 'network-only', // ensures fresh data
+        });
+
+        return data.reviews.length > 0;
+    } catch (error) {
+        console.error("Error checking review existence", error);
+        return false;
+    }
+};

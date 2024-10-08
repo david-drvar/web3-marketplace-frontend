@@ -2,56 +2,44 @@ import {useEffect, useState} from "react";
 import {Modal, Input, Button, Notification, Icon, Tooltip} from "web3uikit";
 import {Star} from "@web3uikit/icons";
 import {useMoralis} from "react-moralis";
+import {checkReviewExistence} from "@/pages/utils/apolloService";
 
 export default function ReviewItemModal({isVisible, onClose, onSubmit, transaction}) {
     const {account} = useMoralis();
     const [reviewText, setReviewText] = useState("");
     const [rating, setRating] = useState(0);
     const [toRoles, setToRoles] = useState([]);
-    const [toSelected, setToSelected] = useState(null);
+    const [toSelected, setToSelected] = useState("select review receiver");
 
     useEffect(() => {
-        if (account === transaction.buyer)
-            setToRoles(["seller", "moderator"])
-        else if (account === transaction.seller)
-            setToRoles(["buyer", "moderator"])
-        else if (account === transaction.moderator)
-            setToRoles(["buyer", "seller"])
-
-        //todo - check additionally if the review has already been submitted
-        //todo - check to whom you can still send
-
-
+        if (account === transaction.buyer) {
+            addToRoleIfReviewDoesNotExist("seller")
+            addToRoleIfReviewDoesNotExist("moderator")
+        } else if (account === transaction.seller) {
+            addToRoleIfReviewDoesNotExist("buyer")
+            addToRoleIfReviewDoesNotExist("moderator")
+        } else if (account === transaction.moderator) {
+            addToRoleIfReviewDoesNotExist("buyer")
+            addToRoleIfReviewDoesNotExist("seller")
+        }
     }, [])
 
-    const handleSubmit = () => {
-        // if (rating === 0) {
-        //     Notification({
-        //         type: "error",
-        //         message: "Please provide a star rating.",
-        //         title: "Incomplete Review",
-        //         position: "topR",
-        //     });
-        //     return;
-        // }
-        // if (!reviewText) {
-        //     Notification({
-        //         type: "error",
-        //         message: "Please write a review.",
-        //         title: "Incomplete Review",
-        //         position: "topR",
-        //     });
-        //     return;
-        // }
-        console.log("calling create review")
-        console.log("toSelected", toSelected)
-        onSubmit(reviewText, rating, toSelected);
+    const addToRoleIfReviewDoesNotExist = (role) => {
+        checkReviewExistence(account, transaction[role], transaction.itemId).then((result) => {
+            if (!result && !toRoles.includes(role))
+                setToRoles((prevRoles) => [...prevRoles, role]);
+        })
+    }
 
+    const handleSubmit = () => {
+        onSubmit(reviewText, rating, toSelected);
         resetAndCloseForm();
     };
 
     const resetAndCloseForm = () => {
         setReviewText("");
+        setToRoles([]);
+        setToSelected("select review receiver");
         setRating(0);
 
         onClose();
@@ -61,12 +49,11 @@ export default function ReviewItemModal({isVisible, onClose, onSubmit, transacti
         <Modal
             isVisible={isVisible}
             onCancel={resetAndCloseForm}
-            onCloseButtonPressed={onClose}
+            onCloseButtonPressed={resetAndCloseForm}
             title="Leave a Review"
             okText={"Submit"}
             onOk={handleSubmit}
-            isOkDisabled={rating === 0 || reviewText === "" || toSelected === "to"}
-
+            isOkDisabled={rating === 0 || reviewText === "" || toSelected === "select review receiver"}
         >
             <div className="flex flex-col space-y-4 mb-4">
 
@@ -75,13 +62,17 @@ export default function ReviewItemModal({isVisible, onClose, onSubmit, transacti
                     id="toDropbox"
                     name="toDropbox"
                     value={toSelected}
-                    onChange={(e) => setToSelected(e.target.value)}
+                    onChange={(e) => {
+                        setToSelected(e.target.value);
+                        console.log("e.target.value")
+                        console.log(e.target.value)
+                    }}
                     className="border p-2 rounded-md flex-grow min-w-[150px] mb-4"
                 >
-                    <option value="to" disabled={true}>to</option>
-                    {toRoles.map((toRole) => (
+                    <option value="select review receiver">select review receiver</option>
+                    {toRoles && toRoles.map((toRole) => (
                         <option key={toRole} value={toRole}>
-                            {toRole}
+                            {toRole} - {transaction[toRole]}
                         </option>
                     ))}
                 </select>
