@@ -458,10 +458,6 @@ export const fetchAllReviewsByUser = async (userAddress) => {
         user {
           id
         }
-        fromUser: user {
-          username
-          avatarHash
-        }
       }
     }
   `;
@@ -478,6 +474,7 @@ export const fetchAllReviewsByUser = async (userAddress) => {
         const reviewsWithDetails = await Promise.all(
             data.reviews.map(async (review) => {
                 const item = await fetchItemById(review.itemId)
+                const fromUser = await fetchUserByAddress(review.from)
                 return {
                     id: review.id,
                     from: review.from,
@@ -486,8 +483,8 @@ export const fetchAllReviewsByUser = async (userAddress) => {
                     itemId: review.itemId,
                     blockTimestamp: review.blockTimestamp,
                     itemTitle: item[0].title,
-                    fromUsername: review.fromUser.username,
-                    fromAvatarHash: review.fromUser.avatarHash
+                    fromUsername: fromUser.username,
+                    fromAvatarHash: fromUser.avatarHash
                 };
             })
         );

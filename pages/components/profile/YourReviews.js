@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { useMoralis } from "react-moralis";
-import { fetchAllReviewsByUser } from "@/pages/utils/apolloService";
+import React, {useEffect, useState} from 'react';
+import {useMoralis} from "react-moralis";
+import {fetchAllReviewsByUser} from "@/pages/utils/apolloService";
 import Link from 'next/link';
 
 const YourReviews = () => {
     const [reviews, setReviews] = useState([]);
-    const { account } = useMoralis();
+    const {account} = useMoralis();
 
     useEffect(() => {
         fetchAllReviewsByUser(account).then((reviews) => setReviews(reviews));
@@ -13,7 +13,7 @@ const YourReviews = () => {
 
     const renderStars = (rating) => {
         const totalStars = 5;
-        return Array.from({ length: totalStars }, (_, i) => (
+        return Array.from({length: totalStars}, (_, i) => (
             <span key={i} className={`text-xl ${i < rating ? 'text-yellow-500' : 'text-gray-300'}`}>
                 {i < rating ? '★' : '☆'}
             </span>
@@ -29,21 +29,32 @@ const YourReviews = () => {
             ) : (
                 <div className="grid grid-cols-1 gap-6">
                     {reviews.map((review, index) => (
-                        <div key={index} className="p-6 border border-gray-200 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200">
-                            <div className="flex justify-between items-center mb-2">
-                                <span className="text-gray-600 font-medium">
-                                    Review for: {" "}
-                                    <Link href={`/item/${review.itemId}`} passHref>
-                                    <span className="text-blue-600 hover:underline font-medium">
-                                        {review.itemTitle}
-                                    </span>
-                                </Link>
-                                </span>
-
-                                <div className="flex">{renderStars(review.rating)}</div>
+                        <div key={index}
+                             className="p-6 border border-gray-200 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 flex items-center"> {/* Added items-center */}
+                            <div className="flex-shrink-0 mr-4">
+                                <img
+                                    src={`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${review.fromAvatarHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
+                                    alt="User Avatar"
+                                    className="w-12 h-12 rounded-full border border-gray-300"
+                                />
                             </div>
-                            <p className="text-gray-700">{review.content}</p>
-                            <p className="text-sm text-gray-400 mt-2">Reviewed on: {new Date(review.blockTimestamp * 1000).toDateString()}</p>
+                            <div className="flex-grow">
+                                <div className="flex justify-between items-center mb-2">
+                <span className="text-gray-600 font-medium">
+                    Review for:{" "}
+                    <Link href={`/item/${review.itemId}`} passHref>
+                        <span className="text-blue-600 hover:underline font-medium">
+                            {review.itemTitle}
+                        </span>
+                    </Link>
+                </span>
+
+                                    <div className="flex">{renderStars(review.rating)}</div>
+                                </div>
+                                <p className="text-gray-700">{review.content}</p>
+                                <p className="text-sm text-gray-400 mt-2">Reviewed on: {new Date(review.blockTimestamp * 1000).toDateString()}</p>
+                                <p className="text-sm text-gray-500">Reviewed by: {review.fromUsername}</p>
+                            </div>
                         </div>
                     ))}
                 </div>
