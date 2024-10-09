@@ -437,3 +437,67 @@ export const checkReviewExistence = async (from, to, itemId) => {
         return false;
     }
 };
+
+
+export const fetchAllReviewsByUser = async (userAddress) => {
+    if (!userAddress) {
+        return [];
+    }
+
+    const fetchAllReviewsByUser = gql`
+    query FetchAllReviewsByUser($userAddress: Bytes!) {
+      reviews(
+        where: { user: $userAddress }
+      ) {
+        id
+        from
+        content
+        rating
+        itemId
+        blockTimestamp
+        user {
+          id
+        }
+        fromUser: user {
+          username
+          avatarHash
+        }
+      }
+    }
+  `;
+
+    try {
+        const {data} = await apolloClient.query({
+            query: fetchAllReviewsByUser,
+            variables: {
+                userAddress: userAddress,
+            },
+            fetchPolicy: 'network-only',
+        });
+
+        const reviewsWithDetails = await Promise.all(
+            data.reviews.map(async (review) => {
+                const item = await fetchItemById(review.itemId)
+                return {
+                    id: review.id,
+                    from: review.from,
+                    content: review.content,
+                    rating: review.rating,
+                    itemId: review.itemId,
+                    blockTimestamp: review.blockTimestamp,
+                    itemTitle: item[0].title,
+                    fromUsername: review.fromUser.username,
+                    fromAvatarHash: review.fromUser.avatarHash
+                };
+            })
+        );
+
+        console.log("reviewsWithDetails", reviewsWithDetails)
+
+        return reviewsWithDetails || [];
+
+    } catch (error) {
+        console.error("Error fetching all reviews from user", error);
+        return false;
+    }
+};
