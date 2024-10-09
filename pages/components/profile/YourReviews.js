@@ -53,7 +53,13 @@ const YourReviews = () => {
                                 </div>
                                 <p className="text-gray-700">{review.content}</p>
                                 <p className="text-sm text-gray-400 mt-2">Reviewed on: {new Date(review.blockTimestamp * 1000).toDateString()}</p>
-                                <p className="text-sm text-gray-500">Reviewed by: {review.fromUsername}</p>
+                                <p className="text-sm text-gray-500 mt-2">Reviewed by: {" "}
+                                    <Link href={`/profile/${review.from}`} passHref>
+                                        <span className="text-blue-500 hover:underline font-medium">
+                                            {review.fromUsername}
+                                        </span>
+                                    </Link>
+                                </p>
                             </div>
                         </div>
                     ))}
