@@ -98,3 +98,20 @@ export const setLastSeenForUser = async (address) => {
         console.error("Error setting last seen for user ", error);
     }
 };
+
+export const getLastSeenForUser = async (address) => {
+    try {
+        const userRef = doc(firebase_db, "users", address);
+        const lastSeenDocSnap = await getDoc(userRef);
+
+        if (lastSeenDocSnap.exists()) {
+            const lastSeenData = lastSeenDocSnap.data();
+            return (lastSeenData.lastSeen || null);
+        } else {
+            console.log("No last seen found for this user.");
+            return [];
+        }
+    } catch (error) {
+        console.error("Error getting last seen for user ", error);
+    }
+};

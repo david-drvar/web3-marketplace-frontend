@@ -1,8 +1,14 @@
 import {useEffect, useState} from "react";
 import {useRouter} from "next/router";
-import {fetchActiveAdsByUser, fetchAllReviewsByUser, fetchUserByAddress} from "@/pages/utils/apolloService";
+import {
+    fetchActiveAdsByUser,
+    fetchAllReviewsByUser,
+    fetchAllTransactionsByUser,
+    fetchUserByAddress
+} from "@/pages/utils/apolloService";
 import ItemBox from "@/pages/components/ItemBox";
 import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
+import {getLastSeenForUser} from "@/pages/utils/firebaseService";
 
 
 export default function UserProfile() {
@@ -15,13 +21,26 @@ export default function UserProfile() {
     const [user, setUser] = useState({});
     const [items, setItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [gpa, setGpa] = useState(0);
+    const [lastSeen, setLastSeen] = useState(0);
+    const [totalAdsPosted, setTotalAdsPosted] = useState(0);
+    const [totalClosedDeals, setTotalClosedDeals] = useState(0);
 
-    // todo - add more user info
     useEffect(() => {
         const loadData = async () => {
-            fetchAllReviewsByUser(id).then((reviews) => setReviews(reviews));
+            fetchAllReviewsByUser(id).then((reviews) => {
+                setReviews(reviews);
+                let totalGrade = 0;
+                reviews.forEach((review) =>
+                    totalGrade += review.rating
+                )
+                setGpa(totalGrade/reviews.length);
+            });
             fetchUserByAddress(id).then((user) => setUser(user));
             await fetchActiveAdsByUser(id).then((items) => setItems(items));
+            getLastSeenForUser(id).then((data) => setLastSeen(data))
+            fetchActiveAdsByUser(id).then((items) => setTotalAdsPosted(items.length));
+            fetchAllTransactionsByUser(id).then((transactions) => setTotalClosedDeals(transactions.length));
         }
 
         loadData().then(() => setIsLoading(false))
@@ -41,7 +60,12 @@ export default function UserProfile() {
                                 alt={user.username} className="w-24 h-24 rounded-full"/>
                             <div>
                                 <h1 className="text-3xl font-semibold">{user.username}</h1>
-                                <p className="text-gray-500">{reviews.length} reviews</p>
+                                <p className="text-gray-500 mt-3">Number of reviews - {reviews.length}</p>
+                                <p className="text-gray-500">GPA - {gpa}</p>
+                                <p className="text-gray-500">member since - {new Date(user.blockTimestamp * 1000).toDateString()}</p>
+                                <p className="text-gray-500">last seen - {new Date(lastSeen).toLocaleString()}</p>
+                                <p className="text-gray-500">total ads posted - {totalAdsPosted}</p>
+                                <p className="text-gray-500">total deals closed - {totalClosedDeals}</p>
                                 <button onClick={() => setShowReviews(true)}
                                         className="mt-2 text-blue-500 underline">See all
                                     reviews

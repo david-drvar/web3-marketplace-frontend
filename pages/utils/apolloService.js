@@ -257,6 +257,7 @@ export const fetchUserByAddress = async (userAddress) => {
         avatarHash
         isModerator
         moderatorFee
+        blockTimestamp
       }
     }
   `;
@@ -393,6 +394,54 @@ export const fetchAllItemsByModerator = async (moderator) => {
         return items || [];
     } catch (error) {
         console.error("Error fetching items from moderator", error);
+        return [];
+    }
+}
+
+export const fetchAllTransactionsByUser = async (userAddress) => {
+    if (!userAddress) {
+        return [];
+    }
+    const getTransactionsByBuyer = gql`
+      query getTransactionsByBuyer($user: String!) {
+        transactions(where: { buyer: $user }) {
+          id
+        }
+      }
+    `;
+
+    const getTransactionsBySeller = gql`
+      query getTransactionsBySeller($user: String!) {
+        transactions(where: { seller: $user }) {
+          id
+        }
+      }
+    `;
+
+    const getTransactionsByModerator = gql`
+      query getTransactionsByModerator($user: String!) {
+        transactions(where: { moderator: $user }) {
+          id
+        }
+      }
+    `;
+
+    try {
+        const [buyerResult, sellerResult, moderatorResult] = await Promise.all([
+            apolloClient.query({ query: getTransactionsByBuyer, variables:  {user: userAddress}, fetchPolicy: 'network-only' }),
+            apolloClient.query({ query: getTransactionsBySeller, variables:  {user: userAddress}, fetchPolicy: 'network-only' }),
+            apolloClient.query({ query: getTransactionsByModerator, variables:  {user: userAddress}, fetchPolicy: 'network-only' }),
+        ]);
+
+        const allTransactions = [
+            ...buyerResult.data.transactions,
+            ...sellerResult.data.transactions,
+            ...moderatorResult.data.transactions,
+        ];
+
+        return allTransactions || [];
+    } catch (error) {
+        console.error("Error fetching all transactions of user", error);
         return [];
     }
 }
