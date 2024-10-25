@@ -64,56 +64,56 @@ export default function ItemPage() {
 
     useEffect(() => {
         loadData();
-    }, [account]);
+    }, [account, id]);
 
-    // todo optimize function
     const loadData = async () => {
-        let sellerAddress;
-        fetchItemById(id).then((data) => {
-            sellerAddress = data[0].seller;
-            setItem(data[0]);
-            setTitle(data[0].title);
-            setDescription(data[0].description);
-            setPrice(data[0].price);
-            setPhotosIPFSHashes(typeof data[0].photosIPFSHashes == "string" ? [data[0].photosIPFSHashes] : data[0].photosIPFSHashes);
-            setItemStatus(data[0].itemStatus);
-            setCondition(data[0].condition);
-            setCategory(data[0].category);
-            setSubcategory(data[0].subcategory);
-            setCountry(data[0].country);
-            setIsGift(data[0].isGift);
-            setBlockTimestamp(data[0].blockTimestamp);
-            setSeller(data[0].seller);
-            setIsAccountSeller(data[0].seller === account || data[0].seller === undefined)
-        }).then(() => {
-            fetchUserByAddress(sellerAddress).then((data) => {
-                setSellerProfile((prevProfile) => ({
-                    ...prevProfile,
-                    username: data.username,
-                    firstName: data.firstName,
-                    lastName: data.lastName,
-                    avatarHash: data.avatarHash,
-                }));
+        try {
+            setIsLoading(true);
+
+            const itemData = await fetchItemById(id);
+            const sellerAddress = itemData[0].seller;
+
+            setItem(itemData[0]);
+            setTitle(itemData[0].title);
+            setDescription(itemData[0].description);
+            setPrice(itemData[0].price);
+            setPhotosIPFSHashes(Array.isArray(itemData[0].photosIPFSHashes) ? itemData[0].photosIPFSHashes : [itemData[0].photosIPFSHashes]);
+            setItemStatus(itemData[0].itemStatus);
+            setCondition(itemData[0].condition);
+            setCategory(itemData[0].category);
+            setSubcategory(itemData[0].subcategory);
+            setCountry(itemData[0].country);
+            setIsGift(itemData[0].isGift);
+            setBlockTimestamp(itemData[0].blockTimestamp);
+            setSeller(sellerAddress);
+            setIsAccountSeller(sellerAddress === account || !sellerAddress);
+
+            const [userData, reviews, lastSeen] = await Promise.all([
+                fetchUserByAddress(sellerAddress),
+                fetchAllReviewsByUser(sellerAddress),
+                getLastSeenForUser(sellerAddress),
+            ]);
+
+            const totalRating = reviews.reduce((total, review) => total + review.rating, 0);
+            const averageRating = reviews.length ? totalRating / reviews.length : 0;
+
+            setSellerProfile({
+                ...sellerProfile,
+                username: userData.username,
+                firstName: userData.firstName,
+                lastName: userData.lastName,
+                avatarHash: userData.avatarHash,
+                averageRating,
+                numberOfReviews: reviews.length,
+                lastSeen,
             });
-            fetchAllReviewsByUser(sellerAddress).then((reviews) => {
-                let totalGrade = 0;
-                reviews.forEach((review) =>
-                    totalGrade += review.rating
-                );
-                setSellerProfile((prevProfile) => ({
-                    ...prevProfile,
-                    averageRating: totalGrade / reviews.length,
-                    numberOfReviews: reviews.length,
-                }));
-            });
-            getLastSeenForUser(sellerAddress).then((data) => {
-                setSellerProfile((prevProfile) => ({
-                    ...prevProfile,
-                    lastSeen: data,
-                }));
-            })
-        }).then(() => setIsLoading(false));
-    }
+        } catch (error) {
+            console.error("Error loading data:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
 
     const handleBuyItemWithModerator = async (moderator, address) => {
         const contractParams = {
