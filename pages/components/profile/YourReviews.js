@@ -3,6 +3,7 @@ import {useMoralis} from "react-moralis";
 import {fetchAllReviewsByUser} from "@/pages/utils/apolloService";
 import Link from 'next/link';
 import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
+import {renderStars} from "@/pages/utils/utils";
 
 const YourReviews = () => {
     const [reviews, setReviews] = useState([]);
@@ -12,15 +13,6 @@ const YourReviews = () => {
     useEffect(() => {
         fetchAllReviewsByUser(account).then((reviews) => setReviews(reviews)).then(() => setIsLoading(false));
     }, [account]);
-
-    const renderStars = (rating) => {
-        const totalStars = 5;
-        return Array.from({length: totalStars}, (_, i) => (
-            <span key={i} className={`text-xl ${i < rating ? 'text-yellow-500' : 'text-gray-300'}`}>
-                {i < rating ? '★' : '☆'}
-            </span>
-        ));
-    };
 
     return (
         <>

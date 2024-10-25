@@ -428,9 +428,9 @@ export const fetchAllTransactionsByUser = async (userAddress) => {
 
     try {
         const [buyerResult, sellerResult, moderatorResult] = await Promise.all([
-            apolloClient.query({ query: getTransactionsByBuyer, variables:  {user: userAddress}, fetchPolicy: 'network-only' }),
-            apolloClient.query({ query: getTransactionsBySeller, variables:  {user: userAddress}, fetchPolicy: 'network-only' }),
-            apolloClient.query({ query: getTransactionsByModerator, variables:  {user: userAddress}, fetchPolicy: 'network-only' }),
+            apolloClient.query({query: getTransactionsByBuyer, variables: {user: userAddress}, fetchPolicy: 'network-only'}),
+            apolloClient.query({query: getTransactionsBySeller, variables: {user: userAddress}, fetchPolicy: 'network-only'}),
+            apolloClient.query({query: getTransactionsByModerator, variables: {user: userAddress}, fetchPolicy: 'network-only'}),
         ]);
 
         const allTransactions = [
@@ -487,7 +487,46 @@ export const checkReviewExistence = async (from, to, itemId) => {
     }
 };
 
+export const getReviewsGivenByUserForItem = async (from, itemId) => {
+    if (!from || !itemId) {
+        return false;
+    }
 
+    const reviewsGivenByUserForItem = gql`
+    query CheckReviewExistence($from: Bytes!, $itemId: String!) {
+      reviews(
+        where: { from: $from, itemId: $itemId }
+      ) {
+        id
+        from
+        content
+        rating
+        itemId
+        user {
+          id
+        }
+      }
+    }
+  `;
+
+    try {
+        const {data} = await apolloClient.query({
+            query: reviewsGivenByUserForItem,
+            variables: {
+                from: from,
+                itemId: itemId,
+            },
+            fetchPolicy: 'network-only', // ensures fresh data
+        });
+
+        return data.reviews || [];
+    } catch (error) {
+        console.error("Error checking review existence", error);
+        return false;
+    }
+};
+
+// reviews that were given to this user
 export const fetchAllReviewsByUser = async (userAddress) => {
     if (!userAddress) {
         return [];

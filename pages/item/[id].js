@@ -66,6 +66,7 @@ export default function ItemPage() {
         loadData();
     }, [account]);
 
+    // todo optimize function
     const loadData = async () => {
         let sellerAddress;
         fetchItemById(id).then((data) => {

@@ -1,6 +1,6 @@
 import Image from "next/image";
 import {useRouter} from "next/router";
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useMoralis, useWeb3Contract} from "react-moralis";
 import {Button, useNotification} from "web3uikit";
 import escrowAbi from "../../constants/Escrow.json";
@@ -8,14 +8,15 @@ import usersAbi from "../../constants/Users.json";
 import {ethers} from "ethers";
 import {useSelector} from "react-redux";
 import ChatPopup from "@/pages/components/chat/ChatPopup";
-import {fetchItemById, fetchTransactionByItemId} from "@/pages/utils/apolloService";
-import {handleNotification} from "@/pages/utils/utils";
+import {fetchItemById, fetchTransactionByItemId, getReviewsGivenByUserForItem} from "@/pages/utils/apolloService";
+import {handleNotification, renderStars} from "@/pages/utils/utils";
 import ApproveItemModal from "@/pages/components/modals/ApproveItemModal";
 import DisputeItemModal from "@/pages/components/modals/DisputeItemModal";
 import FinalizeTransactionModal from "@/pages/components/modals/FinalizeTransactionModal";
 import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
 import {getOrderAddress} from "@/pages/utils/firebaseService";
 import ReviewItemModal from "@/pages/components/modals/ReviewItemModal";
+import Link from "next/link";
 
 export default function OrderPage() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -26,7 +27,7 @@ export default function OrderPage() {
     const [item, setItem] = useState({});
 
     const [title, setTitle] = useState("");
-    const [price, setPrice] = useState("");
+    const [price, setPrice] = useState(0);
     const [description, setDescription] = useState("");
     const [photosIPFSHashes, setPhotosIPFSHashes] = useState([]);
     const [itemStatus, setItemStatus] = useState("");
@@ -55,10 +56,13 @@ export default function OrderPage() {
     const [address, setAddress] = useState({});
     const [roleInTransaction, setRoleInTransaction] = useState("");
 
+    const [givenReviewsByUser, setGivenReviewsByUser] = useState({});
+
     const dispatch = useNotification();
 
     const [isLoading, setIsLoading] = useState(true);
 
+    // todo add seller's/buyer's data like you have in item
     useEffect(() => {
         // Wrap all fetches in a Promise.all to handle them together
         const fetchData = async () => {
@@ -67,10 +71,11 @@ export default function OrderPage() {
                 setIsLoading(true);
 
                 // Fetch all data simultaneously
-                const [itemData, transactionData, orderAddressData] = await Promise.all([
+                const [itemData, transactionData, orderAddressData, reviewsData] = await Promise.all([
                     fetchItemById(id),
                     fetchTransactionByItemId(id),
                     getOrderAddress(id),
+                    getReviewsGivenByUserForItem(account, id)
                 ]);
 
                 // Handle item data
@@ -120,7 +125,8 @@ export default function OrderPage() {
                 // Handle order address
                 setAddress(orderAddressData);
 
-                //todo - get all reviews for this item and check if current user has any left to give
+                // Handle reviews given by account user for this item
+                setGivenReviewsByUser(reviewsData);
 
             } catch (error) {
                 console.error("Error fetching data: ", error);
@@ -384,8 +390,29 @@ export default function OrderPage() {
                                     />
                                 )}
 
-                                {/*todo - display all reviews for this item*/}
                             </div>
+
+                            <div className="mt-10 p-4 border-t border-gray-200">
+                                <h2 className="text-2xl font-semibold mb-4">Reviews you gave for this order</h2>
+                                {
+                                    givenReviewsByUser.map((review, index) => (
+                                        <div key={index}
+                                             className="p-6 border border-gray-200 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 flex items-center"> {/* Added items-center */}
+                                            <div className="flex-grow">
+                                                <div className="flex justify-between items-center mb-2">
+                                                <span className="text-gray-600 font-medium">
+                                                    Review for {review.user.id === transaction.seller ? "seller" : review.user.id === transaction.buyer ? "buyer" : "moderator"}
+                                                </span>
+                                                    <div className="flex">{renderStars(review.rating)}</div>
+                                                </div>
+                                                <p className="text-gray-700">{review.content}</p>
+                                                <p className="text-sm text-gray-400 mt-2">Reviewed on: {new Date(review.blockTimestamp * 1000).toDateString()}</p>
+                                            </div>
+                                        </div>
+                                    ))
+                                }
+                            </div>
+
                         </div>
                     ) : (
                         <div className="m-4 italic text-center w-full">Please connect your wallet first to use the
