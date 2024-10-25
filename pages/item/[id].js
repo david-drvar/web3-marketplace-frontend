@@ -10,8 +10,8 @@ import DeleteItemModal from "../components/modals/DeleteItemModal";
 import {useSelector} from "react-redux";
 import BuyItemModal from "@/pages/components/modals/BuyItemModal";
 import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
-import {addAddressToOrder} from "@/pages/utils/firebaseService";
-import {fetchItemById} from "@/pages/utils/apolloService";
+import {addAddressToOrder, getLastSeenForUser} from "@/pages/utils/firebaseService";
+import {fetchAllReviewsByUser, fetchItemById, fetchUserByAddress} from "@/pages/utils/apolloService";
 import ChatPopup from "@/pages/components/chat/ChatPopup";
 
 export default function ItemPage() {
@@ -23,7 +23,7 @@ export default function ItemPage() {
     const [item, setItem] = useState({});
 
     const [title, setTitle] = useState("");
-    const [price, setPrice] = useState("");
+    const [price, setPrice] = useState(0);
     const [seller, setSeller] = useState("");
     const [description, setDescription] = useState("");
     const [photosIPFSHashes, setPhotosIPFSHashes] = useState([]);
@@ -49,14 +49,26 @@ export default function ItemPage() {
 
     const dispatch = useNotification();
 
+    const [sellerProfile, setSellerProfile] = useState({
+        avatarHash: "",
+        username: "",
+        firstName: "",
+        lastName: "",
+        lastSeen: "",
+        averageRating: 0,
+        numberOfReviews: 0,
+    });
+
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        fetchItem();
+        loadData();
     }, [account]);
 
-    const fetchItem = async () => {
+    const loadData = async () => {
+        let sellerAddress;
         fetchItemById(id).then((data) => {
+            sellerAddress = data[0].seller;
             setItem(data[0]);
             setTitle(data[0].title);
             setDescription(data[0].description);
@@ -71,6 +83,33 @@ export default function ItemPage() {
             setBlockTimestamp(data[0].blockTimestamp);
             setSeller(data[0].seller);
             setIsAccountSeller(data[0].seller === account || data[0].seller === undefined)
+        }).then(() => {
+            fetchUserByAddress(sellerAddress).then((data) => {
+                setSellerProfile((prevProfile) => ({
+                    ...prevProfile,
+                    username: data.username,
+                    firstName: data.firstName,
+                    lastName: data.lastName,
+                    avatarHash: data.avatarHash,
+                }));
+            });
+            fetchAllReviewsByUser(sellerAddress).then((reviews) => {
+                let totalGrade = 0;
+                reviews.forEach((review) =>
+                    totalGrade += review.rating
+                );
+                setSellerProfile((prevProfile) => ({
+                    ...prevProfile,
+                    averageRating: totalGrade / reviews.length,
+                    numberOfReviews: reviews.length,
+                }));
+            });
+            getLastSeenForUser(sellerAddress).then((data) => {
+                setSellerProfile((prevProfile) => ({
+                    ...prevProfile,
+                    lastSeen: data,
+                }));
+            })
         }).then(() => setIsLoading(false));
     }
 
@@ -179,7 +218,7 @@ export default function ItemPage() {
                             country={country}
 
                             onClose={() => {
-                                fetchItem().then(() => setShowUpdateModal(false))
+                                loadData().then(() => setShowUpdateModal(false))
 
                             }}
                             setPrice={setPrice}
@@ -215,6 +254,21 @@ export default function ItemPage() {
                             <p className="text-lg mb-4">Subcategory: {subcategory}</p>
                             <p className="text-lg mb-4">Country: {country}</p>
                         </div>
+
+                        { /* only show seller's data for user's that are not the item seller */
+                            account !== item.seller &&
+                            <div className="text-center">
+                                <h1 className="text-2xl font-bold mb-4">Seller's profile</h1>
+                                <p className="text-lg mb-4">{sellerProfile.username}</p>
+                                <p className="text-lg mb-4">{sellerProfile.firstName}</p>
+                                <p className="text-lg mb-4">{sellerProfile.lastName}</p>
+                                <p className="text-lg mb-4">{sellerProfile.avatarHash}</p>
+                                <p className="text-lg mb-4">{sellerProfile.averageRating}</p>
+                                <p className="text-lg mb-4">{sellerProfile.numberOfReviews}</p>
+                                <p className="text-lg mb-4">{new Date(sellerProfile.lastSeen).toLocaleString()}</p>
+                            </div>
+                        }
+
 
                         <div className="grid grid-cols-2 gap-4 mt-6">
                             {photosIPFSHashes.map((photoHash) => (
