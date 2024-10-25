@@ -1,6 +1,6 @@
 import Image from "next/image";
 import {useRouter} from "next/router";
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useMoralis, useWeb3Contract} from "react-moralis";
 import {Button, useNotification} from "web3uikit";
 import marketplaceAbi from "../../constants/Marketplace.json";
@@ -13,6 +13,7 @@ import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
 import {addAddressToOrder, getLastSeenForUser} from "@/pages/utils/firebaseService";
 import {fetchAllReviewsByUser, fetchItemById, fetchUserByAddress} from "@/pages/utils/apolloService";
 import ChatPopup from "@/pages/components/chat/ChatPopup";
+import Link from "next/link";
 
 export default function ItemPage() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -266,6 +267,13 @@ export default function ItemPage() {
                                 <p className="text-lg mb-4">{sellerProfile.averageRating}</p>
                                 <p className="text-lg mb-4">{sellerProfile.numberOfReviews}</p>
                                 <p className="text-lg mb-4">{new Date(sellerProfile.lastSeen).toLocaleString()}</p>
+                                <p className="text-lg mb-4">
+                                    <Link href={`/profile/${item.seller}`} passHref>
+                                                    <span className="text-blue-500 hover:underline font-medium">
+                                                        View profile
+                                                    </span>
+                                    </Link>
+                                </p>
                             </div>
                         }
 
