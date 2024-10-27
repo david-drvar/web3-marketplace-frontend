@@ -11,22 +11,23 @@ export default function ReviewItemModal({isVisible, onClose, onSubmit, transacti
     const [toSelected, setToSelected] = useState("select review receiver");
 
     useEffect(() => {
+        let toRolesLocal = []
         if (account === transaction.buyer) {
-            addToRoleIfReviewDoesNotExist("seller")
-            addToRoleIfReviewDoesNotExist("moderator")
+            addToRoleIfReviewDoesNotExist("seller", toRolesLocal)
+            addToRoleIfReviewDoesNotExist("moderator", toRolesLocal)
         } else if (account === transaction.seller) {
-            addToRoleIfReviewDoesNotExist("buyer")
-            addToRoleIfReviewDoesNotExist("moderator")
+            addToRoleIfReviewDoesNotExist("buyer", toRolesLocal)
+            addToRoleIfReviewDoesNotExist("moderator", toRolesLocal)
         } else if (account === transaction.moderator) {
-            addToRoleIfReviewDoesNotExist("buyer")
-            addToRoleIfReviewDoesNotExist("seller")
+            addToRoleIfReviewDoesNotExist("buyer", toRolesLocal)
+            addToRoleIfReviewDoesNotExist("seller", toRolesLocal)
         }
-    }, [])
+        setToRoles(toRolesLocal);
+    }, [account])
 
-    // todo - fix - it gets added twice
-    const addToRoleIfReviewDoesNotExist = (role) => {
-        if (!reviews.some(review => review.from === account && review.to === transaction[role]) && !toRoles.includes(role))
-            setToRoles((prevRoles) => [...prevRoles, role]);
+    const addToRoleIfReviewDoesNotExist = (role, toRolesLocal) => {
+        if (!reviews.some(review => review.from === account && review.user.id === transaction[role]) && !toRolesLocal.includes(role))
+            toRolesLocal.push(role)
     }
 
     const handleSubmit = () => {

@@ -197,7 +197,7 @@ export default function OrderPage() {
             params: contractParams,
             onSuccess: (tx) => {
                 handleNotification(dispatch, "info", "Transaction submitted. Waiting for confirmations.", "Waiting for confirmations");
-                tx.wait().then((finalTx) => {
+                tx.wait().then((_) => {
                     handleNotification(dispatch, "success", "Item approved successfully", "Item confirmed");
                     setApproveButtonDisabled(true);
                     setShowApproveModal(false);
@@ -222,7 +222,7 @@ export default function OrderPage() {
             params: contractParams,
             onSuccess: (tx) => {
                 handleNotification(dispatch, "info", "Transaction submitted. Waiting for confirmations.", "Waiting for confirmations");
-                tx.wait().then((finalTx) => {
+                tx.wait().then((_) => {
                     handleNotification(dispatch, "success", "Item disputed successfully", "Item disputed");
                     setDisputeButtonDisabled(true);
                     setShowDisputeModal(false);
@@ -249,9 +249,8 @@ export default function OrderPage() {
             params: contractParams,
             onSuccess: (tx) => {
                 handleNotification(dispatch, "info", "Transaction submitted. Waiting for confirmations.", "Waiting for confirmations");
-                tx.wait().then((finalTx) => {
+                tx.wait().then((_) => {
                     handleNotification(dispatch, "success", "Item finalized successfully", "Item finalized");
-                    // setDisputeButtonDisabled(true);
                     setShowFinalizeModal(false);
                 })
             },
@@ -280,14 +279,18 @@ export default function OrderPage() {
             params: contractParams,
             onSuccess: (tx) => {
                 handleNotification(dispatch, "info", "Review submitted. Waiting for confirmations.", "Waiting for confirmations");
-                tx.wait().then((finalTx) => {
+                tx.wait().then((_) => {
                     handleNotification(dispatch, "success", "User reviewed successfully", "Review finalized");
-                    // setDisputeButtonDisabled(true);
                     setShowReviewItemModal(false);
+                    updateReviews();
                 })
             },
             onError: (error) => handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Finalize error"),
         });
+    }
+
+    const updateReviews = () => {
+        fetchAllReviewsForItem(id).then((data) => setReviews(data))
     }
 
     return (
