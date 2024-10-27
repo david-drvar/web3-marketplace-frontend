@@ -62,6 +62,7 @@ export default function OrderPage() {
     const dispatch = useNotification();
 
     const [isLoading, setIsLoading] = useState(true);
+    const [refreshPage, setRefreshPage] = useState(0);
 
     useEffect(() => {
         // Wrap all fetches in a Promise.all to handle them together
@@ -141,7 +142,7 @@ export default function OrderPage() {
         };
 
         fetchData();
-    }, [id, account]); // Add account to dependency array if used in conditions
+    }, [id, account, refreshPage]); // Add account to dependency array if used in conditions
 
     const loadParticipantsProfiles = async (transactionData) => {
         let participant1Address, participant2Address, participant1Role, participant2Role;
@@ -282,16 +283,13 @@ export default function OrderPage() {
                 tx.wait().then((_) => {
                     handleNotification(dispatch, "success", "User reviewed successfully", "Review finalized");
                     setShowReviewItemModal(false);
-                    updateReviews();
+                    setRefreshPage(refreshPage + 1);
                 })
             },
             onError: (error) => handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Finalize error"),
         });
     }
 
-    const updateReviews = () => {
-        fetchAllReviewsForItem(id).then((data) => setReviews(data))
-    }
 
     return (
         <>
@@ -394,13 +392,22 @@ export default function OrderPage() {
                                 <p className="mb-4">avg rating - {participant1Profile.averageRating}</p>
                                 <p className="mb-4">num reviews - {participant1Profile.numberOfReviews}</p>
 
-                                <h2 className="text-2xl font-semibold mb-4 mt-10">{participant2Profile.role}</h2>
-                                <p className="mb-4">{participant2Profile.firstName + " " + participant2Profile.lastName}</p>
-                                <p className="mb-4">{participant2Profile.username}</p>
-                                <p className="mb-4">{participant2Profile.avatarHash}</p>
-                                <p className="mb-4">{new Date(participant2Profile.lastSeen).toLocaleString()}</p>
-                                <p className="mb-4">avg rating - {participant2Profile.averageRating}</p>
-                                <p className="mb-4">num reviews - {participant2Profile.numberOfReviews}</p>
+                                {
+                                    /*
+                                       for transaction that don't have moderator there is nothing to display. only participant2
+                                       can be moderator so there is no need to check for the participant1
+                                    */
+                                    participant2Profile.firstName !== undefined &&
+                                    <>
+                                        <h2 className="text-2xl font-semibold mb-4 mt-10">{participant2Profile.role}</h2>
+                                        <p className="mb-4">{participant2Profile.firstName + " " + participant2Profile.lastName}</p>
+                                        <p className="mb-4">{participant2Profile.username}</p>
+                                        <p className="mb-4">{participant2Profile.avatarHash}</p>
+                                        <p className="mb-4">{new Date(participant2Profile.lastSeen).toLocaleString()}</p>
+                                        <p className="mb-4">avg rating - {participant2Profile.averageRating}</p>
+                                        <p className="mb-4">num reviews - {participant2Profile.numberOfReviews}</p>
+                                    </>
+                                }
 
 
                             </div>
