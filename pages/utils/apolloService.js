@@ -1,4 +1,5 @@
 import {ApolloClient, gql, InMemoryCache} from "@apollo/client";
+import {getLastSeenForUser} from "@/pages/utils/firebaseService";
 
 export const apolloClient = new ApolloClient({
     cache: new InMemoryCache(),
@@ -276,6 +277,52 @@ export const fetchUserByAddress = async (userAddress) => {
     }
 }
 
+
+export const fetchUserProfileByAddress = async (userAddress) => {
+    if (!userAddress) {
+        return [];
+    }
+
+    let userProfile = {
+        avatarHash: "",
+        username: "",
+        firstName: "",
+        lastName: "",
+        lastSeen: "",
+        averageRating: 0,
+        numberOfReviews: 0,
+    };
+
+    try {
+
+
+        const [userData, reviews, lastSeen] = await Promise.all([
+            fetchUserByAddress(userAddress),
+            fetchAllReviewsByUser(userAddress),
+            getLastSeenForUser(userAddress),
+        ]);
+
+
+        const totalRating = reviews.reduce((total, review) => total + review.rating, 0);
+        const averageRating = reviews.length ? totalRating / reviews.length : 0;
+
+        userProfile = {
+            username: userData.username,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            avatarHash: userData.avatarHash,
+            averageRating,
+            numberOfReviews: reviews.length,
+            lastSeen,
+        };
+
+        return userProfile;
+    } catch (error) {
+        console.error("Error fetching user profile", error);
+        return userProfile;
+    }
+}
+
 export const fetchTransactionByItemId = async (itemId) => {
     if (!itemId) {
         return [];
@@ -538,8 +585,6 @@ export const fetchAllReviewsByUser = async (userAddress) => {
                 };
             })
         );
-
-        console.log("reviewsWithDetails", reviewsWithDetails)
 
         return reviewsWithDetails || [];
 

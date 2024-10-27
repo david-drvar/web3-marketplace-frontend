@@ -11,7 +11,7 @@ import {useSelector} from "react-redux";
 import BuyItemModal from "@/pages/components/modals/BuyItemModal";
 import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
 import {addAddressToOrder, getLastSeenForUser} from "@/pages/utils/firebaseService";
-import {fetchAllReviewsByUser, fetchItemById, fetchUserByAddress} from "@/pages/utils/apolloService";
+import {fetchAllReviewsByUser, fetchItemById, fetchUserByAddress, fetchUserProfileByAddress} from "@/pages/utils/apolloService";
 import ChatPopup from "@/pages/components/chat/ChatPopup";
 import Link from "next/link";
 
@@ -88,25 +88,9 @@ export default function ItemPage() {
             setSeller(sellerAddress);
             setIsAccountSeller(sellerAddress === account || !sellerAddress);
 
-            const [userData, reviews, lastSeen] = await Promise.all([
-                fetchUserByAddress(sellerAddress),
-                fetchAllReviewsByUser(sellerAddress),
-                getLastSeenForUser(sellerAddress),
-            ]);
+            const sellerProfileData = await fetchUserProfileByAddress(sellerAddress);
 
-            const totalRating = reviews.reduce((total, review) => total + review.rating, 0);
-            const averageRating = reviews.length ? totalRating / reviews.length : 0;
-
-            setSellerProfile({
-                ...sellerProfile,
-                username: userData.username,
-                firstName: userData.firstName,
-                lastName: userData.lastName,
-                avatarHash: userData.avatarHash,
-                averageRating,
-                numberOfReviews: reviews.length,
-                lastSeen,
-            });
+            setSellerProfile(sellerProfileData);
         } catch (error) {
             console.error("Error loading data:", error);
         } finally {

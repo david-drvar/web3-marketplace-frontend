@@ -8,7 +8,7 @@ import usersAbi from "../../constants/Users.json";
 import {ethers} from "ethers";
 import {useSelector} from "react-redux";
 import ChatPopup from "@/pages/components/chat/ChatPopup";
-import {fetchAllReviewsForItem, fetchItemById, fetchTransactionByItemId} from "@/pages/utils/apolloService";
+import {fetchAllReviewsForItem, fetchItemById, fetchTransactionByItemId, fetchUserProfileByAddress} from "@/pages/utils/apolloService";
 import {handleNotification, renderStars} from "@/pages/utils/utils";
 import ApproveItemModal from "@/pages/components/modals/ApproveItemModal";
 import DisputeItemModal from "@/pages/components/modals/DisputeItemModal";
@@ -56,12 +56,13 @@ export default function OrderPage() {
     const [roleInTransaction, setRoleInTransaction] = useState("");
 
     const [reviews, setReviews] = useState([]);
+    const [participant1Profile, setParticipant1Profile] = useState({});
+    const [participant2Profile, setParticipant2Profile] = useState({});
 
     const dispatch = useNotification();
 
     const [isLoading, setIsLoading] = useState(true);
 
-    // todo add seller's/buyer's data like you have in item
     useEffect(() => {
         // Wrap all fetches in a Promise.all to handle them together
         const fetchData = async () => {
@@ -127,6 +128,9 @@ export default function OrderPage() {
                 // Handle reviews given by account user for this item
                 setReviews(reviewsData);
 
+                // Handle participants' profiles
+                await loadParticipantsProfiles(transactionData);
+
             } catch (error) {
                 console.error("Error fetching data: ", error);
             } finally {
@@ -137,6 +141,55 @@ export default function OrderPage() {
 
         fetchData();
     }, [id, account]); // Add account to dependency array if used in conditions
+
+    const loadParticipantsProfiles = async (transactionData) => {
+        if (roleInTransaction === "Buyer") {
+            const [participant1ProfileData, participant2ProfileData] = await Promise.all([
+                fetchUserProfileByAddress(transactionData.seller),
+                fetchUserProfileByAddress(transactionData.moderator),
+            ]);
+            setParticipant1Profile({
+                ...participant1Profile,
+                ...participant1ProfileData,
+                role: "Seller"
+            });
+            setParticipant2Profile({
+                ...participant2Profile,
+                ...participant2ProfileData,
+                role: "Moderator"
+            });
+        } else if (roleInTransaction === "Seller") {
+            const [participant1ProfileData, participant2ProfileData] = await Promise.all([
+                fetchUserProfileByAddress(transactionData.buyer),
+                fetchUserProfileByAddress(transactionData.moderator),
+            ]);
+            setParticipant1Profile({
+                ...participant1Profile,
+                ...participant1ProfileData,
+                role: "Buyer"
+            });
+            setParticipant2Profile({
+                ...participant2Profile,
+                ...participant2ProfileData,
+                role: "Moderator"
+            });
+        } else if (roleInTransaction === "Moderator") {
+            const [participant1ProfileData, participant2ProfileData] = await Promise.all([
+                fetchUserProfileByAddress(transactionData.seller),
+                fetchUserProfileByAddress(transactionData.buyer),
+            ]);
+            setParticipant1Profile({
+                ...participant1Profile,
+                ...participant1ProfileData,
+                role: "Seller"
+            });
+            setParticipant2Profile({
+                ...participant2Profile,
+                ...participant2ProfileData,
+                role: "Buyer"
+            });
+        }
+    }
 
 
     const handleApprove = async () => {
@@ -340,6 +393,24 @@ export default function OrderPage() {
                                 <p className="mb-4"><strong>Disputed by seller:</strong> {transaction.disputedBySeller ? "Yes" : "No"}</p>
 
                                 <p><strong>Is completed:</strong> {transaction.isCompleted ? "Yes" : "No"}</p>
+
+                                <h2 className="text-2xl font-semibold mb-4 mt-10">{participant1Profile.role}</h2>
+                                <p className="mb-4">{participant1Profile.firstName + " " + participant1Profile.lastName}</p>
+                                <p className="mb-4">{participant1Profile.username}</p>
+                                <p className="mb-4">{participant1Profile.avatarHash}</p>
+                                <p className="mb-4">{new Date(participant1Profile.lastSeen).toLocaleString()}</p>
+                                <p className="mb-4">avg rating - {participant1Profile.averageRating}</p>
+                                <p className="mb-4">num reviews - {participant1Profile.numberOfReviews}</p>
+
+                                <h2 className="text-2xl font-semibold mb-4 mt-10">{participant2Profile.role}</h2>
+                                <p className="mb-4">{participant2Profile.firstName + " " + participant2Profile.lastName}</p>
+                                <p className="mb-4">{participant2Profile.username}</p>
+                                <p className="mb-4">{participant2Profile.avatarHash}</p>
+                                <p className="mb-4">{new Date(participant2Profile.lastSeen).toLocaleString()}</p>
+                                <p className="mb-4">avg rating - {participant2Profile.averageRating}</p>
+                                <p className="mb-4">num reviews - {participant2Profile.numberOfReviews}</p>
+
+
                             </div>
 
                             {/* Buttons */}
