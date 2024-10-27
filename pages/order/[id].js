@@ -78,6 +78,9 @@ export default function OrderPage() {
                     fetchAllReviewsForItem(id)
                 ]);
 
+                // Handle participants' profiles
+                await loadParticipantsProfiles(transactionData);
+
                 // Handle item data
                 const item = itemData[0];
                 setItem(item);
@@ -128,8 +131,6 @@ export default function OrderPage() {
                 // Handle reviews given by account user for this item
                 setReviews(reviewsData);
 
-                // Handle participants' profiles
-                await loadParticipantsProfiles(transactionData);
 
             } catch (error) {
                 console.error("Error fetching data: ", error);
@@ -143,54 +144,42 @@ export default function OrderPage() {
     }, [id, account]); // Add account to dependency array if used in conditions
 
     const loadParticipantsProfiles = async (transactionData) => {
-        if (roleInTransaction === "Buyer") {
-            const [participant1ProfileData, participant2ProfileData] = await Promise.all([
-                fetchUserProfileByAddress(transactionData.seller),
-                fetchUserProfileByAddress(transactionData.moderator),
-            ]);
-            setParticipant1Profile({
-                ...participant1Profile,
-                ...participant1ProfileData,
-                role: "Seller"
-            });
-            setParticipant2Profile({
-                ...participant2Profile,
-                ...participant2ProfileData,
-                role: "Moderator"
-            });
-        } else if (roleInTransaction === "Seller") {
-            const [participant1ProfileData, participant2ProfileData] = await Promise.all([
-                fetchUserProfileByAddress(transactionData.buyer),
-                fetchUserProfileByAddress(transactionData.moderator),
-            ]);
-            setParticipant1Profile({
-                ...participant1Profile,
-                ...participant1ProfileData,
-                role: "Buyer"
-            });
-            setParticipant2Profile({
-                ...participant2Profile,
-                ...participant2ProfileData,
-                role: "Moderator"
-            });
-        } else if (roleInTransaction === "Moderator") {
-            const [participant1ProfileData, participant2ProfileData] = await Promise.all([
-                fetchUserProfileByAddress(transactionData.seller),
-                fetchUserProfileByAddress(transactionData.buyer),
-            ]);
-            setParticipant1Profile({
-                ...participant1Profile,
-                ...participant1ProfileData,
-                role: "Seller"
-            });
-            setParticipant2Profile({
-                ...participant2Profile,
-                ...participant2ProfileData,
-                role: "Buyer"
-            });
-        }
-    }
+        let participant1Address, participant2Address, participant1Role, participant2Role;
 
+        if (account === transactionData.buyer) {
+            participant1Address = transactionData.seller;
+            participant2Address = transactionData.moderator;
+            participant1Role = "Seller";
+            participant2Role = "Moderator";
+        } else if (account === transactionData.seller) {
+            participant1Address = transactionData.buyer;
+            participant2Address = transactionData.moderator;
+            participant1Role = "Buyer";
+            participant2Role = "Moderator";
+        } else if (account === transactionData.moderator) {
+            participant1Address = transactionData.seller;
+            participant2Address = transactionData.buyer;
+            participant1Role = "Seller";
+            participant2Role = "Buyer";
+        }
+
+        const [participant1ProfileData, participant2ProfileData] = await Promise.all([
+            fetchUserProfileByAddress(participant1Address),
+            fetchUserProfileByAddress(participant2Address),
+        ]);
+
+        setParticipant1Profile({
+            ...participant1Profile,
+            ...participant1ProfileData,
+            role: participant1Role
+        });
+
+        setParticipant2Profile({
+            ...participant2Profile,
+            ...participant2ProfileData,
+            role: participant2Role
+        });
+    };
 
     const handleApprove = async () => {
         const contractParams = {
