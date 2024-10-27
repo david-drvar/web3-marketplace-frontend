@@ -1,10 +1,9 @@
 import {useEffect, useState} from "react";
-import {Modal, Input, Button, Notification, Icon, Tooltip} from "web3uikit";
+import {Modal, Input} from "web3uikit";
 import {Star} from "@web3uikit/icons";
 import {useMoralis} from "react-moralis";
-import {checkReviewExistence} from "@/pages/utils/apolloService";
 
-export default function ReviewItemModal({isVisible, onClose, onSubmit, transaction}) {
+export default function ReviewItemModal({isVisible, onClose, onSubmit, transaction, reviews}) {
     const {account} = useMoralis();
     const [reviewText, setReviewText] = useState("");
     const [rating, setRating] = useState(0);
@@ -24,11 +23,10 @@ export default function ReviewItemModal({isVisible, onClose, onSubmit, transacti
         }
     }, [])
 
+    // todo - fix - it gets added twice
     const addToRoleIfReviewDoesNotExist = (role) => {
-        checkReviewExistence(account, transaction[role], transaction.itemId).then((result) => {
-            if (!result && !toRoles.includes(role))
-                setToRoles((prevRoles) => [...prevRoles, role]);
-        })
+        if (!reviews.some(review => review.from === account && review.to === transaction[role]) && !toRoles.includes(role))
+            setToRoles((prevRoles) => [...prevRoles, role]);
     }
 
     const handleSubmit = () => {

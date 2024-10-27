@@ -487,44 +487,6 @@ export const checkReviewExistence = async (from, to, itemId) => {
     }
 };
 
-export const getReviewsGivenByUserForItem = async (from, itemId) => {
-    if (!from || !itemId) {
-        return false;
-    }
-
-    const reviewsGivenByUserForItem = gql`
-    query CheckReviewExistence($from: Bytes!, $itemId: String!) {
-      reviews(
-        where: { from: $from, itemId: $itemId }
-      ) {
-        id
-        from
-        content
-        rating
-        itemId
-        user {
-          id
-        }
-      }
-    }
-  `;
-
-    try {
-        const {data} = await apolloClient.query({
-            query: reviewsGivenByUserForItem,
-            variables: {
-                from: from,
-                itemId: itemId,
-            },
-            fetchPolicy: 'network-only', // ensures fresh data
-        });
-
-        return data.reviews || [];
-    } catch (error) {
-        console.error("Error checking review existence", error);
-        return false;
-    }
-};
 
 // reviews that were given to this user
 export const fetchAllReviewsByUser = async (userAddress) => {
@@ -580,6 +542,48 @@ export const fetchAllReviewsByUser = async (userAddress) => {
         console.log("reviewsWithDetails", reviewsWithDetails)
 
         return reviewsWithDetails || [];
+
+    } catch (error) {
+        console.error("Error fetching all reviews from user", error);
+        return false;
+    }
+};
+
+
+// reviews that were given to this user
+export const fetchAllReviewsForItem = async (itemId) => {
+    if (!itemId) {
+        return [];
+    }
+
+    const fetchAllReviewsForItem = gql`
+    query FetchAllReviewsByUser($itemId: String!) {
+      reviews(
+        where: { itemId: $itemId }
+      ) {
+        id
+        from
+        content
+        rating
+        itemId
+        blockTimestamp
+        user {
+          id
+        }
+      }
+    }
+  `;
+
+    try {
+        const {data} = await apolloClient.query({
+            query: fetchAllReviewsForItem,
+            variables: {
+                itemId: itemId,
+            },
+            fetchPolicy: 'network-only',
+        });
+
+        return data.reviews || [];
 
     } catch (error) {
         console.error("Error fetching all reviews from user", error);

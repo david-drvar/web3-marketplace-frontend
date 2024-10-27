@@ -8,7 +8,7 @@ import usersAbi from "../../constants/Users.json";
 import {ethers} from "ethers";
 import {useSelector} from "react-redux";
 import ChatPopup from "@/pages/components/chat/ChatPopup";
-import {fetchItemById, fetchTransactionByItemId, getReviewsGivenByUserForItem} from "@/pages/utils/apolloService";
+import {fetchAllReviewsForItem, fetchItemById, fetchTransactionByItemId} from "@/pages/utils/apolloService";
 import {handleNotification, renderStars} from "@/pages/utils/utils";
 import ApproveItemModal from "@/pages/components/modals/ApproveItemModal";
 import DisputeItemModal from "@/pages/components/modals/DisputeItemModal";
@@ -16,7 +16,6 @@ import FinalizeTransactionModal from "@/pages/components/modals/FinalizeTransact
 import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
 import {getOrderAddress} from "@/pages/utils/firebaseService";
 import ReviewItemModal from "@/pages/components/modals/ReviewItemModal";
-import Link from "next/link";
 
 export default function OrderPage() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -56,7 +55,7 @@ export default function OrderPage() {
     const [address, setAddress] = useState({});
     const [roleInTransaction, setRoleInTransaction] = useState("");
 
-    const [givenReviewsByUser, setGivenReviewsByUser] = useState({});
+    const [reviews, setReviews] = useState([]);
 
     const dispatch = useNotification();
 
@@ -75,7 +74,7 @@ export default function OrderPage() {
                     fetchItemById(id),
                     fetchTransactionByItemId(id),
                     getOrderAddress(id),
-                    getReviewsGivenByUserForItem(account, id)
+                    fetchAllReviewsForItem(id)
                 ]);
 
                 // Handle item data
@@ -126,7 +125,7 @@ export default function OrderPage() {
                 setAddress(orderAddressData);
 
                 // Handle reviews given by account user for this item
-                setGivenReviewsByUser(reviewsData);
+                setReviews(reviewsData);
 
             } catch (error) {
                 console.error("Error fetching data: ", error);
@@ -227,7 +226,7 @@ export default function OrderPage() {
             functionName: `createReview`,
             params: {
                 itemId: id,
-                toWhom: transaction[toWhom], //todo
+                toWhom: transaction[toWhom],
                 content: content,
                 rating: rating,
             },
@@ -282,6 +281,7 @@ export default function OrderPage() {
                                 onClose={() => setShowReviewItemModal(false)}
                                 onSubmit={handleSubmitReview}
                                 transaction={transaction}
+                                reviews={reviews}
                             />}
 
                             {showChat &&
@@ -386,7 +386,13 @@ export default function OrderPage() {
                                         text={`Leave a review`}
                                         id="reviewButton"
                                         className="bg-yellow-400 hover:bg-yellow-600"
-                                        onClick={() => setShowReviewItemModal(true)}
+                                        onClick={() => {
+                                            if (reviews.filter(review => review.from === account).length === 2) {
+                                                alert("You already gave all reviews");
+                                                return;
+                                            }
+                                            setShowReviewItemModal(true);
+                                        }}
                                     />
                                 )}
 
@@ -395,21 +401,57 @@ export default function OrderPage() {
                             <div className="mt-10 p-4 border-t border-gray-200">
                                 <h2 className="text-2xl font-semibold mb-4">Reviews you gave for this order</h2>
                                 {
-                                    givenReviewsByUser.map((review, index) => (
-                                        <div key={index}
-                                             className="p-6 border border-gray-200 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 flex items-center"> {/* Added items-center */}
-                                            <div className="flex-grow">
-                                                <div className="flex justify-between items-center mb-2">
+                                    reviews.filter(review => review.from === account).length > 0 ? (
+                                        reviews.filter(review => review.from === account).map((review, index) => (
+                                            <div key={index}
+                                                 className="p-6 border border-gray-200 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 flex items-center"> {/* Added items-center */}
+                                                <div className="flex-grow">
+                                                    <div className="flex justify-between items-center mb-2">
                                                 <span className="text-gray-600 font-medium">
                                                     Review for {review.user.id === transaction.seller ? "seller" : review.user.id === transaction.buyer ? "buyer" : "moderator"}
                                                 </span>
-                                                    <div className="flex">{renderStars(review.rating)}</div>
+                                                        <div className="flex">{renderStars(review.rating)}</div>
+                                                    </div>
+                                                    <p className="text-gray-700">{review.content}</p>
+                                                    <p className="text-sm text-gray-400 mt-2">Reviewed on: {new Date(review.blockTimestamp * 1000).toDateString()}</p>
                                                 </div>
-                                                <p className="text-gray-700">{review.content}</p>
-                                                <p className="text-sm text-gray-400 mt-2">Reviewed on: {new Date(review.blockTimestamp * 1000).toDateString()}</p>
                                             </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-center text-gray-500 italic">
+                                            You haven't submitted any review.
                                         </div>
-                                    ))
+                                    )
+
+                                }
+                            </div>
+
+
+                            <div className="mt-10 p-4 border-t border-gray-200">
+                                <h2 className="text-2xl font-semibold mb-4">Reviews given to you for this order</h2>
+                                {
+                                    reviews.filter(review => review.user.id === account).length > 0 ? (
+                                        reviews.filter(review => review.user.id === account).map((review, index) => (
+                                            <div key={index}
+                                                 className="p-6 border border-gray-200 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 flex items-center"> {/* Added items-center */}
+                                                <div className="flex-grow">
+                                                    <div className="flex justify-between items-center mb-2">
+                                                <span className="text-gray-600 font-medium">
+                                                    Review for {review.user.id === transaction.seller ? "seller" : review.user.id === transaction.buyer ? "buyer" : "moderator"}
+                                                </span>
+                                                        <div className="flex">{renderStars(review.rating)}</div>
+                                                    </div>
+                                                    <p className="text-gray-700">{review.content}</p>
+                                                    <p className="text-sm text-gray-600 mt-2">Reviewed from: {review.from === transaction.seller ? "seller" : review.from === transaction.buyer ? "buyer" : "moderator"} </p>
+                                                    <p className="text-sm text-gray-400 mt-2">Reviewed on: {new Date(review.blockTimestamp * 1000).toDateString()}</p>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-center text-gray-500 italic">
+                                            Other participants haven't submitted any review.
+                                        </div>
+                                    )
                                 }
                             </div>
 
