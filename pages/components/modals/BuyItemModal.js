@@ -27,7 +27,7 @@ export default function BuyItemModal({isVisible, onClose, onBuyItemWithModerator
             okText={"Buy Item"}
             isOkDisabled={(useModerator && !selectedModerator) || selectedAddress === -1}
             onOk={() => {
-                if (selectedModerator)
+                if (useModerator && selectedModerator)
                     onBuyItemWithModerator(selectedModerator, addresses[selectedAddress])
                 else
                     onBuyItemWithoutModerator(addresses[selectedAddress])

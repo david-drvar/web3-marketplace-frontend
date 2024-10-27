@@ -26,7 +26,8 @@ export default function ReviewItemModal({isVisible, onClose, onSubmit, transacti
     }, [account])
 
     const addToRoleIfReviewDoesNotExist = (role, toRolesLocal) => {
-        if (!reviews.some(review => review.from === account && review.user.id === transaction[role]) && !toRolesLocal.includes(role))
+        if (!reviews.some(review => review.from === account && review.user.id === transaction[role]) &&
+            !toRolesLocal.includes(role) && transaction[role] !== "0x00000000")
             toRolesLocal.push(role)
     }
 
