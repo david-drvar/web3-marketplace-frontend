@@ -35,7 +35,9 @@ export default function Home() {
                 (filter.priceRange.min === '' || item.price >= filter.priceRange.min) &&
                 (filter.priceRange.max === '' || item.price <= filter.priceRange.max) &&
                 (filter.condition === '' || item.condition === filter.condition) &&
-                (filter.country === '' || item.country === filter.country)
+                (filter.country === '' || item.country === filter.country) &&
+                (filter.country === '' || item.country === filter.country) &&
+                (filter.currency === '' || item.currency === filter.currency)
             );
         });
         setFilteredItems(filtered);

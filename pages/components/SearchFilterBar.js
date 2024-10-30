@@ -8,11 +8,14 @@ const SearchFilterBar = ({onFilter, onReset}) => {
     const [priceRange, setPriceRange] = useState({min: '', max: ''});
     const [condition, setCondition] = useState('');
     const [country, setCountry] = useState('');
+    const [currency, setCurrency] = useState('');
 
     const categories = getCategories();
     const countries = getCountries();
 
     const subcategories = category ? categories[category] : [];
+
+    const supportedCurrencies = ["ETH", "USDC", "EURC"]
 
     const handleSearch = () => {
         onFilter({
@@ -21,7 +24,8 @@ const SearchFilterBar = ({onFilter, onReset}) => {
             subcategory,
             priceRange,
             condition,
-            country
+            country,
+            currency
         });
     };
 
@@ -32,6 +36,7 @@ const SearchFilterBar = ({onFilter, onReset}) => {
         setPriceRange({min: '', max: ''})
         setCondition('')
         setCountry('')
+        setCurrency('All Currencies')
         onReset();
     }
 
@@ -96,6 +101,18 @@ const SearchFilterBar = ({onFilter, onReset}) => {
                         className="border p-2 rounded-md w-1/2"
                     />
                 </div>
+
+                <select
+                    value={currency}
+                    onChange={(e) => setCurrency(e.target.value)}
+                    className="border p-2 rounded-md flex-grow min-w-[150px]"
+                >
+                    <option value="">Any currency</option>
+                    {supportedCurrencies.map((currency, key) =>
+                        <option value={currency} key={key}>{currency}</option>
+                    )
+                    }
+                </select>
 
                 <select
                     value={condition}
