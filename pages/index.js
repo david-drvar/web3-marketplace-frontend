@@ -44,7 +44,7 @@ export default function Home() {
     const handleReset = () => {
         setFilteredItems(items);
     }
-    
+
     useEffect(() => {
         if (marketplaceContractAddress && usersContractAddress && escrowContractAddress) {
             dispatch(setMarketplaceContractAddress(marketplaceContractAddress))
@@ -76,6 +76,7 @@ export default function Home() {
                                 {filteredItems.map((item) => {
                                     const {
                                         price,
+                                        currency,
                                         title,
                                         description,
                                         seller,
@@ -92,6 +93,7 @@ export default function Home() {
                                             key={id}
                                             id={id}
                                             price={price}
+                                            currency={currency}
                                             title={title}
                                             description={description}
                                             seller={seller}

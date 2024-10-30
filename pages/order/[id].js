@@ -27,6 +27,7 @@ export default function OrderPage() {
 
     const [title, setTitle] = useState("");
     const [price, setPrice] = useState(0);
+    const [currency, setCurrency] = useState("");
     const [description, setDescription] = useState("");
     const [photosIPFSHashes, setPhotosIPFSHashes] = useState([]);
     const [itemStatus, setItemStatus] = useState("");
@@ -88,6 +89,7 @@ export default function OrderPage() {
                 setTitle(item.title);
                 setDescription(item.description);
                 setPrice(item.price);
+                setCurrency(item.currency);
                 setPhotosIPFSHashes(typeof item.photosIPFSHashes === "string" ? [item.photosIPFSHashes] : item.photosIPFSHashes);
                 setBlockTimestamp(item.blockTimestamp);
                 setItemStatus(item.itemStatus);
@@ -338,7 +340,7 @@ export default function OrderPage() {
                                 <div>
                                     <h1 className="text-3xl font-bold text-gray-800 mb-4">{title}</h1>
                                     <p className="text-lg mb-4">{description}</p>
-                                    <p className="text-xl font-semibold text-green-600 mb-2">{isGift ? "FREE" : `Price : ${ethers.utils.formatEther(price)} ETH`}</p>
+                                    <p className="text-xl font-semibold text-green-600 mb-2">{isGift ? "FREE" : `Price : ${currency === "ETH" ? ethers.utils.formatEther(price) : price / 1e6} ${currency}`}</p>
                                     <p className="text-gray-400 mb-2">Date
                                         posted: {new Date(blockTimestamp * 1000).toDateString()}</p>
                                     <p className="text-lg mb-4">Condition: {condition}</p>

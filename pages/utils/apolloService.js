@@ -15,6 +15,7 @@ export const fetchAllItemsListed = async () => {
         buyer
         seller
         price
+        currency
         title
         description
         blockTimestamp
@@ -54,6 +55,7 @@ export const fetchItemById = async (id) => {
         buyer
         seller
         price
+        currency
         title
         description
         blockTimestamp
@@ -93,6 +95,7 @@ export const fetchItemsOrderedByUser = async (userAddress) => {
         buyer
         seller
         price
+        currency
         title
         description
         blockTimestamp
@@ -133,6 +136,7 @@ export const fetchActiveAdsByUser = async (userAddress) => {
         buyer
         seller
         price
+        currency
         title
         description
         blockTimestamp
@@ -175,6 +179,7 @@ export const fetchTransactionsByItemIds = async (itemIds) => {
                 seller
                 moderator
                 price
+                currency
                 moderatorFee
                 buyerApproved
                 sellerApproved
@@ -336,6 +341,7 @@ export const fetchTransactionByItemId = async (itemId) => {
         seller
         moderator
         price
+        currency
         moderatorFee
         buyerApproved
         sellerApproved
@@ -381,6 +387,7 @@ export const fetchAllItemsByModerator = async (moderator) => {
         seller
         moderator
         price
+        currency
         moderatorFee
         buyerApproved
         sellerApproved
@@ -405,6 +412,7 @@ export const fetchAllItemsByModerator = async (moderator) => {
           buyer
           seller
           price
+          currency
           title
           description
           blockTimestamp

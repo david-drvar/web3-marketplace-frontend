@@ -15,7 +15,7 @@ const truncateStr = (fullStr, strLen) => {
     return fullStr.substring(0, frontChars) + separator + fullStr.substring(fullStr.length - backChars);
 };
 
-export default function ItemBox({id, price, title, description, seller, photosIPFSHashes, itemStatus, blockTimestamp, displayOwnedStatus, category, subcategory, condition}) {
+export default function ItemBox({id, price, currency, title, description, seller, photosIPFSHashes, itemStatus, blockTimestamp, displayOwnedStatus, category, subcategory, condition}) {
     const {isWeb3Enabled, account} = useMoralis();
     const [imageURI, setImageURI] = useState("");
 
@@ -73,7 +73,7 @@ export default function ItemBox({id, price, title, description, seller, photosIP
                                 </div>
                                 <div className="flex justify-between items-center mt-4">
                                     <div>
-                                        <p className="font-bold text-gray-800">{price === "0" ? "FREE" : `Price : ${ethers.utils.formatEther(price)} ETH`}</p>
+                                        <p className="font-bold text-gray-800">{price === "0" ? "FREE" : `Price : ${currency === "ETH" ? ethers.utils.formatEther(price) : price / 1e6} ${currency}`}</p>
                                     </div>
                                 </div>
                             </div>

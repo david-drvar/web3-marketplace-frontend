@@ -13,6 +13,7 @@ export default function ListItem() {
 
     const marketplaceContractAddress = useSelector((state) => state.contract["marketplaceContractAddress"]);
     const dispatchRedux = useDispatch();
+    const supportedCurrencies = ["ETH", "USDC", "EURC"]
 
 
     const {runContractFunction} = useWeb3Contract();
@@ -24,6 +25,7 @@ export default function ListItem() {
         description: "",
         price: "",
         condition: "0",
+        currency: "ETH",
         category: "",
         subcategory: "",
         country: "",
@@ -117,22 +119,34 @@ export default function ListItem() {
         console.log("hashes");
         console.log(hashes);
 
+        const finalPrice = formData.currency === "ETH" ? ethers.utils.parseEther(formData.price).toString() : formData.price * 1e6;
+
+        const item = {
+            id: 0,
+            seller: account,
+            title: formData.title,
+            description: formData.description,
+            price: finalPrice,
+            currency: formData.currency,
+            photosIPFSHashes: hashes,
+            itemStatus: 0,
+            condition: formData.condition,
+            category: formData.category,
+            subcategory: formData.subcategory,
+            country: formData.country,
+            isGift: formData.isGift,
+        }
+
         const listOptions = {
             abi: marketplaceAbi,
             contractAddress: marketplaceContractAddress,
             functionName: "listNewItem",
             params: {
-                _title: formData.title,
-                _description: formData.description,
-                _price: ethers.utils.parseEther(formData.price).toString(),
-                photosIPFSHashes: hashes,
-                _condition: formData.condition,
-                _category: formData.category,
-                _subcategory: formData.subcategory,
-                _country: formData.country,
-                _isGift: formData.isGift,
+                item: item
             },
         };
+
+        console.log("listOptions", listOptions)
 
         await runContractFunction({
             params: listOptions,
@@ -259,9 +273,26 @@ export default function ListItem() {
                                 className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
                             />
                         </div>
+
+                        <div>
+                            <label htmlFor="currency" className="block text-sm font-medium text-gray-700">Currency</label>
+                            <select
+                                id="currency"
+                                name="currency"
+                                value={formData.currency}
+                                onChange={handleChange}
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            >
+                                {supportedCurrencies.map((currency, key) =>
+                                    <option value={currency} key={key}>{currency}</option>
+                                )
+                                }
+                            </select>
+                        </div>
+
                         <div>
                             <label htmlFor="price" className="block text-sm font-medium text-gray-700">
-                                Price (ETH)
+                                Price
                             </label>
                             <input
                                 type="number"

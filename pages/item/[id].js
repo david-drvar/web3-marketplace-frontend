@@ -4,6 +4,8 @@ import React, {useEffect, useState} from "react";
 import {useMoralis, useWeb3Contract} from "react-moralis";
 import {Button, useNotification} from "web3uikit";
 import marketplaceAbi from "../../constants/Marketplace.json";
+import usdcAbi from "../../constants/USDCAbi.json";
+import eurcAbi from "../../constants/EURCAbi.json";
 import {ethers} from "ethers";
 import UpdateItemModal from "../components/modals/UpdateItemModal";
 import DeleteItemModal from "../components/modals/DeleteItemModal";
@@ -25,6 +27,7 @@ export default function ItemPage() {
 
     const [title, setTitle] = useState("");
     const [price, setPrice] = useState(0);
+    const [currency, setCurrency] = useState("");
     const [seller, setSeller] = useState("");
     const [description, setDescription] = useState("");
     const [photosIPFSHashes, setPhotosIPFSHashes] = useState([]);
@@ -46,6 +49,9 @@ export default function ItemPage() {
     const [isAccountSeller, setIsAccountSeller] = useState(false);
     const {runContractFunction} = useWeb3Contract();
     const marketplaceContractAddress = useSelector((state) => state.contract["marketplaceContractAddress"]);
+    const escrowContractAddress = useSelector((state) => state.contract["escrowContractAddress"]);
+    const usdcContractAddress = useSelector((state) => state.contract["usdcContractAddress"]);
+    const eurcContractAddress = useSelector((state) => state.contract["eurcContractAddress"]);
 
 
     const dispatch = useNotification();
@@ -77,6 +83,7 @@ export default function ItemPage() {
             setTitle(itemData[0].title);
             setDescription(itemData[0].description);
             setPrice(itemData[0].price);
+            setCurrency(itemData[0].currency);
             setPhotosIPFSHashes(Array.isArray(itemData[0].photosIPFSHashes) ? itemData[0].photosIPFSHashes : [itemData[0].photosIPFSHashes]);
             setItemStatus(itemData[0].itemStatus);
             setCondition(itemData[0].condition);
@@ -100,11 +107,16 @@ export default function ItemPage() {
 
 
     const handleBuyItemWithModerator = async (moderator, address) => {
+        await handleApprovals(marketplaceContractAddress);
+        await handleApprovals(escrowContractAddress);
+
+        const finalPrice = currency === "ETH" ? price : 0;
+
         const contractParams = {
             abi: marketplaceAbi,
             contractAddress: marketplaceContractAddress,
             functionName: "buyItem",
-            msgValue: price,
+            msgValue: finalPrice,
             params: {
                 sellerAddress: seller,
                 id: id,
@@ -127,12 +139,70 @@ export default function ItemPage() {
         });
     }
 
+    const handleApprovals = async (whichContractToAllowAddress) => {
+        if (currency !== "ETH") {
+            const approvalAmount = price * 1e6;
+
+            const tokenAddress = currency === "USDC" ? usdcContractAddress : eurcContractAddress;
+            const tokenAbi = currency === "USDC" ? usdcAbi : eurcAbi;
+
+            // 1. check if allowance is enough
+            const allowanceParams = {
+                abi: tokenAbi,
+                contractAddress: tokenAddress,
+                functionName: "allowance",
+                params: {
+                    owner: account,
+                    spender: whichContractToAllowAddress,
+                },
+            };
+            const allowance = await runContractFunction({params: allowanceParams});
+
+            // 2. approve more if not enough
+            if (allowance < approvalAmount) {
+                console.log("Allowance is not enough. More approval required");
+                console.log("allowance", allowance);
+
+                const approveParams = {
+                    abi: tokenAbi,
+                    contractAddress: tokenAddress,
+                    functionName: "approve",
+                    params: {
+                        spender: whichContractToAllowAddress,
+                        value: approvalAmount,
+                    },
+                };
+
+                await runContractFunction({
+                    params: approveParams,
+                    onSuccess: async (tx) => {
+                        handleApprovalWaitingConfirmation();
+                        try {
+                            const finalTx = await tx.wait(); // Wait for confirmation
+                            handleApprovalSuccess(); // Call success handler after confirmation
+                        } catch (error) {
+                            handleApprovalError(error); // Handle any errors during waiting
+                        }
+                    },
+                    onError: (error) => handleApprovalError(error),
+                });
+            } else {
+                console.log("Sufficient allowance exists; no need to approve.", allowance);
+            }
+        }
+    }
+
     const handleBuyItemWithoutModerator = async (address) => {
+        await handleApprovals(marketplaceContractAddress);
+        await handleApprovals(escrowContractAddress);
+
+        const finalPrice = currency === "ETH" ? price : 0;
+
         const contractParams = {
             abi: marketplaceAbi,
             contractAddress: marketplaceContractAddress,
             functionName: "buyItemWithoutModerator",
-            msgValue: price,
+            msgValue: finalPrice,
             params: {
                 sellerAddress: seller,
                 id: id,
@@ -163,11 +233,39 @@ export default function ItemPage() {
         });
     }
 
+    async function handleApprovalWaitingConfirmation() {
+        dispatch({
+            type: "info",
+            message: "Approval submitted. Waiting for confirmations.",
+            title: "Waiting for confirmations",
+            position: "topR",
+        });
+    }
+
     const handleBuyItemSuccess = () => {
         dispatch({
             type: "success",
             message: "Item bought!",
             title: "Item Bought",
+            position: "topR",
+        });
+    };
+
+    const handleApprovalSuccess = () => {
+        dispatch({
+            type: "success",
+            message: "Token approval success",
+            title: "Approval confirmed",
+            position: "topR",
+        });
+    };
+
+    const handleApprovalError = (error) => {
+        console.log("error", error)
+        dispatch({
+            type: "error",
+            message: "Token approval error",
+            title: "Approval error",
             position: "topR",
         });
     };
@@ -195,6 +293,8 @@ export default function ItemPage() {
                             id={id}
                             title={title}
                             price={price}
+                            seller={seller}
+                            currency={currency}
                             description={description}
                             photosIPFSHashes={photosIPFSHashes}
                             condition={condition}
@@ -207,10 +307,6 @@ export default function ItemPage() {
                                 loadData().then(() => setShowUpdateModal(false))
 
                             }}
-                            setPrice={setPrice}
-                            setDescription={setDescription}
-                            setTitle={setTitle}
-                            setPhotosIPFSHashes={setPhotosIPFSHashes}
                         />
                         <DeleteItemModal isVisible={showModalDelete} id={id} onClose={() => setShowModalDelete(false)}
                                          disableButtons={() => setButtonsDisabled(true)}/>
@@ -232,7 +328,7 @@ export default function ItemPage() {
                         <div className="text-center">
                             <h1 className="text-2xl font-bold mb-4">{title}</h1>
                             <p className="text-lg mb-4">{description}</p>
-                            <p className="text-xl font-semibold text-green-600 mb-2">{isGift ? "FREE" : `Price : ${ethers.utils.formatEther(price)} ETH`}</p>
+                            <p className="text-xl font-semibold text-green-600 mb-2">{isGift ? "FREE" : `Price : ${currency === "ETH" ? ethers.utils.formatEther(price) : price / 1e6} ${currency}`}</p>
                             <p className="text-gray-400 mb-4">Date
                                 posted: {new Date(blockTimestamp * 1000).toDateString()}</p>
                             <p className="text-lg mb-4">Condition: {condition}</p>
