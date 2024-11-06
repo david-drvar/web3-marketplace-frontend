@@ -12,6 +12,7 @@
     "@apollo/client": "^3.10.1",
     "@pinata/sdk": "^2.1.0",
     "@reduxjs/toolkit": "^2.2.7",
+    "@vercel/speed-insights": "^1.0.14",
     "@walletconnect/ethereum-provider": "^2.12.2",
     "@walletconnect/web3-provider": "^1.8.0",
     "@web3auth/web3auth": "^2.1.3",
