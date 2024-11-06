@@ -35,7 +35,9 @@ export default function Home() {
                 (filter.priceRange.min === '' || item.price >= filter.priceRange.min) &&
                 (filter.priceRange.max === '' || item.price <= filter.priceRange.max) &&
                 (filter.condition === '' || item.condition === filter.condition) &&
-                (filter.country === '' || item.country === filter.country)
+                (filter.country === '' || item.country === filter.country) &&
+                (filter.country === '' || item.country === filter.country) &&
+                (filter.currency === '' || item.currency === filter.currency)
             );
         });
         setFilteredItems(filtered);
@@ -44,7 +46,7 @@ export default function Home() {
     const handleReset = () => {
         setFilteredItems(items);
     }
-    
+
     useEffect(() => {
         if (marketplaceContractAddress && usersContractAddress && escrowContractAddress) {
             dispatch(setMarketplaceContractAddress(marketplaceContractAddress))
@@ -76,6 +78,7 @@ export default function Home() {
                                 {filteredItems.map((item) => {
                                     const {
                                         price,
+                                        currency,
                                         title,
                                         description,
                                         seller,
@@ -92,6 +95,7 @@ export default function Home() {
                                             key={id}
                                             id={id}
                                             price={price}
+                                            currency={currency}
                                             title={title}
                                             description={description}
                                             seller={seller}

@@ -1,4 +1,5 @@
 import {ApolloClient, gql, InMemoryCache} from "@apollo/client";
+import {getLastSeenForUser} from "@/pages/utils/firebaseService";
 
 export const apolloClient = new ApolloClient({
     cache: new InMemoryCache(),
@@ -14,6 +15,7 @@ export const fetchAllItemsListed = async () => {
         buyer
         seller
         price
+        currency
         title
         description
         blockTimestamp
@@ -53,6 +55,7 @@ export const fetchItemById = async (id) => {
         buyer
         seller
         price
+        currency
         title
         description
         blockTimestamp
@@ -92,6 +95,7 @@ export const fetchItemsOrderedByUser = async (userAddress) => {
         buyer
         seller
         price
+        currency
         title
         description
         blockTimestamp
@@ -132,6 +136,7 @@ export const fetchActiveAdsByUser = async (userAddress) => {
         buyer
         seller
         price
+        currency
         title
         description
         blockTimestamp
@@ -174,6 +179,7 @@ export const fetchTransactionsByItemIds = async (itemIds) => {
                 seller
                 moderator
                 price
+                currency
                 moderatorFee
                 buyerApproved
                 sellerApproved
@@ -276,6 +282,52 @@ export const fetchUserByAddress = async (userAddress) => {
     }
 }
 
+
+export const fetchUserProfileByAddress = async (userAddress) => {
+    if (!userAddress) {
+        return [];
+    }
+
+    let userProfile = {
+        avatarHash: "",
+        username: "",
+        firstName: "",
+        lastName: "",
+        lastSeen: "",
+        averageRating: 0,
+        numberOfReviews: 0,
+    };
+
+    try {
+
+
+        const [userData, reviews, lastSeen] = await Promise.all([
+            fetchUserByAddress(userAddress),
+            fetchAllReviewsByUser(userAddress),
+            getLastSeenForUser(userAddress),
+        ]);
+
+
+        const totalRating = reviews.reduce((total, review) => total + review.rating, 0);
+        const averageRating = reviews.length ? totalRating / reviews.length : 0;
+
+        userProfile = {
+            username: userData.username,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            avatarHash: userData.avatarHash,
+            averageRating,
+            numberOfReviews: reviews.length,
+            lastSeen,
+        };
+
+        return userProfile;
+    } catch (error) {
+        console.error("Error fetching user profile", error);
+        return userProfile;
+    }
+}
+
 export const fetchTransactionByItemId = async (itemId) => {
     if (!itemId) {
         return [];
@@ -289,6 +341,7 @@ export const fetchTransactionByItemId = async (itemId) => {
         seller
         moderator
         price
+        currency
         moderatorFee
         buyerApproved
         sellerApproved
@@ -334,6 +387,7 @@ export const fetchAllItemsByModerator = async (moderator) => {
         seller
         moderator
         price
+        currency
         moderatorFee
         buyerApproved
         sellerApproved
@@ -358,6 +412,7 @@ export const fetchAllItemsByModerator = async (moderator) => {
           buyer
           seller
           price
+          currency
           title
           description
           blockTimestamp
@@ -428,9 +483,9 @@ export const fetchAllTransactionsByUser = async (userAddress) => {
 
     try {
         const [buyerResult, sellerResult, moderatorResult] = await Promise.all([
-            apolloClient.query({ query: getTransactionsByBuyer, variables:  {user: userAddress}, fetchPolicy: 'network-only' }),
-            apolloClient.query({ query: getTransactionsBySeller, variables:  {user: userAddress}, fetchPolicy: 'network-only' }),
-            apolloClient.query({ query: getTransactionsByModerator, variables:  {user: userAddress}, fetchPolicy: 'network-only' }),
+            apolloClient.query({query: getTransactionsByBuyer, variables: {user: userAddress}, fetchPolicy: 'network-only'}),
+            apolloClient.query({query: getTransactionsBySeller, variables: {user: userAddress}, fetchPolicy: 'network-only'}),
+            apolloClient.query({query: getTransactionsByModerator, variables: {user: userAddress}, fetchPolicy: 'network-only'}),
         ]);
 
         const allTransactions = [
@@ -488,6 +543,7 @@ export const checkReviewExistence = async (from, to, itemId) => {
 };
 
 
+// reviews that were given to this user
 export const fetchAllReviewsByUser = async (userAddress) => {
     if (!userAddress) {
         return [];
@@ -538,9 +594,49 @@ export const fetchAllReviewsByUser = async (userAddress) => {
             })
         );
 
-        console.log("reviewsWithDetails", reviewsWithDetails)
-
         return reviewsWithDetails || [];
+
+    } catch (error) {
+        console.error("Error fetching all reviews from user", error);
+        return false;
+    }
+};
+
+
+// reviews that were given to this user
+export const fetchAllReviewsForItem = async (itemId) => {
+    if (!itemId) {
+        return [];
+    }
+
+    const fetchAllReviewsForItem = gql`
+    query FetchAllReviewsByUser($itemId: String!) {
+      reviews(
+        where: { itemId: $itemId }
+      ) {
+        id
+        from
+        content
+        rating
+        itemId
+        blockTimestamp
+        user {
+          id
+        }
+      }
+    }
+  `;
+
+    try {
+        const {data} = await apolloClient.query({
+            query: fetchAllReviewsForItem,
+            variables: {
+                itemId: itemId,
+            },
+            fetchPolicy: 'network-only',
+        });
+
+        return data.reviews || [];
 
     } catch (error) {
         console.error("Error fetching all reviews from user", error);

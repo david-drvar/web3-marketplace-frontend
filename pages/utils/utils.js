@@ -1,3 +1,5 @@
+import React from "react";
+
 const crypto = require('crypto');
 
 export function getChatID(itemId, address1, address2, address3) {
@@ -84,6 +86,15 @@ export function handleNotification(dispatch, type, message, title) {
         position: "topR",
     });
 }
+
+export const renderStars = (rating) => {
+    const totalStars = 5;
+    return Array.from({length: totalStars}, (_, i) => (
+        <span key={i} className={`text-xl ${i < rating ? 'text-yellow-500' : 'text-gray-300'}`}>
+                {i < rating ? '★' : '☆'}
+            </span>
+    ));
+};
 
 
 export function getCategories() {

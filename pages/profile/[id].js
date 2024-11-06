@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useRouter} from "next/router";
 import {
     fetchActiveAdsByUser,
@@ -34,7 +34,7 @@ export default function UserProfile() {
                 reviews.forEach((review) =>
                     totalGrade += review.rating
                 )
-                setGpa(totalGrade/reviews.length);
+                setGpa(totalGrade / reviews.length);
             });
             fetchUserByAddress(id).then((user) => setUser(user));
             await fetchActiveAdsByUser(id).then((items) => setItems(items));
@@ -44,8 +44,14 @@ export default function UserProfile() {
         }
 
         loadData().then(() => setIsLoading(false))
+    }, [id])
 
-    }, [])
+
+    const handleProfileNavigation = (address) => {
+        setIsLoading(true);
+        setShowReviews(false);
+        router.push(`/profile/${address}`);
+    };
 
     return (
         <>
@@ -74,27 +80,36 @@ export default function UserProfile() {
                         </div>
 
                         <h2 className="text-2xl font-semibold mb-4">Current ads</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {items.map((item, index) => (
-                                item.itemStatus === "Listed" &&
-                                <ItemBox
-                                    key={item.id}
-                                    id={item.id}
-                                    price={item.price}
-                                    title={item.title}
-                                    description={item.description}
-                                    seller={item.seller}
-                                    photosIPFSHashes={item.photosIPFSHashes}
-                                    itemStatus={item.itemStatus}
-                                    blockTimestamp={item.blockTimestamp}
-                                    displayOwnedStatus={false}
-                                    category={item.category}
-                                    subcategory={item.subcategory}
-                                    condition={item.condition}
-                                />
+                        {
+                            items.length === 0 ? (
+                                <div className="text-center text-gray-500 italic">
+                                    No listed items available at the moment.
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {items.map((item, index) => (
+                                        item.itemStatus === "Listed" &&
+                                        <ItemBox
+                                            key={item.id}
+                                            id={item.id}
+                                            price={item.price}
+                                            title={item.title}
+                                            description={item.description}
+                                            seller={item.seller}
+                                            photosIPFSHashes={item.photosIPFSHashes}
+                                            itemStatus={item.itemStatus}
+                                            blockTimestamp={item.blockTimestamp}
+                                            displayOwnedStatus={false}
+                                            category={item.category}
+                                            subcategory={item.subcategory}
+                                            condition={item.condition}
+                                        />
 
-                            ))}
-                        </div>
+                                    ))}
+                                </div>
+                            )
+                        }
+
 
                         {showReviews && (
                             <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
@@ -104,10 +119,18 @@ export default function UserProfile() {
                                         <div key={review.id} className="mb-4 border-b pb-2">
                                             <p className="text-gray-700">{review.content}</p>
                                             <div className="flex justify-between">
-                                        <span
-                                            className="text-sm text-gray-400">{review.fromUsername} - {new Date(review.blockTimestamp * 1000).toDateString()}</span>
+                                                <span className="text-sm text-gray-400">
+                                                  <span
+                                                      className="text-blue-500 hover:underline font-medium cursor-pointer"
+                                                      onClick={() => handleProfileNavigation(review.from)}
+                                                  >
+                                                    {review.fromUsername}
+                                                  </span>
+                                                  - {new Date(review.blockTimestamp * 1000).toDateString()}
+                                                </span>
                                                 <span
-                                                    className="text-yellow-500">{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</span>
+                                                    className="text-yellow-500">{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
+                                                </span>
                                             </div>
                                         </div>
                                     ))}

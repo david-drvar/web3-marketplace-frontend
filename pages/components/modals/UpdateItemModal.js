@@ -9,8 +9,10 @@ import {getCategories, getCountries} from "@/pages/utils/utils";
 
 export default function UpdateItemModal({
                                             id,
+                                            seller,
                                             title,
                                             price,
+                                            currency,
                                             description,
                                             onClose,
                                             isVisible,
@@ -23,10 +25,13 @@ export default function UpdateItemModal({
                                         }) {
     const dispatch = useNotification();
 
+    const supportedCurrencies = ["ETH", "USDC", "EURC"]
+
     const [formData, setFormData] = useState({
         title: title,
         description: description,
-        price: ethers.utils.formatEther(price),
+        price: currency === "ETH" ? ethers.utils.formatEther(price) : price / 1e6,
+        currency: currency,
         condition: condition,
         category: category,
         subcategory: subcategory,
@@ -117,21 +122,31 @@ export default function UpdateItemModal({
 
         const newItemImageHashes = imageURIs.concat(hashes);
         console.log(hashes);
+
+        const finalPrice = formData.currency === "ETH" ? ethers.utils.parseEther(formData.price).toString() : formData.price * 1e6;
+
+        const item = {
+            id: id,
+            seller: seller,
+            title: formData.title,
+            description: formData.description,
+            price: finalPrice,
+            currency: formData.currency,
+            photosIPFSHashes: newItemImageHashes,
+            itemStatus: 0,
+            condition: formData.condition,
+            category: formData.category,
+            subcategory: formData.subcategory,
+            country: formData.country,
+            isGift: formData.isGift,
+        }
+
         const listOptions = {
             abi: marketplaceAbi,
             contractAddress: marketplaceContractAddress,
             functionName: "updateItem",
             params: {
-                id: id,
-                _title: formData.title,
-                _description: formData.description,
-                _price: ethers.utils.parseEther(formData.price).toString(),
-                photosIPFSHashes: newItemImageHashes,
-                _condition: formData.condition,
-                _category: formData.category,
-                _subcategory: formData.subcategory,
-                _country: formData.country,
-                _isGift: formData.isGift,
+                item: item
             },
         };
         await runContractFunction({
@@ -255,7 +270,7 @@ export default function UpdateItemModal({
         setFormData({
             title: title,
             description: description,
-            price: ethers.utils.formatEther(price),
+            price: currency === "ETH" ? ethers.utils.formatEther(price) : price / 1e6,
         });
         setNewImages([]);
     };
@@ -326,8 +341,23 @@ export default function UpdateItemModal({
                     />
                 </div>
                 <div>
+                    <label htmlFor="currency" className="block text-sm font-medium text-gray-700">Currency</label>
+                    <select
+                        id="currency"
+                        name="currency"
+                        value={formData.currency}
+                        onChange={handleChange}
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                    >
+                        {supportedCurrencies.map((currency, key) =>
+                            <option value={currency} key={key}>{currency}</option>
+                        )
+                        }
+                    </select>
+                </div>
+                <div>
                     <label htmlFor="price" className="block text-sm font-medium text-gray-700">
-                        Price (ETH)
+                        Price
                     </label>
                     <input
                         type="number"

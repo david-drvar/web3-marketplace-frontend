@@ -1,10 +1,9 @@
 import {useEffect, useState} from "react";
-import {Modal, Input, Button, Notification, Icon, Tooltip} from "web3uikit";
+import {Modal, Input} from "web3uikit";
 import {Star} from "@web3uikit/icons";
 import {useMoralis} from "react-moralis";
-import {checkReviewExistence} from "@/pages/utils/apolloService";
 
-export default function ReviewItemModal({isVisible, onClose, onSubmit, transaction}) {
+export default function ReviewItemModal({isVisible, onClose, onSubmit, transaction, reviews}) {
     const {account} = useMoralis();
     const [reviewText, setReviewText] = useState("");
     const [rating, setRating] = useState(0);
@@ -12,23 +11,24 @@ export default function ReviewItemModal({isVisible, onClose, onSubmit, transacti
     const [toSelected, setToSelected] = useState("select review receiver");
 
     useEffect(() => {
+        let toRolesLocal = []
         if (account === transaction.buyer) {
-            addToRoleIfReviewDoesNotExist("seller")
-            addToRoleIfReviewDoesNotExist("moderator")
+            addToRoleIfReviewDoesNotExist("seller", toRolesLocal)
+            addToRoleIfReviewDoesNotExist("moderator", toRolesLocal)
         } else if (account === transaction.seller) {
-            addToRoleIfReviewDoesNotExist("buyer")
-            addToRoleIfReviewDoesNotExist("moderator")
+            addToRoleIfReviewDoesNotExist("buyer", toRolesLocal)
+            addToRoleIfReviewDoesNotExist("moderator", toRolesLocal)
         } else if (account === transaction.moderator) {
-            addToRoleIfReviewDoesNotExist("buyer")
-            addToRoleIfReviewDoesNotExist("seller")
+            addToRoleIfReviewDoesNotExist("buyer", toRolesLocal)
+            addToRoleIfReviewDoesNotExist("seller", toRolesLocal)
         }
-    }, [])
+        setToRoles(toRolesLocal);
+    }, [account])
 
-    const addToRoleIfReviewDoesNotExist = (role) => {
-        checkReviewExistence(account, transaction[role], transaction.itemId).then((result) => {
-            if (!result && !toRoles.includes(role))
-                setToRoles((prevRoles) => [...prevRoles, role]);
-        })
+    const addToRoleIfReviewDoesNotExist = (role, toRolesLocal) => {
+        if (!reviews.some(review => review.from === account && review.user.id === transaction[role]) &&
+            !toRolesLocal.includes(role) && transaction[role] !== "0x00000000")
+            toRolesLocal.push(role)
     }
 
     const handleSubmit = () => {
