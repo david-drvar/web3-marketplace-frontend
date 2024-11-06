@@ -1,8 +1,8 @@
 import {useMoralis} from "react-moralis";
-import ItemBox from "./components/ItemBox";
+import ItemBox from "@/components/ItemBox";
 import {useEffect, useState} from "react";
-import LoadingAnimation from "@/pages/components/LoadingAnimation";
-import {fetchItemsOrderedByUser, fetchTransactionsByItemIds} from "@/pages/utils/apolloService";
+import LoadingAnimation from "@/components/LoadingAnimation";
+import {fetchItemsOrderedByUser, fetchTransactionsByItemIds} from "@/utils/apolloService";
 
 export default function MyOrders() {
     const {isWeb3Enabled, account} = useMoralis();

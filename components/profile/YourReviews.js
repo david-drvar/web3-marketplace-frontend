@@ -1,9 +1,9 @@
 import React, {useEffect, useState} from 'react';
 import {useMoralis} from "react-moralis";
-import {fetchAllReviewsByUser} from "@/pages/utils/apolloService";
+import {fetchAllReviewsByUser} from "@/utils/apolloService";
 import Link from 'next/link';
-import LoadingAnimation from "@/pages/components/LoadingAnimation";
-import {renderStars} from "@/pages/utils/utils";
+import LoadingAnimation from "@/components/LoadingAnimation";
+import {renderStars} from "@/utils/utils";
 
 const YourReviews = () => {
     const [reviews, setReviews] = useState([]);

@@ -1,11 +1,11 @@
 import {Modal, Input, useNotification, Upload} from "web3uikit";
 import {useEffect, useState} from "react";
 import {useWeb3Contract} from "react-moralis";
-import marketplaceAbi from "../../../constants/Marketplace.json";
+import marketplaceAbi from "../../constants/Marketplace.json";
 import {ethers} from "ethers";
 import Image from "next/image";
 import {useSelector} from "react-redux";
-import {getCategories, getCountries} from "@/pages/utils/utils";
+import {getCategories, getCountries} from "@/utils/utils";
 
 export default function UpdateItemModal({
                                             id,

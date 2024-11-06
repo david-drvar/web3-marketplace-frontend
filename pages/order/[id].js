@@ -7,15 +7,15 @@ import escrowAbi from "../../constants/Escrow.json";
 import usersAbi from "../../constants/Users.json";
 import {ethers} from "ethers";
 import {useSelector} from "react-redux";
-import ChatPopup from "@/pages/components/chat/ChatPopup";
-import {fetchAllReviewsForItem, fetchItemById, fetchTransactionByItemId, fetchUserProfileByAddress} from "@/pages/utils/apolloService";
-import {handleNotification, renderStars} from "@/pages/utils/utils";
-import ApproveItemModal from "@/pages/components/modals/ApproveItemModal";
-import DisputeItemModal from "@/pages/components/modals/DisputeItemModal";
-import FinalizeTransactionModal from "@/pages/components/modals/FinalizeTransactionModal";
-import LoadingAnimation from "@/pages/components/LoadingAnimation";
-import {getOrderAddress} from "@/pages/utils/firebaseService";
-import ReviewItemModal from "@/pages/components/modals/ReviewItemModal";
+import ChatPopup from "@/components/chat/ChatPopup";
+import {fetchAllReviewsForItem, fetchItemById, fetchTransactionByItemId, fetchUserProfileByAddress} from "@/utils/apolloService";
+import {handleNotification, renderStars} from "@/utils/utils";
+import ApproveItemModal from "@/components/modals/ApproveItemModal";
+import DisputeItemModal from "@/components/modals/DisputeItemModal";
+import FinalizeTransactionModal from "@/components/modals/FinalizeTransactionModal";
+import LoadingAnimation from "@/components/LoadingAnimation";
+import {getOrderAddress} from "@/utils/firebaseService";
+import ReviewItemModal from "@/components/modals/ReviewItemModal";
 
 export default function OrderPage() {
     const {isWeb3Enabled, account} = useMoralis();

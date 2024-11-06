@@ -1,14 +1,14 @@
 import "@/styles/globals.css";
 import Head from "next/head";
 import {MoralisProvider} from "react-moralis";
-import Header from "./components/Header";
+import Header from "@/components/Header";
 import {ApolloProvider} from "@apollo/client";
 import {NotificationProvider} from "web3uikit";
 import {store, persistor} from '@/store/store';
 import {Provider} from "react-redux";
 import {PersistGate} from "redux-persist/integration/react";
-import {apolloClient} from "./utils/apolloService"
-import AccountChangedListener from "@/pages/components/AccountChangedListener";
+import {apolloClient} from "@/utils/apolloService"
+import AccountChangedListener from "@/components/AccountChangedListener";
 
 function App({Component, pageProps}) {
     return (

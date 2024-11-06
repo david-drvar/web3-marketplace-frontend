@@ -1,5 +1,5 @@
 import {ApolloClient, gql, InMemoryCache} from "@apollo/client";
-import {getLastSeenForUser} from "@/pages/utils/firebaseService";
+import {getLastSeenForUser} from "@/utils/firebaseService";
 
 export const apolloClient = new ApolloClient({
     cache: new InMemoryCache(),

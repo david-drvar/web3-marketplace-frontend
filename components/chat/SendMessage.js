@@ -1,6 +1,6 @@
 import React, {useState} from "react";
 
-import {addMessageToDb, addNotification} from "@/pages/utils/firebaseService";
+import {addMessageToDb, addNotification} from "@/utils/firebaseService";
 
 import {useMoralis} from "react-moralis";
 

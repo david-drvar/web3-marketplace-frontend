@@ -1,11 +1,11 @@
 import {useEffect, useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {setUser} from "@/store/slices/userSlice";
-import {getCountries} from "@/pages/utils/utils";
+import {getCountries} from "@/utils/utils";
 import {useMoralis} from "react-moralis";
-import {firebase_db} from "@/pages/utils/firebaseConfig";
+import {firebase_db} from "@/utils/firebaseConfig";
 import {doc, getDoc, setDoc, updateDoc} from "firebase/firestore";
-import {getUserAddresses} from "@/pages/utils/firebaseService";
+import {getUserAddresses} from "@/utils/firebaseService";
 
 
 export default function ManageAddresses() {

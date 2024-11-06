@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import {Modal} from "web3uikit";
-import {fetchModerators} from "@/pages/utils/apolloService";
-import {getUserAddresses} from "@/pages/utils/firebaseService";
+import {fetchModerators} from "@/utils/apolloService";
+import {getUserAddresses} from "@/utils/firebaseService";
 import {useMoralis} from "react-moralis";
 
 export default function BuyItemModal({isVisible, onClose, onBuyItemWithModerator, onBuyItemWithoutModerator}) {

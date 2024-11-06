@@ -1,13 +1,13 @@
 import {useEffect, useState} from 'react';
-import ManageProfile from "@/pages/components/profile/ManageProfile";
-import AdvancedSettings from "@/pages/components/profile/AdvancedSettings";
-import ManageAddresses from "@/pages/components/profile/ManageAddresses";
-import {fetchUserByAddress} from "@/pages/utils/apolloService";
+import ManageProfile from "@/components/profile/ManageProfile";
+import AdvancedSettings from "@/components/profile/AdvancedSettings";
+import ManageAddresses from "@/components/profile/ManageAddresses";
+import {fetchUserByAddress} from "@/utils/apolloService";
 import {setUser} from "@/store/slices/userSlice";
 import {useMoralis} from "react-moralis";
 import {useDispatch} from "react-redux";
-import LoadingAnimation from "@/pages/components/LoadingAnimation";
-import YourReviews from "@/pages/components/profile/YourReviews";
+import LoadingAnimation from "@/components/LoadingAnimation";
+import YourReviews from "@/components/profile/YourReviews";
 
 
 export default function Profile() {

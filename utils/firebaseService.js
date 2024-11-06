@@ -1,5 +1,5 @@
 import {collection, doc, getDoc, query, setDoc, where, getDocs, addDoc, serverTimestamp} from "firebase/firestore";
-import {firebase_db} from "@/pages/utils/firebaseConfig";
+import {firebase_db} from "@/utils/firebaseConfig";
 
 export const getUserAddresses = async (userId) => {
     try {

@@ -5,7 +5,7 @@ import marketplaceAbi from "../constants/Marketplace.json";
 import {useState} from "react";
 import {useRouter} from "next/router";
 import {useDispatch, useSelector} from "react-redux";
-import {getCategories, getCountries} from "@/pages/utils/utils";
+import {getCategories, getCountries} from "@/utils/utils";
 
 export default function ListItem() {
     const {chainId, isWeb3Enabled, account} = useMoralis();

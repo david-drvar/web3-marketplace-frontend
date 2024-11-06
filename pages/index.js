@@ -1,6 +1,6 @@
 import {useMoralis} from "react-moralis";
 import networkMapping from "../constants/networkMapping.json";
-import ItemBox from "./components/ItemBox";
+import ItemBox from "@/components/ItemBox";
 import {useEffect, useState} from "react";
 import {useDispatch} from "react-redux";
 import {
@@ -8,9 +8,9 @@ import {
     setMarketplaceContractAddress,
     setUsersContractAddress
 } from "@/store/slices/contractSlice";
-import LoadingAnimation from "@/pages/components/LoadingAnimation";
-import {fetchAllItemsListed} from "@/pages/utils/apolloService";
-import SearchFilterBar from "@/pages/components/SearchFilterBar";
+import LoadingAnimation from "@/components/LoadingAnimation";
+import {fetchAllItemsListed} from "@/utils/apolloService";
+import SearchFilterBar from "@/components/SearchFilterBar";
 
 
 export default function Home() {

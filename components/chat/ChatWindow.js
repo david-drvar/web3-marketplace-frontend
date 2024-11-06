@@ -1,9 +1,9 @@
 import React, {useEffect, useRef, useState} from "react";
 import {useMoralis} from "react-moralis";
-import SendMessage from "@/pages/components/chat/SendMessage";
+import SendMessage from "@/components/chat/SendMessage";
 import {query, collection, orderBy, onSnapshot, limit} from "firebase/firestore";
-import {firebase_db} from "@/pages/utils/firebaseConfig";
-import Message from "@/pages/components/chat/Message";
+import {firebase_db} from "@/utils/firebaseConfig";
+import Message from "@/components/chat/Message";
 import {useSelector} from "react-redux";
 
 const ChatWindow = ({chat}) => {

@@ -7,14 +7,14 @@ import marketplaceAbi from "../../constants/Marketplace.json";
 import usdcAbi from "../../constants/USDCAbi.json";
 import eurcAbi from "../../constants/EURCAbi.json";
 import {ethers} from "ethers";
-import UpdateItemModal from "../components/modals/UpdateItemModal";
-import DeleteItemModal from "../components/modals/DeleteItemModal";
+import UpdateItemModal from "@/components/modals/UpdateItemModal";
+import DeleteItemModal from "@/components/modals/DeleteItemModal";
 import {useSelector} from "react-redux";
-import BuyItemModal from "@/pages/components/modals/BuyItemModal";
-import LoadingAnimation from "@/pages/components/LoadingAnimation";
-import {addAddressToOrder, getLastSeenForUser} from "@/pages/utils/firebaseService";
-import {fetchAllReviewsByUser, fetchItemById, fetchUserByAddress, fetchUserProfileByAddress} from "@/pages/utils/apolloService";
-import ChatPopup from "@/pages/components/chat/ChatPopup";
+import BuyItemModal from "@/components/modals/BuyItemModal";
+import LoadingAnimation from "@/components/LoadingAnimation";
+import {addAddressToOrder, getLastSeenForUser} from "@/utils/firebaseService";
+import {fetchAllReviewsByUser, fetchItemById, fetchUserByAddress, fetchUserProfileByAddress} from "@/utils/apolloService";
+import ChatPopup from "@/components/chat/ChatPopup";
 import Link from "next/link";
 
 export default function ItemPage() {

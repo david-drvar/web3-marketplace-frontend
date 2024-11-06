@@ -5,10 +5,10 @@ import {
     fetchAllReviewsByUser,
     fetchAllTransactionsByUser,
     fetchUserByAddress
-} from "@/pages/utils/apolloService";
-import ItemBox from "@/pages/components/ItemBox";
-import LoadingAnimation from "@/pages/components/LoadingAnimation";
-import {getLastSeenForUser} from "@/pages/utils/firebaseService";
+} from "@/utils/apolloService";
+import ItemBox from "@/components/ItemBox";
+import LoadingAnimation from "@/components/LoadingAnimation";
+import {getLastSeenForUser} from "@/utils/firebaseService";
 
 
 export default function UserProfile() {

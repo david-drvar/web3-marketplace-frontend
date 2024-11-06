@@ -3,9 +3,9 @@ import {query, collection, orderBy, onSnapshot, limit, doc, getDoc, setDoc, dele
 import Message from "./Message";
 import SendMessage from "./SendMessage";
 import {useMoralis} from "react-moralis";
-import {firebase_db} from "@/pages/utils/firebaseConfig";
-import {getChatID} from "@/pages/utils/utils";
-import {fetchUserByAddress} from "@/pages/utils/apolloService";
+import {firebase_db} from "@/utils/firebaseConfig";
+import {getChatID} from "@/utils/utils";
+import {fetchUserByAddress} from "@/utils/apolloService";
 
 const ChatPopup = ({onClose, transaction}) => {
     const {account} = useMoralis();

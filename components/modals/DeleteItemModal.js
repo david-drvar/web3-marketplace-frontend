@@ -1,6 +1,6 @@
 import {Modal, useNotification} from "web3uikit";
 import {useWeb3Contract} from "react-moralis";
-import marketplaceAbi from "../../../constants/Marketplace.json";
+import marketplaceAbi from "../../constants/Marketplace.json";
 import {useRouter} from "next/router";
 import {useSelector} from "react-redux";
 

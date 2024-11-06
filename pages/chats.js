@@ -1,8 +1,8 @@
 import React, {useState, useEffect} from "react";
-import {getChatsByUser} from "@/pages/utils/firebaseService";
+import {getChatsByUser} from "@/utils/firebaseService";
 import {useMoralis} from "react-moralis";
-import {fetchItemById, fetchUserByAddress} from "@/pages/utils/apolloService";
-import ChatWindow from "@/pages/components/chat/ChatWindow";
+import {fetchItemById, fetchUserByAddress} from "@/utils/apolloService";
+import ChatWindow from "@/components/chat/ChatWindow";
 
 const Chats = () => {
     const {account} = useMoralis();

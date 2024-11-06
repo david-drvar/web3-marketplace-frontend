@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {getCategories, getCountries} from "@/pages/utils/utils";
+import {getCategories, getCountries} from "@/utils/utils";
 
 const SearchFilterBar = ({onFilter, onReset}) => {
     const [searchQuery, setSearchQuery] = useState('');

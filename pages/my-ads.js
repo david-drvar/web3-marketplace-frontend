@@ -1,8 +1,8 @@
 import {useMoralis} from "react-moralis";
-import ItemBox from "./components/ItemBox";
+import ItemBox from "@/components/ItemBox";
 import {useEffect, useState} from "react";
-import LoadingAnimation from "@/pages/components/LoadingAnimation";
-import {fetchActiveAdsByUser, fetchTransactionsByItemIds} from "@/pages/utils/apolloService";
+import LoadingAnimation from "@/components/LoadingAnimation";
+import {fetchActiveAdsByUser, fetchTransactionsByItemIds} from "@/utils/apolloService";
 
 export default function MyAds() {
     const {isWeb3Enabled, account} = useMoralis();
