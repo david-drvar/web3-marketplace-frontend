@@ -9,6 +9,7 @@ import {Provider} from "react-redux";
 import {PersistGate} from "redux-persist/integration/react";
 import {apolloClient} from "@/utils/apolloService"
 import AccountChangedListener from "@/components/AccountChangedListener";
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 function App({Component, pageProps}) {
     return (
@@ -27,6 +28,7 @@ function App({Component, pageProps}) {
                             <NotificationProvider>
                                 <Header/>
                                 <Component {...pageProps} />
+                                <SpeedInsights />
                             </NotificationProvider>
                         </ApolloProvider>
                     </MoralisProvider>
