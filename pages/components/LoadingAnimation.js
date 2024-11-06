@@ -1,6 +1,6 @@
 import {Loading} from "web3uikit";
 
-export const LoadingAnimation = () => (
+const LoadingAnimation = () => (
     <div className="flex justify-center items-center h-screen">
         <Loading
             size={80}
@@ -8,3 +8,5 @@ export const LoadingAnimation = () => (
         />
     </div>
 );
+
+export default LoadingAnimation;

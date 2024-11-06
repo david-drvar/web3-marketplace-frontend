@@ -1,4 +1,4 @@
-import {collection, doc, getDoc, query, setDoc, where, getDocs} from "firebase/firestore";
+import {collection, doc, getDoc, query, setDoc, where, getDocs, addDoc, serverTimestamp} from "firebase/firestore";
 import {firebase_db} from "@/pages/utils/firebaseConfig";
 
 export const getUserAddresses = async (userId) => {
@@ -115,3 +115,55 @@ export const getLastSeenForUser = async (address) => {
         console.error("Error getting last seen for user ", error);
     }
 };
+
+export const addMessageToDb = async (message, chatID, itemId, participants, account) => {
+    if (message.trim() === "") {
+        alert("Enter valid message");
+        return;
+    }
+
+    // if chat does not exist yet, add participants and itemId to it
+    const chatDocRef = doc(firebase_db, "chats", chatID);
+    const chatDocSnapshot = await getDoc(chatDocRef);
+
+    if (!chatDocSnapshot.exists()) {
+        await setDoc(chatDocRef, {
+            participants: participants,
+            itemId: itemId
+        });
+    }
+    //
+
+    await addDoc(collection(firebase_db, "chats", chatID, "messages"), {
+        content: message,
+        from: account,
+        timestamp: serverTimestamp(),
+    });
+}
+
+
+export const addNotification = async (userId, message, from, itemId, actionUrl, type) => {
+    const notificationData = {
+        message,
+        from,
+        itemId,
+        actionUrl,
+        type,
+        isRead: false,
+        timestamp: Date.now()
+    };
+
+    console.log("notification data", notificationData)
+    console.log("userId", userId)
+
+    try {
+        // Define the subcollection path
+        const userNotificationsRef = collection(firebase_db, 'notifications', userId, 'userNotifications');
+
+        // Add a new notification document with an auto-generated ID
+        const notificationRef = await addDoc(userNotificationsRef, notificationData);
+        console.log('Notification added with ID:', notificationRef.id);
+    } catch (e) {
+        console.error('Error adding notification:', e);
+    }
+}

@@ -35,7 +35,7 @@ const Chats = () => {
                 finalOneChat["seller"] = seller;
                 finalOneChat["buyer"] = buyer;
                 finalOneChat["moderator"] = moderator;
-                finalOneChat["messages"] = chat.messages;
+                finalOneChat["messages"] = chat.messages.sort((a, b) => a.timestamp - b.timestamp);
                 finalOneChat["id"] = chat.id;
 
                 let sellerTemp = {...seller, role: "seller"}

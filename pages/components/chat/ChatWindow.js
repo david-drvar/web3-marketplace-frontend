@@ -94,6 +94,7 @@ const ChatWindow = ({chat}) => {
                 <SendMessage scroll={scrollRef}
                              chatID={chat.id}
                              itemId={chat.item.id}
+                             participants={chat.participants}
                 />
             </div>
         </>

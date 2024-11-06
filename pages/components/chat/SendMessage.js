@@ -1,7 +1,7 @@
 import React, {useState} from "react";
 
-import {addDoc, collection, doc, getDoc, serverTimestamp, setDoc} from "firebase/firestore";
-import {firebase_db} from "../../utils/firebaseConfig";
+import {addMessageToDb, addNotification} from "@/pages/utils/firebaseService";
+
 import {useMoralis} from "react-moralis";
 
 const SendMessage = ({scroll, chatID, participants, itemId}) => {
@@ -11,32 +11,30 @@ const SendMessage = ({scroll, chatID, participants, itemId}) => {
 
     const sendMessage = async (event) => {
         event.preventDefault();
-        if (message.trim() === "") {
-            alert("Enter valid message");
-            return;
-        }
 
+        await addMessageToDb(message, chatID, itemId, participants, account);
 
-        // if chat does not exist yet, add participants and itemId to it
-        const chatDocRef = doc(firebase_db, "chats", chatID);
-        const chatDocSnapshot = await getDoc(chatDocRef);
-
-        if (!chatDocSnapshot.exists()) {
-            await setDoc(chatDocRef, {
-                participants: participants,
-                itemId: itemId
-            });
-        }
-        //
-
-        await addDoc(collection(firebase_db, "chats", chatID, "messages"), {
-            content: message,
-            from: account,
-            timestamp: serverTimestamp(),
-        });
         setMessage("");
         scroll.current?.scrollIntoView({behavior: "smooth"});
+
+        // for chat window component participants have structure [{},{}]
+        if (Array.isArray(participants)) {
+            participants.forEach((participant) => {
+                if (participant.userAddress !== undefined && participant.userAddress !== null)
+                    addNotification(participant.userAddress, message, account, itemId, "http.com", "type1")
+            })
+        }
+        // for chat popup component participants have structure {seller:"0x...", buyer:"0x..", "moderator":"0x.."}
+        else {
+            if (participants.seller !== "" && participants.seller !== account)
+                await addNotification(participants.seller, message, account, itemId, "http.com", "type1")
+            if (participants.buyer !== "" && participants.buyer !== account)
+                await addNotification(participants.buyer, message, account, itemId, "http.com", "type1")
+            if (participants.moderator !== "" && participants.moderator !== account)
+                await addNotification(participants.moderator, message, account, itemId, "http.com", "type1")
+        }
     };
+
     return (
         <form onSubmit={(event) => sendMessage(event)} className="send-message">
             <label htmlFor="messageInput" hidden>
