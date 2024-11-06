@@ -13,7 +13,7 @@ import {handleNotification, renderStars} from "@/pages/utils/utils";
 import ApproveItemModal from "@/pages/components/modals/ApproveItemModal";
 import DisputeItemModal from "@/pages/components/modals/DisputeItemModal";
 import FinalizeTransactionModal from "@/pages/components/modals/FinalizeTransactionModal";
-import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
+import LoadingAnimation from "@/pages/components/LoadingAnimation";
 import {getOrderAddress} from "@/pages/utils/firebaseService";
 import ReviewItemModal from "@/pages/components/modals/ReviewItemModal";
 

@@ -6,7 +6,7 @@ import {fetchUserByAddress} from "@/pages/utils/apolloService";
 import {setUser} from "@/store/slices/userSlice";
 import {useMoralis} from "react-moralis";
 import {useDispatch} from "react-redux";
-import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
+import LoadingAnimation from "@/pages/components/LoadingAnimation";
 import YourReviews from "@/pages/components/profile/YourReviews";
 
 

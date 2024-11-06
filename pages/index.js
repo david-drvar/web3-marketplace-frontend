@@ -8,7 +8,7 @@ import {
     setMarketplaceContractAddress,
     setUsersContractAddress
 } from "@/store/slices/contractSlice";
-import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
+import LoadingAnimation from "@/pages/components/LoadingAnimation";
 import {fetchAllItemsListed} from "@/pages/utils/apolloService";
 import SearchFilterBar from "@/pages/components/SearchFilterBar";
 

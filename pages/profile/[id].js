@@ -7,7 +7,7 @@ import {
     fetchUserByAddress
 } from "@/pages/utils/apolloService";
 import ItemBox from "@/pages/components/ItemBox";
-import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
+import LoadingAnimation from "@/pages/components/LoadingAnimation";
 import {getLastSeenForUser} from "@/pages/utils/firebaseService";
 
 

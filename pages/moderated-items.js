@@ -2,7 +2,7 @@ import {useMoralis} from "react-moralis";
 import {useEffect, useState} from "react";
 import ItemBox from "./components/ItemBox";
 import {fetchAllItemsByModerator, fetchTransactionsByItemIds} from "@/pages/utils/apolloService";
-import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
+import LoadingAnimation from "@/pages/components/LoadingAnimation";
 
 export default function ModeratedItems() {
     const {isWeb3Enabled, account} = useMoralis();

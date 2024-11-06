@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react';
 import {useMoralis} from "react-moralis";
 import {fetchAllReviewsByUser} from "@/pages/utils/apolloService";
 import Link from 'next/link';
-import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
+import LoadingAnimation from "@/pages/components/LoadingAnimation";
 import {renderStars} from "@/pages/utils/utils";
 
 const YourReviews = () => {

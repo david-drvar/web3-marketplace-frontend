@@ -11,7 +11,7 @@ import UpdateItemModal from "../components/modals/UpdateItemModal";
 import DeleteItemModal from "../components/modals/DeleteItemModal";
 import {useSelector} from "react-redux";
 import BuyItemModal from "@/pages/components/modals/BuyItemModal";
-import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
+import LoadingAnimation from "@/pages/components/LoadingAnimation";
 import {addAddressToOrder, getLastSeenForUser} from "@/pages/utils/firebaseService";
 import {fetchAllReviewsByUser, fetchItemById, fetchUserByAddress, fetchUserProfileByAddress} from "@/pages/utils/apolloService";
 import ChatPopup from "@/pages/components/chat/ChatPopup";

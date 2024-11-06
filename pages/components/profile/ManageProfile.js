@@ -5,7 +5,7 @@ import {useDispatch, useSelector} from "react-redux";
 import usersAbi from "@/constants/Users.json";
 import {getCountries, removePinnedImage, uploadFile} from "@/pages/utils/utils";
 import {setUser} from "@/store/slices/userSlice";
-import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
+import LoadingAnimation from "@/pages/components/LoadingAnimation";
 
 export default function ManageProfile() {
     const {isWeb3Enabled} = useMoralis();

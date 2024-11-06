@@ -1,7 +1,7 @@
 import {useMoralis} from "react-moralis";
 import ItemBox from "./components/ItemBox";
 import {useEffect, useState} from "react";
-import {LoadingAnimation} from "@/pages/components/LoadingAnimation";
+import LoadingAnimation from "@/pages/components/LoadingAnimation";
 import {fetchActiveAdsByUser, fetchTransactionsByItemIds} from "@/pages/utils/apolloService";
 
 export default function MyAds() {
