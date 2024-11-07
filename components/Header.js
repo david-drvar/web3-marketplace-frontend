@@ -1,27 +1,17 @@
 import Link from "next/link";
-import { useRouter } from "next/router";
-import { useMoralis } from "react-moralis";
-import { ConnectButton } from "web3uikit";
+import {useMoralis} from "react-moralis";
+import {ConnectButton} from "web3uikit";
 import {useState, useEffect, useRef} from "react";
-import { FaBell, FaEnvelope } from "react-icons/fa";
+import {FaBell, FaEnvelope} from "react-icons/fa";
+import {getAllNotifications, markNotificationsAsRead} from "@/utils/firebaseService";
 
 export default function Header() {
-    const { isWeb3Enabled } = useMoralis();
-    const router = useRouter();
+    const {account} = useMoralis();
 
-    const [notifications, setNotifications] = useState([
-        { id: 1, message: "New item listed!", unread: true },
-        { id: 2, message: "Price updated on item", unread: true },
-        { id: 3, message: "Order confirmed", unread: false }
-    ]);
-
-    const [chatNotifications, setChatNotifications] = useState([
-        { id: 1, message: "New message from Alice", unread: true },
-        { id: 2, message: "New message from Bob", unread: false }
-    ]);
-
-    const unreadNotificationsCount = notifications.filter(n => n.unread).length;
-    const unreadChatCount = chatNotifications.filter(n => n.unread).length;
+    const [notifications, setNotifications] = useState([]);
+    const [chatNotifications, setChatNotifications] = useState([]);
+    const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
+    const [unreadChatCount, setUnreadChatCount] = useState(0);
 
     const [isNotificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
     const [isChatDropdownOpen, setChatDropdownOpen] = useState(false);
@@ -42,16 +32,41 @@ export default function Header() {
             }
         }
 
+        fetchNotifications();
+        fetchChatNotifications();
+
+        getAllNotifications(account, true).then((data) => {
+            setChatNotifications(data);
+            setUnreadChatCount(data.filter(n => n.isRead === false).length);
+        });
+
         // Bind the event listener
         document.addEventListener("mousedown", handleClickOutside);
         return () => {
             // Clean up the event listener on component unmount
             document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, []);
+    }, [account]);
+
+    const fetchNotifications = async () => {
+        getAllNotifications(account).then((data) => {
+            setNotifications(data);
+            setUnreadNotificationsCount(data.filter(n => n.isRead === false).length);
+        });
+    }
+
+    const fetchChatNotifications = async () => {
+        getAllNotifications(account, true).then((data) => {
+            setChatNotifications(data);
+            setUnreadChatCount(data.filter(n => n.isRead === false).length);
+        });
+    }
+
+    const handleMarkAllAsRead = async () => {
+        markNotificationsAsRead(account, notifications.filter(n => n.isRead === false)).then(() => fetchNotifications());
+    }
 
     // todo - napravi da se na chat klik otvori chat i onda da budu shadowed oni chatovi gde ima poruka
-    // todo - action url na general notification ikonici i da ide sa firebasea podaci
     return (
         <nav className="p-5 border-b-2 flex flex-row justify-between items-center">
             <Link href="/">
@@ -70,7 +85,7 @@ export default function Header() {
                 {/* Chat Notification Icon */}
                 <div className="relative mr-4">
                     <button onClick={toggleChatDropdown} className="text-xl">
-                        <FaEnvelope size={25} />
+                        <FaEnvelope size={25}/>
                         {unreadChatCount > 0 && (
                             <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-3 w-3 flex items-center justify-center">
                                 {unreadChatCount}
@@ -115,31 +130,31 @@ export default function Header() {
                             <div className="flex justify-between items-center mb-2">
                                 <span className="font-semibold text-gray-700">Notifications</span>
                                 <button
-                                    onClick={() => {}}
+                                    onClick={handleMarkAllAsRead}
                                     className="text-xs text-blue-500 hover:text-blue-700">
                                     Mark all as read
                                 </button>
                             </div>
                             <div className="max-h-60 overflow-y-auto">
-                                {notifications.filter(notification => notification.unread).length > 0 ? (
-                                    notifications.filter(notification => notification.unread).map(notification => (
-                                        <div
-                                            key={notification.id}
-                                            className="p-3 mb-2 bg-gray-100 rounded-md border border-gray-200 hover:bg-gray-200 transition-colors">
-                                            <p className="text-sm text-gray-800">{notification.message}</p>
-                                            <span className="text-xs text-gray-500">{new Date(notification.timestamp).toLocaleString()}</span>
-                                        </div>
+                                {
+                                    notifications.map(notification => (
+                                        <Link href={notification.actionUrl} key={notification.id}>
+                                            <div
+                                                key={notification.id}
+                                                className={`p-3 mb-2 ${notification.isRead ? 'bg-white hover:bg-gray-50' : 'bg-gray-100 hover:bg-gray-200'} rounded-md border border-gray-200  transition-colors`}>
+                                                <p className="text-sm text-gray-800">{notification.message}</p>
+                                                <span className="text-xs text-gray-500">{new Date(notification.timestamp).toLocaleString()}</span>
+                                            </div>
+                                        </Link>
                                     ))
-                                ) : (
-                                    <p className="text-sm text-gray-500">No unread notifications</p>
-                                )}
+                                }
                             </div>
                         </div>
                     )}
                 </div>
 
                 <div>
-                    <ConnectButton moralisAuth={false} />
+                    <ConnectButton moralisAuth={false}/>
                 </div>
             </div>
         </nav>

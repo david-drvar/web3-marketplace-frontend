@@ -1,4 +1,4 @@
-import {collection, doc, getDoc, query, setDoc, where, getDocs, addDoc, serverTimestamp} from "firebase/firestore";
+import {collection, doc, getDoc, query, setDoc, where, getDocs, addDoc, serverTimestamp, writeBatch} from "firebase/firestore";
 import {firebase_db} from "@/utils/firebaseConfig";
 
 export const getUserAddresses = async (userId) => {
@@ -167,3 +167,45 @@ export const addNotification = async (userId, message, from, itemId, actionUrl, 
         console.error('Error adding notification:', e);
     }
 }
+
+export const getAllNotifications = async (userId, fetchOnlyChat = false) => {
+    try {
+        const userNotificationsRef = collection(firebase_db, 'notifications', userId, 'userNotifications');
+
+        let notificationsQuery;
+        if (fetchOnlyChat) {
+            notificationsQuery = query(userNotificationsRef, where("type", "==", "chat"));
+        } else {
+            notificationsQuery = query(userNotificationsRef, where("type", "!=", "chat"));
+        }
+
+        const querySnapshot = await getDocs(notificationsQuery);
+        const notifications = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+
+        return notifications;
+    } catch (e) {
+        console.error('Error fetching notifications:', e);
+        return [];
+    }
+};
+
+export const markNotificationsAsRead = async (userId, notifications) => {
+    if (!notifications || notifications.length === 0) return;
+
+    const batch = writeBatch(firebase_db);
+
+    try {
+        notifications.forEach((notification) => {
+            const notificationRef = doc(firebase_db, 'notifications', userId, 'userNotifications', notification.id);
+            batch.update(notificationRef, {isRead: true});
+        });
+
+        await batch.commit();
+        console.log('Notifications marked as read');
+    } catch (error) {
+        console.error('Error marking notifications as read:', error);
+    }
+};

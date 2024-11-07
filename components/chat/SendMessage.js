@@ -21,17 +21,17 @@ const SendMessage = ({scroll, chatID, participants, itemId}) => {
         if (Array.isArray(participants)) {
             participants.forEach((participant) => {
                 if (participant.userAddress !== undefined && participant.userAddress !== null)
-                    addNotification(participant.userAddress, message, account, itemId, "http.com", "type1")
+                    addNotification(participant.userAddress, message, account, itemId, "http.com", "chat")
             })
         }
         // for chat popup component participants have structure {seller:"0x...", buyer:"0x..", "moderator":"0x.."}
         else {
             if (participants.seller !== "" && participants.seller !== account)
-                await addNotification(participants.seller, message, account, itemId, "http.com", "type1")
+                await addNotification(participants.seller, message, account, itemId, "http.com", "chat")
             if (participants.buyer !== "" && participants.buyer !== account)
-                await addNotification(participants.buyer, message, account, itemId, "http.com", "type1")
+                await addNotification(participants.buyer, message, account, itemId, "http.com", "chat")
             if (participants.moderator !== "" && participants.moderator !== account)
-                await addNotification(participants.moderator, message, account, itemId, "http.com", "type1")
+                await addNotification(participants.moderator, message, account, itemId, "http.com", "chat")
         }
     };
 
