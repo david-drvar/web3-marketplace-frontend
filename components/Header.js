@@ -66,6 +66,10 @@ export default function Header() {
         markNotificationsAsRead(account, notifications.filter(n => n.isRead === false)).then(() => fetchNotifications());
     }
 
+    const handleNotificationClick = async (notification) => {
+        markNotificationsAsRead(account, [notification]).then(() => fetchNotifications());
+    }
+
     // todo - napravi da se na chat klik otvori chat i onda da budu shadowed oni chatovi gde ima poruka
     return (
         <nav className="p-5 border-b-2 flex flex-row justify-between items-center">
@@ -138,7 +142,7 @@ export default function Header() {
                             <div className="max-h-60 overflow-y-auto">
                                 {
                                     notifications.map(notification => (
-                                        <Link href={notification.actionUrl} key={notification.id}>
+                                        <Link href={`/${notification.actionUrl}`} key={notification.id} onClick={() => handleNotificationClick(notification)}>
                                             <div
                                                 key={notification.id}
                                                 className={`p-3 mb-2 ${notification.isRead ? 'bg-white hover:bg-gray-50' : 'bg-gray-100 hover:bg-gray-200'} rounded-md border border-gray-200  transition-colors`}>

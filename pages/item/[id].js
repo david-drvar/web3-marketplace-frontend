@@ -12,8 +12,8 @@ import DeleteItemModal from "@/components/modals/DeleteItemModal";
 import {useSelector} from "react-redux";
 import BuyItemModal from "@/components/modals/BuyItemModal";
 import LoadingAnimation from "@/components/LoadingAnimation";
-import {addAddressToOrder, getLastSeenForUser} from "@/utils/firebaseService";
-import {fetchAllReviewsByUser, fetchItemById, fetchUserByAddress, fetchUserProfileByAddress} from "@/utils/apolloService";
+import {addAddressToOrder, addNotification} from "@/utils/firebaseService";
+import {fetchItemById, fetchUserProfileByAddress} from "@/utils/apolloService";
 import ChatPopup from "@/components/chat/ChatPopup";
 import Link from "next/link";
 
@@ -130,6 +130,8 @@ export default function ItemPage() {
                 handleListWaitingConfirmation();
                 tx.wait().then((finalTx) => {
                     addAddressToOrder(id, address);
+                    addNotification(seller, `Your item ${title} has been bought by ${account} with moderator ${moderator}`, account, id, `order/${id}`, "item_bought")
+                    addNotification(moderator, `You have been assigned as moderator for item ${title} by ${account}`, account, id, `order/${id}`, "item_bought")
                     handleBuyItemSuccess();
                     setShowBuyModal(false);
                     router.push({pathname: `/order/${id}`});
@@ -215,6 +217,7 @@ export default function ItemPage() {
                 handleListWaitingConfirmation();
                 tx.wait().then((finalTx) => {
                     addAddressToOrder(id, address);
+                    addNotification(seller, `Your item ${title} has been bought by ${account}`, account, id, `order/${id}`, "item_bought")
                     handleBuyItemSuccess();
                     setShowBuyModal(false);
                     router.push({pathname: `/order/${id}`});

@@ -1,4 +1,4 @@
-import {Modal, Input, useNotification, Upload} from "web3uikit";
+import {Modal, useNotification, Upload} from "web3uikit";
 import {useEffect, useState} from "react";
 import {useWeb3Contract} from "react-moralis";
 import marketplaceAbi from "../../constants/Marketplace.json";
@@ -123,7 +123,7 @@ export default function UpdateItemModal({
         const newItemImageHashes = imageURIs.concat(hashes);
         console.log(hashes);
 
-        const finalPrice = formData.currency === "ETH" ? ethers.utils.parseEther(formData.price).toString() : formData.price * 1e6;
+        const finalPrice = formData.currency === "ETH" ? ethers.utils.parseEther(formData.price.toString()).toString() : formData.price * 1e6;
 
         const item = {
             id: id,
