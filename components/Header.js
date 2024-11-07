@@ -4,41 +4,31 @@ import {ConnectButton} from "web3uikit";
 import {useState, useEffect, useRef} from "react";
 import {FaBell, FaEnvelope} from "react-icons/fa";
 import {getAllNotifications, markNotificationsAsRead} from "@/utils/firebaseService";
+import {useDispatch, useSelector} from "react-redux";
+import {setUnreadCount} from "@/store/slices/unreadChatCounterSlice";
 
 export default function Header() {
     const {account} = useMoralis();
 
     const [notifications, setNotifications] = useState([]);
-    const [chatNotifications, setChatNotifications] = useState([]);
     const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
-    const [unreadChatCount, setUnreadChatCount] = useState(0);
 
     const [isNotificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
-    const [isChatDropdownOpen, setChatDropdownOpen] = useState(false);
-
     const toggleNotificationDropdown = () => setNotificationDropdownOpen(!isNotificationDropdownOpen);
-    const toggleChatDropdown = () => setChatDropdownOpen(!isChatDropdownOpen);
-
     const notificationsRef = useRef(null);
-    const chatRef = useRef(null);
+
+    const chatCounter = useSelector((state) => state.chatCounter.unreadCount);
+    const dispatch = useDispatch();
 
     useEffect(() => {
         function handleClickOutside(event) {
             if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
                 setNotificationDropdownOpen(false);
             }
-            if (chatRef.current && !chatRef.current.contains(event.target)) {
-                setChatDropdownOpen(false);
-            }
         }
 
         fetchNotifications();
         fetchChatNotifications();
-
-        getAllNotifications(account, true).then((data) => {
-            setChatNotifications(data);
-            setUnreadChatCount(data.filter(n => n.isRead === false).length);
-        });
 
         // Bind the event listener
         document.addEventListener("mousedown", handleClickOutside);
@@ -57,8 +47,7 @@ export default function Header() {
 
     const fetchChatNotifications = async () => {
         getAllNotifications(account, true).then((data) => {
-            setChatNotifications(data);
-            setUnreadChatCount(data.filter(n => n.isRead === false).length);
+            dispatch(setUnreadCount(data.filter(n => n.isRead === false).length));
         });
     }
 
@@ -70,7 +59,7 @@ export default function Header() {
         markNotificationsAsRead(account, [notification]).then(() => fetchNotifications());
     }
 
-    // todo - napravi da se na chat klik otvori chat i onda da budu shadowed oni chatovi gde ima poruka
+
     return (
         <nav className="p-5 border-b-2 flex flex-row justify-between items-center">
             <Link href="/">
@@ -84,40 +73,21 @@ export default function Header() {
                 <Link href="/my-ads" className="mr-4 p-6">My ads</Link>
                 <Link href="/moderated-items" className="mr-4 p-6">Moderated items</Link>
                 <Link href="/profile" className="mr-4 p-6">Profile</Link>
-                <Link href="/chats" className="mr-4 p-6">Chats</Link>
 
                 {/* Chat Notification Icon */}
-                <div className="relative mr-4">
-                    <button onClick={toggleChatDropdown} className="text-xl">
-                        <FaEnvelope size={25}/>
-                        {unreadChatCount > 0 && (
-                            <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-3 w-3 flex items-center justify-center">
-                                {unreadChatCount}
-                            </span>
-                        )}
-                    </button>
-                    {isChatDropdownOpen && (
-                        <div className="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-md p-4" ref={chatRef}>
-                            <div className="flex justify-between items-center mb-2">
-                                <span className="font-semibold text-gray-700">Chats</span>
-                            </div>
-                            <div className="max-h-60 overflow-y-auto">
-                                {chatNotifications.filter(notification => notification.unread).length > 0 ? (
-                                    chatNotifications.filter(notification => notification.unread).map(notification => (
-                                        <div
-                                            key={notification.id}
-                                            className="p-3 mb-2 bg-gray-100 rounded-md border border-gray-200 hover:bg-gray-200 transition-colors">
-                                            <p className="text-sm text-gray-800">{notification.message}</p>
-                                            <span className="text-xs text-gray-500">{new Date(notification.timestamp).toLocaleString()}</span>
-                                        </div>
-                                    ))
-                                ) : (
-                                    <p className="text-sm text-gray-500">No unread messages</p>
-                                )}
-                            </div>
-                        </div>
-                    )}
-                </div>
+                <Link href={'/chats'} className="mr-1 p-3">
+                    <div className="relative mr-4">
+                        <button className="text-xl">
+                            <FaEnvelope size={25}/>
+                            {chatCounter > 0 && (
+                                <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-3 w-3 flex items-center justify-center">
+                                    {chatCounter}
+                                </span>
+                            )}
+                        </button>
+                    </div>
+                </Link>
+
 
                 {/* General Notification Icon */}
                 <div className="relative mr-4">
