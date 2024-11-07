@@ -2,6 +2,8 @@ import {collection, doc, getDoc, query, setDoc, where, getDocs, addDoc, serverTi
 import {firebase_db} from "@/utils/firebaseConfig";
 
 export const getUserAddresses = async (userId) => {
+    if (!userId || userId.length === 0) return [];
+
     try {
         const userDocRef = doc(collection(firebase_db, "addresses"), userId);
         const userDocSnap = await getDoc(userDocRef);
@@ -20,6 +22,8 @@ export const getUserAddresses = async (userId) => {
 }
 
 export const getOrderAddress = async (orderId) => {
+    if (!orderId || orderId.length === 0) return [];
+
     try {
         const orderDocRef = doc(collection(firebase_db, "orders"), orderId);
         const orderDocSnap = await getDoc(orderDocRef);
@@ -49,6 +53,8 @@ export const addAddressToOrder = async (itemId, address) => {
 };
 
 export const getChatsByUser = async (userId) => {
+    if (!userId || userId.length === 0) return [];
+
     // Reference to the chats collection
     const chatsRef = collection(firebase_db, "chats");
 
@@ -90,6 +96,8 @@ export const getChatsByUser = async (userId) => {
 };
 
 export const setLastSeenForUser = async (address) => {
+    if (!address || address.length === 0) return;
+
     try {
         const userRef = doc(firebase_db, "users", address);
         await setDoc(userRef, {lastSeen: Date.now()});
@@ -100,6 +108,8 @@ export const setLastSeenForUser = async (address) => {
 };
 
 export const getLastSeenForUser = async (address) => {
+    if (!address || address.length === 0) return "";
+
     try {
         const userRef = doc(firebase_db, "users", address);
         const lastSeenDocSnap = await getDoc(userRef);
@@ -109,7 +119,7 @@ export const getLastSeenForUser = async (address) => {
             return (lastSeenData.lastSeen || null);
         } else {
             console.log("No last seen found for this user.");
-            return [];
+            return "";
         }
     } catch (error) {
         console.error("Error getting last seen for user ", error);
@@ -169,6 +179,8 @@ export const addNotification = async (userId, message, from, itemId, actionUrl, 
 }
 
 export const getAllNotifications = async (userId, fetchOnlyChat = false) => {
+    if (!userId || userId.length === 0) return [];
+
     try {
         const userNotificationsRef = collection(firebase_db, 'notifications', userId, 'userNotifications');
 
