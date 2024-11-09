@@ -98,14 +98,12 @@ const Chats = () => {
                 </div>
 
                 {/* Chat List */}
-                {/* todo - display number of unread messages */}
-                {/* todo - fix selected chat styling bug */}
                 <div>
                     {myChats.map((chat) => (
                         <div
                             key={chat.id}
                             className={`p-4 hover:bg-gray-200 cursor-pointer border-b border-gray-300 
-                                ${selectedChat === chat.id ? "bg-gray-300" : ""} 
+                                ${selectedChat && selectedChat.id === chat.id ? "bg-emerald-200" : "bg-gray-300"} 
                                 ${chat.isRead ? 'bg-white' : 'bg-gray-200'}`}
                             onClick={() => handleChatClick(chat)}
                         >
@@ -121,6 +119,12 @@ const Chats = () => {
                                     <h3 className="text-lg font-semibold">{chat.item.title}</h3>
                                     <p className="text-sm text-gray-500 truncate">{chat.messages[chat.messages.length - 1].content}</p>
                                 </div>
+                                {/* Unread Count */}
+                                {chat.numberOfUnreadMessages > 0 && (
+                                    <div className="bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                        {chat.numberOfUnreadMessages}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ))}
