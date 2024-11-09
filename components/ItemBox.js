@@ -27,7 +27,7 @@ export default function ItemBox({id, price, currency, title, description, seller
         if (isWeb3Enabled) {
             setImageURI(`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photosIPFSHashes[0]}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`);
         }
-    }, [isWeb3Enabled]);
+    }, [isWeb3Enabled, account]);
 
     const isOwnedByUser = seller === account || seller === undefined;
     const formattedSellerAddress = isOwnedByUser ? "you" : truncateStr(seller || "", 15);

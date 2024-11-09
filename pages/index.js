@@ -57,18 +57,18 @@ export default function Home() {
             dispatch(setEscrowContractAddress(escrowContractAddress))
         }
 
-        const loadData = async () => {
-            const fetchedItems = await fetchAllItemsListed();
-            const favoriteItemsIds = await getFavoriteItems(account);
-
-            setItems(fetchedItems);
-            setFilteredItems(fetchedItems);
-            setFavoriteItemsIds(favoriteItemsIds);
-        };
-
         loadData().then(() => setIsLoading(false));
-    }, [marketplaceContractAddress, usersContractAddress, escrowContractAddress, dispatch]);
+    }, [marketplaceContractAddress, usersContractAddress, escrowContractAddress, dispatch, account]);
 
+    const loadData = async () => {
+        setIsLoading(true);
+        const fetchedItems = await fetchAllItemsListed();
+        const favoriteItemsIds = await getFavoriteItems(account);
+
+        setItems(fetchedItems);
+        setFilteredItems(fetchedItems);
+        setFavoriteItemsIds(favoriteItemsIds);
+    };
 
     return (
         <>

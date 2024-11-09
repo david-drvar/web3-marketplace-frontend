@@ -12,7 +12,7 @@ import DeleteItemModal from "@/components/modals/DeleteItemModal";
 import {useSelector} from "react-redux";
 import BuyItemModal from "@/components/modals/BuyItemModal";
 import LoadingAnimation from "@/components/LoadingAnimation";
-import {addAddressToOrder, addNotification} from "@/utils/firebaseService";
+import {addAddressToOrder, addNotification, getUserIdsWithItemInFavorites} from "@/utils/firebaseService";
 import {fetchItemById, fetchUserProfileByAddress} from "@/utils/apolloService";
 import ChatPopup from "@/components/chat/ChatPopup";
 import Link from "next/link";
@@ -132,6 +132,16 @@ export default function ItemPage() {
                     addAddressToOrder(id, address);
                     addNotification(seller, `Your item ${title} has been bought by ${account} with moderator ${moderator}`, account, id, `order/${id}`, "item_bought")
                     addNotification(moderator, `You have been assigned as moderator for item ${title} by ${account}`, account, id, `order/${id}`, "item_bought")
+
+                    // notify users who have this item in their favorites
+                    getUserIdsWithItemInFavorites(id).then((userIds) => {
+                        console.log("userIds", userIds)
+                        userIds.forEach((userId) => {
+                            if (userId !== account)
+                                addNotification(userId, `Your favorite item ${title} has been sold`, account, id, `item/${id}`, "favorite_item_sold")
+                        })
+                    })
+
                     handleBuyItemSuccess();
                     setShowBuyModal(false);
                     router.push({pathname: `/order/${id}`});
@@ -218,6 +228,16 @@ export default function ItemPage() {
                 tx.wait().then((finalTx) => {
                     addAddressToOrder(id, address);
                     addNotification(seller, `Your item ${title} has been bought by ${account}`, account, id, `order/${id}`, "item_bought")
+
+                    // notify users who have this item in their favorites
+                    getUserIdsWithItemInFavorites(id).then((userIds) => {
+                        console.log("userIds", userIds)
+                        userIds.forEach((userId) => {
+                            if (userId !== account)
+                                addNotification(userId, `Your favorite item ${title} has been sold`, account, id, `item/${id}`, "favorite_item_sold")
+                        })
+                    })
+                    
                     handleBuyItemSuccess();
                     setShowBuyModal(false);
                     router.push({pathname: `/order/${id}`});

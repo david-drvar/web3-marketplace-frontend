@@ -263,3 +263,23 @@ export const getFavoriteItems = async (userId) => {
         return [];
     }
 }
+
+export const getUserIdsWithItemInFavorites = async (itemId) => {
+    try {
+        const favoritesCollection = collection(firebase_db, "favorites");
+
+        const q = query(favoritesCollection, where("itemIds", "array-contains", itemId));
+
+        const querySnapshot = await getDocs(q);
+
+        const userIds = [];
+        querySnapshot.forEach((doc) => {
+            userIds.push(doc.id); // doc.id is the userId
+        });
+
+        return userIds || [];
+    } catch (error) {
+        console.error("Error getting user IDs:", error);
+        throw new Error("Failed to fetch user IDs");
+    }
+};
