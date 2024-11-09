@@ -135,7 +135,6 @@ export default function ItemPage() {
 
                     // notify users who have this item in their favorites
                     getUserIdsWithItemInFavorites(id).then((userIds) => {
-                        console.log("userIds", userIds)
                         userIds.forEach((userId) => {
                             if (userId !== account)
                                 addNotification(userId, `Your favorite item ${title} has been sold`, account, id, `item/${id}`, "favorite_item_sold")
@@ -231,13 +230,12 @@ export default function ItemPage() {
 
                     // notify users who have this item in their favorites
                     getUserIdsWithItemInFavorites(id).then((userIds) => {
-                        console.log("userIds", userIds)
                         userIds.forEach((userId) => {
                             if (userId !== account)
                                 addNotification(userId, `Your favorite item ${title} has been sold`, account, id, `item/${id}`, "favorite_item_sold")
                         })
                     })
-                    
+
                     handleBuyItemSuccess();
                     setShowBuyModal(false);
                     router.push({pathname: `/order/${id}`});

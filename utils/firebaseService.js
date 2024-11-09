@@ -46,7 +46,6 @@ export const addAddressToOrder = async (itemId, address) => {
     try {
         const orderRef = doc(firebase_db, "orders", itemId);
         await setDoc(orderRef, {address});
-        console.log("Address added to order successfully.");
     } catch (error) {
         console.error("Error adding address to order: ", error);
     }
@@ -101,7 +100,6 @@ export const setLastSeenForUser = async (address) => {
     try {
         const userRef = doc(firebase_db, "users", address);
         await setDoc(userRef, {lastSeen: Date.now()});
-        console.log("User set last seen successfully.");
     } catch (error) {
         console.error("Error setting last seen for user ", error);
     }
@@ -163,16 +161,12 @@ export const addNotification = async (userId, message, from, itemId, actionUrl, 
         timestamp: Date.now()
     };
 
-    console.log("notification data", notificationData)
-    console.log("userId", userId)
-
     try {
         // Define the subcollection path
         const userNotificationsRef = collection(firebase_db, 'notifications', userId, 'userNotifications');
 
         // Add a new notification document with an auto-generated ID
-        const notificationRef = await addDoc(userNotificationsRef, notificationData);
-        console.log('Notification added with ID:', notificationRef.id);
+        await addDoc(userNotificationsRef, notificationData);
     } catch (e) {
         console.error('Error adding notification:', e);
     }
@@ -216,7 +210,6 @@ export const markNotificationsAsRead = async (userId, notifications) => {
         });
 
         await batch.commit();
-        console.log('Notifications marked as read');
     } catch (error) {
         console.error('Error marking notifications as read:', error);
     }
@@ -234,13 +227,11 @@ export const toggleFavoriteItem = async (userId, itemId) => {
 
         const itemExists = currentItemIds.includes(itemId);
 
-        if (itemExists) {
+        if (itemExists)
             await setDoc(userFavoritesRef, {itemIds: arrayRemove(itemId)}, {merge: true});
-            console.log("Item removed from favorites!");
-        } else {
+        else
             await setDoc(userFavoritesRef, {itemIds: arrayUnion(itemId)}, {merge: true});
-            console.log("Item added to favorites!");
-        }
+
     } catch (error) {
         console.error("Error toggling favorite item: ", error);
     }

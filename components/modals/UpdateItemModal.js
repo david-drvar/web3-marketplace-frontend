@@ -92,13 +92,6 @@ export default function UpdateItemModal({
     }, []);
 
     const handleSubmit = async () => {
-        console.log("formData");
-        console.log(formData);
-        console.log("newImages");
-        console.log(newImages);
-        console.log("imageURIs");
-        console.log(imageURIs);
-
         var hashes = [];
         try {
             for (const image of newImages) {
@@ -121,7 +114,6 @@ export default function UpdateItemModal({
         }
 
         const newItemImageHashes = imageURIs.concat(hashes);
-        console.log(hashes);
 
         const finalPrice = formData.currency === "ETH" ? ethers.utils.parseEther(formData.price.toString()).toString() : formData.price * 1e6;
 
@@ -252,17 +244,17 @@ export default function UpdateItemModal({
     };
 
     const handleAddNewImage = (event, index) => {
-        console.log("event");
-        console.log(event);
-        console.log("index");
-        console.log(index);
+        // console.log("event");
+        // console.log(event);
+        // console.log("index");
+        // console.log(index);
 
         const newImagesArray = [...newImages];
         newImagesArray[index] = event;
         setNewImages(newImagesArray);
 
-        console.log("newImages");
-        console.log(newImages);
+        // console.log("newImages");
+        // console.log(newImages);
     };
 
     const resetFormData = () => {

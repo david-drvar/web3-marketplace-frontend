@@ -194,8 +194,6 @@ export default function OrderPage() {
             },
         };
 
-        console.log("contractParams", contractParams);
-
         await runContractFunction({
             params: contractParams,
             onSuccess: (tx) => {
@@ -266,8 +264,6 @@ export default function OrderPage() {
     }
 
     const handleSubmitReview = async (content, rating, toWhom) => {
-        console.log("toWhom", toWhom);
-
         const contractParams = {
             abi: usersAbi,
             contractAddress: usersContractAddress,
@@ -279,8 +275,6 @@ export default function OrderPage() {
                 rating: rating,
             },
         };
-
-        console.log("contractParams", contractParams);
 
         await runContractFunction({
             params: contractParams,

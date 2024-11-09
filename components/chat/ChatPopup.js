@@ -92,8 +92,6 @@ const ChatPopup = ({onClose, transaction}) => {
 
             // 4. Delete the old document
             await deleteDoc(oldChatRef);
-
-            console.log("Document ID changed successfully!");
         } catch (error) {
             console.error("Error changing document ID:", error);
         }

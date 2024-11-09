@@ -92,8 +92,6 @@ export default function ListItem() {
 
     const handleSubmit = async (e) => {
         setIsSubmitting(true);
-        console.log("images");
-        console.log(images);
         e.preventDefault();
         var hashes = [];
 
@@ -115,9 +113,6 @@ export default function ListItem() {
             setIsSubmitting(false);
             return;
         }
-
-        console.log("hashes");
-        console.log(hashes);
 
         const finalPrice = formData.currency === "ETH" ? ethers.utils.parseEther(formData.price).toString() : formData.price * 1e6;
 
@@ -145,8 +140,6 @@ export default function ListItem() {
                 item: item
             },
         };
-
-        console.log("listOptions", listOptions)
 
         await runContractFunction({
             params: listOptions,

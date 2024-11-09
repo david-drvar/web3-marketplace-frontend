@@ -64,8 +64,8 @@ export default function ReviewItemModal({isVisible, onClose, onSubmit, transacti
                     value={toSelected}
                     onChange={(e) => {
                         setToSelected(e.target.value);
-                        console.log("e.target.value")
-                        console.log(e.target.value)
+                        // console.log("e.target.value")
+                        // console.log(e.target.value)
                     }}
                     className="border p-2 rounded-md flex-grow min-w-[150px] mb-4"
                 >
