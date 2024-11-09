@@ -165,6 +165,47 @@ export const fetchActiveAdsByUser = async (userAddress) => {
     }
 }
 
+export const fetchItemsByIdsList = async (itemIds) => {
+    if (!itemIds || itemIds.length === 0) {
+        return [];
+    }
+
+    const getItemsQuery = gql`
+        query GetItemsByIds($itemIds: [String!]) {
+            items(where: { id_in: $itemIds }) {
+                id
+                buyer
+                seller
+                price
+                currency
+                title
+                description
+                blockTimestamp
+                itemStatus
+                photosIPFSHashes
+                condition
+                category
+                subcategory
+                country
+                isGift
+            }
+        }
+    `;
+
+    try {
+        const {data} = await apolloClient.query({
+            query: getItemsQuery,
+            variables: {itemIds},
+            fetchPolicy: 'network-only',
+        });
+
+        return data.items || [];
+    } catch (error) {
+        console.error("Error fetching items with item ids array", error);
+        return [];
+    }
+}
+
 export const fetchTransactionsByItemIds = async (itemIds) => {
     if (!itemIds || itemIds.length === 0) {
         return [];

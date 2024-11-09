@@ -11,10 +11,11 @@ import {
 import LoadingAnimation from "@/components/LoadingAnimation";
 import {fetchAllItemsListed} from "@/utils/apolloService";
 import SearchFilterBar from "@/components/SearchFilterBar";
+import {getFavoriteItems} from "@/utils/firebaseService";
 
 
 export default function Home() {
-    const {chainId, isWeb3Enabled} = useMoralis();
+    const {chainId, isWeb3Enabled, account} = useMoralis();
     const chainString = chainId ? parseInt(chainId).toString() : null;
     const marketplaceContractAddress = chainId ? networkMapping[chainString].Marketplace[0] : null;
     const usersContractAddress = chainId ? networkMapping[chainString].Users[0] : null;
@@ -25,6 +26,8 @@ export default function Home() {
     const [items, setItems] = useState([]);
     const [filteredItems, setFilteredItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [favoriteItemsIds, setFavoriteItemsIds] = useState([]);
+
 
     const handleFilter = (filter) => {
         const filtered = items.filter(item => {
@@ -54,10 +57,16 @@ export default function Home() {
             dispatch(setEscrowContractAddress(escrowContractAddress))
         }
 
-        fetchAllItemsListed().then((data) => {
-            setItems(data);
-            setFilteredItems(data);
-        }).then(() => setIsLoading(false));
+        const loadData = async () => {
+            const fetchedItems = await fetchAllItemsListed();
+            const favoriteItemsIds = await getFavoriteItems(account);
+
+            setItems(fetchedItems);
+            setFilteredItems(fetchedItems);
+            setFavoriteItemsIds(favoriteItemsIds);
+        };
+
+        loadData().then(() => setIsLoading(false));
     }, [marketplaceContractAddress, usersContractAddress, escrowContractAddress, dispatch]);
 
 
@@ -106,6 +115,8 @@ export default function Home() {
                                             category={category}
                                             subcategory={subcategory}
                                             condition={condition}
+                                            displayFavorite={true}
+                                            isFavorite={favoriteItemsIds.includes(item.id)}
                                         />
                                     );
                                 })}

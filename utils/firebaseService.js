@@ -1,4 +1,4 @@
-import {collection, doc, getDoc, query, setDoc, where, getDocs, addDoc, serverTimestamp, writeBatch} from "firebase/firestore";
+import {collection, doc, getDoc, query, setDoc, where, getDocs, addDoc, serverTimestamp, writeBatch, arrayRemove, arrayUnion} from "firebase/firestore";
 import {firebase_db} from "@/utils/firebaseConfig";
 
 export const getUserAddresses = async (userId) => {
@@ -221,3 +221,45 @@ export const markNotificationsAsRead = async (userId, notifications) => {
         console.error('Error marking notifications as read:', error);
     }
 };
+
+export const toggleFavoriteItem = async (userId, itemId) => {
+    try {
+        const userFavoritesRef = doc(firebase_db, "favorites", userId);
+
+        const userFavoritesSnap = await getDoc(userFavoritesRef);
+        let currentItemIds = [];
+
+        if (userFavoritesSnap.exists())
+            currentItemIds = userFavoritesSnap.data().itemIds || [];
+
+        const itemExists = currentItemIds.includes(itemId);
+
+        if (itemExists) {
+            await setDoc(userFavoritesRef, {itemIds: arrayRemove(itemId)}, {merge: true});
+            console.log("Item removed from favorites!");
+        } else {
+            await setDoc(userFavoritesRef, {itemIds: arrayUnion(itemId)}, {merge: true});
+            console.log("Item added to favorites!");
+        }
+    } catch (error) {
+        console.error("Error toggling favorite item: ", error);
+    }
+}
+
+export const getFavoriteItems = async (userId) => {
+    try {
+        const userFavoritesRef = doc(firebase_db, "favorites", userId);
+        const userFavoritesSnap = await getDoc(userFavoritesRef);
+
+        if (userFavoritesSnap.exists()) {
+            const data = userFavoritesSnap.data();
+            return data.itemIds || [];
+        } else {
+            console.log("No favorites found for this user.");
+            return [];
+        }
+    } catch (error) {
+        console.error("Error retrieving favorite items: ", error);
+        return [];
+    }
+}

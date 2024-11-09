@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@apollo/client": "^3.10.1",
+    "@heroicons/react": "1.0.4",
     "@pinata/sdk": "^2.1.0",
     "@reduxjs/toolkit": "^2.2.7",
     "@vercel/speed-insights": "^1.0.14",

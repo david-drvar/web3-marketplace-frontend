@@ -72,6 +72,7 @@ export default function Header() {
                 <Link href="/my-orders" className="mr-4 p-6">My orders</Link>
                 <Link href="/my-ads" className="mr-4 p-6">My ads</Link>
                 <Link href="/moderated-items" className="mr-4 p-6">Moderated items</Link>
+                <Link href="/favorites" className="mr-4 p-6">Favorites</Link>
                 <Link href="/profile" className="mr-4 p-6">Profile</Link>
 
                 {/* Chat Notification Icon */}
