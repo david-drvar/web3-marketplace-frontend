@@ -216,6 +216,8 @@ export const markNotificationsAsRead = async (userId, notifications) => {
 };
 
 export const toggleFavoriteItem = async (userId, itemId) => {
+    if (!userId || userId.length === 0 || !itemId || itemId.length === 0) return;
+
     try {
         const userFavoritesRef = doc(firebase_db, "favorites", userId);
 
@@ -238,6 +240,8 @@ export const toggleFavoriteItem = async (userId, itemId) => {
 }
 
 export const getFavoriteItems = async (userId) => {
+    if (!userId || userId.length === 0) return [];
+
     try {
         const userFavoritesRef = doc(firebase_db, "favorites", userId);
         const userFavoritesSnap = await getDoc(userFavoritesRef);
@@ -246,7 +250,6 @@ export const getFavoriteItems = async (userId) => {
             const data = userFavoritesSnap.data();
             return data.itemIds || [];
         } else {
-            console.log("No favorites found for this user.");
             return [];
         }
     } catch (error) {
@@ -256,6 +259,8 @@ export const getFavoriteItems = async (userId) => {
 }
 
 export const getUserIdsWithItemInFavorites = async (itemId) => {
+    if (!itemId || itemId.length === 0) return [];
+
     try {
         const favoritesCollection = collection(firebase_db, "favorites");
 
