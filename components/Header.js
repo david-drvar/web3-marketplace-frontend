@@ -2,7 +2,7 @@ import Link from "next/link";
 import {useMoralis} from "react-moralis";
 import {ConnectButton} from "web3uikit";
 import {useState, useEffect, useRef} from "react";
-import {FaBell, FaEnvelope} from "react-icons/fa";
+import {FaBell, FaEnvelope, FaChevronDown, FaChevronUp} from "react-icons/fa";
 import {getAllNotifications, markNotificationsAsRead} from "@/utils/firebaseService";
 import {useDispatch, useSelector} from "react-redux";
 import {setUnreadCount} from "@/store/slices/unreadChatCounterSlice";
@@ -12,9 +12,8 @@ export default function Header() {
 
     const [notifications, setNotifications] = useState([]);
     const [unreadNotificationsCount, setUnreadNotificationsCount] = useState(0);
-
     const [isNotificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
-    const toggleNotificationDropdown = () => setNotificationDropdownOpen(!isNotificationDropdownOpen);
+    const [isMenuOpen, setMenuOpen] = useState(false);
     const notificationsRef = useRef(null);
 
     const chatCounter = useSelector((state) => state.chatCounter.unreadCount);
@@ -59,21 +58,13 @@ export default function Header() {
         markNotificationsAsRead(account, [notification]).then(() => fetchNotifications());
     }
 
-
     return (
         <nav className="p-5 border-b-2 flex flex-row justify-between items-center">
-            <Link href="/">
+            <Link href="/" onClick={() => setMenuOpen(false)}>
                 <h1 className="py-4 px-4 font-bold text-3xl">DecentMarkt</h1>
             </Link>
 
             <div className="flex flex-row items-center">
-                <Link href="/" className="mr-4 p-6">Home</Link>
-                <Link href="/list-item" className="mr-4 p-6">List item</Link>
-                <Link href="/my-orders" className="mr-4 p-6">My orders</Link>
-                <Link href="/my-ads" className="mr-4 p-6">My ads</Link>
-                <Link href="/moderated-items" className="mr-4 p-6">Moderated items</Link>
-                <Link href="/favorites" className="mr-4 p-6">Favorites</Link>
-                <Link href="/profile" className="mr-4 p-6">Profile</Link>
 
                 {/* Chat Notification Icon */}
                 <Link href={'/chats'} className="mr-1 p-3">
@@ -89,10 +80,9 @@ export default function Header() {
                     </div>
                 </Link>
 
-
                 {/* General Notification Icon */}
                 <div className="relative mr-4">
-                    <button onClick={toggleNotificationDropdown} className="text-xl">
+                    <button onClick={() => setNotificationDropdownOpen(!isNotificationDropdownOpen)} className="text-xl">
                         <FaBell size={25}/>
                         {unreadNotificationsCount > 0 && (
                             <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-3 w-3 flex items-center justify-center">
@@ -128,8 +118,41 @@ export default function Header() {
                     )}
                 </div>
 
-                <div>
-                    <ConnectButton moralisAuth={false}/>
+                <div className="relative mr-10">
+                    <div className="flex items-center cursor-pointer" onClick={() => setMenuOpen(!isMenuOpen)}>
+                        <ConnectButton moralisAuth={false}/>
+                        {
+                            !isMenuOpen && <FaChevronDown className="ml-2 text-xl"/>
+                        }
+                        {
+                            isMenuOpen && <FaChevronUp className="ml-2 text-xl"/>
+                        }
+                    </div>
+                    {isMenuOpen && (
+                        <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md p-4">
+                            <Link href="/" onClick={() => setMenuOpen(!isMenuOpen)} className="flex items-center p-2 hover:bg-gray-200 rounded-md">
+                                <span className="mr-2">🏠</span> Home
+                            </Link>
+                            <Link href="/list-item" onClick={() => setMenuOpen(!isMenuOpen)} className="flex items-center p-2 hover:bg-gray-200 rounded-md">
+                                <span className="mr-2">📃</span> List item
+                            </Link>
+                            <Link href="/my-orders" onClick={() => setMenuOpen(!isMenuOpen)} className="flex items-center p-2 hover:bg-gray-200 rounded-md">
+                                <span className="mr-2">🛒</span> My orders
+                            </Link>
+                            <Link href="/my-ads" onClick={() => setMenuOpen(!isMenuOpen)} className="flex items-center p-2 hover:bg-gray-200 rounded-md">
+                                <span className="mr-2">📢</span> My ads
+                            </Link>
+                            <Link href="/moderated-items" onClick={() => setMenuOpen(!isMenuOpen)} className="flex items-center p-2 hover:bg-gray-200 rounded-md">
+                                <span className="mr-2">🔍</span> Moderated items
+                            </Link>
+                            <Link href="/favorites" onClick={() => setMenuOpen(!isMenuOpen)} className="flex items-center p-2 hover:bg-gray-200 rounded-md">
+                                <span className="mr-2">❤️</span> Favorites
+                            </Link>
+                            <Link href="/profile" onClick={() => setMenuOpen(!isMenuOpen)} className="flex items-center p-2 hover:bg-gray-200 rounded-md">
+                                <span className="mr-2">👤</span> Profile
+                            </Link>
+                        </div>
+                    )}
                 </div>
             </div>
         </nav>
