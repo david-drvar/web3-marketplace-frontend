@@ -80,7 +80,7 @@ const ChatWindow = ({chat}) => {
             </div>
 
             {/* Message Input */}
-            <div className="p-4 border-t border-gray-300 flex items-center space-x-4">
+            <div className="p-4 border-t border-gray-300 items-center space-x-4">
                 {/*<input*/}
                 {/*    type="text"*/}
                 {/*    placeholder="Type a message..."*/}

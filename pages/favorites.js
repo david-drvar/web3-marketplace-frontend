@@ -52,13 +52,15 @@ export default function Favorites() {
                                         blockTimestamp,
                                         category,
                                         subcategory,
-                                        condition
+                                        condition,
+                                        currency
                                     } = item;
                                     return (
                                         <ItemBox
                                             key={id}
                                             id={id}
                                             price={price}
+                                            currency={currency}
                                             title={title}
                                             description={description}
                                             seller={seller}

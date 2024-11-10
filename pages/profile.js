@@ -43,10 +43,6 @@ export default function Profile() {
                                     onClick={() => setActiveTab('reviews')}>
                                     Your Reviews
                                 </li>
-                                <li className={`py-2 cursor-pointer ${activeTab === 'notifications' ? 'text-blue-600 font-bold' : 'text-gray-600'}`}
-                                    onClick={() => setActiveTab('notifications')}>
-                                    Notification Settings
-                                </li>
                                 <li className={`py-2 cursor-pointer ${activeTab === 'advanced' ? 'text-blue-600 font-bold' : 'text-gray-600'}`}
                                     onClick={() => setActiveTab('advanced')}>
                                     Advanced
@@ -71,14 +67,6 @@ export default function Profile() {
                             {activeTab === 'reviews' && (
                                 <div className="bg-white p-8 shadow-lg rounded-lg">
                                     <YourReviews/>
-                                </div>
-                            )}
-
-                            {activeTab === 'notifications' && (
-                                <div className="bg-white p-8 shadow-lg rounded-lg">
-                                    <h1 className="text-2xl font-bold mb-6">Notification Settings</h1>
-                                    {/* Notification settings content */}
-                                    <p>This section will contain notification settings options.</p>
                                 </div>
                             )}
 

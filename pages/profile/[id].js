@@ -93,6 +93,7 @@ export default function UserProfile() {
                                             key={item.id}
                                             id={item.id}
                                             price={item.price}
+                                            currency={item.currency}
                                             title={item.title}
                                             description={item.description}
                                             seller={item.seller}
