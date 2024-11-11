@@ -9,7 +9,7 @@ import {ethers} from "ethers";
 import {useSelector} from "react-redux";
 import ChatPopup from "@/components/chat/ChatPopup";
 import {fetchAllReviewsForItem, fetchItemById, fetchTransactionByItemId, fetchUserProfileByAddress} from "@/utils/apolloService";
-import {handleNotification, renderStars} from "@/utils/utils";
+import {handleNotification, renderStars, saniziteCondition} from "@/utils/utils";
 import ApproveItemModal from "@/components/modals/ApproveItemModal";
 import DisputeItemModal from "@/components/modals/DisputeItemModal";
 import FinalizeTransactionModal from "@/components/modals/FinalizeTransactionModal";
@@ -342,7 +342,7 @@ export default function OrderPage() {
                                     <p className="text-xl font-semibold text-green-600 mb-2">{isGift ? "FREE" : `Price : ${currency === "ETH" ? ethers.utils.formatEther(price) : price / 1e6} ${currency}`}</p>
                                     <p className="text-gray-400 mb-2">Date
                                         posted: {new Date(blockTimestamp * 1000).toDateString()}</p>
-                                    <p className="text-lg mb-4">Condition: {condition}</p>
+                                    <p className="text-lg mb-4">Condition: {saniziteCondition(condition)}</p>
                                     <p className="text-lg mb-4">Category: {category}</p>
                                     <p className="text-lg mb-4">Subcategory: {subcategory}</p>
                                     <p className="text-lg mb-4">Country: {country}</p>

@@ -16,6 +16,7 @@ import {addAddressToOrder, addNotification, getUserIdsWithItemInFavorites} from 
 import {fetchItemById, fetchUserProfileByAddress} from "@/utils/apolloService";
 import ChatPopup from "@/components/chat/ChatPopup";
 import Link from "next/link";
+import {saniziteCondition} from "@/utils/utils";
 
 export default function ItemPage() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -352,7 +353,7 @@ export default function ItemPage() {
                             <p className="text-xl font-semibold text-green-600 mb-2">{isGift ? "FREE" : `Price : ${currency === "ETH" ? ethers.utils.formatEther(price) : price / 1e6} ${currency}`}</p>
                             <p className="text-gray-400 mb-4">Date
                                 posted: {new Date(blockTimestamp * 1000).toDateString()}</p>
-                            <p className="text-lg mb-4">Condition: {condition}</p>
+                            <p className="text-lg mb-4">Condition: {saniziteCondition(condition)}</p>
                             <p className="text-lg mb-4">Category: {category}</p>
                             <p className="text-lg mb-4">Subcategory: {subcategory}</p>
                             <p className="text-lg mb-4">Country: {country}</p>

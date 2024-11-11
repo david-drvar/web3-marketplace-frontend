@@ -61,32 +61,35 @@ export default function Header() {
     return (
         <nav className="p-5 border-b-2 flex flex-row justify-between items-center">
             <Link href="/" onClick={() => setMenuOpen(false)}>
-                <h1 className="py-4 px-4 font-bold text-3xl">DecentMarkt</h1>
+                <h1 className="py-4 px-4 font-bold text-3xl hover:text-blue-500">DecentMarkt</h1>
             </Link>
 
             <div className="flex flex-row items-center">
 
                 {/* Chat Notification Icon */}
                 <Link href={'/chats'} className="mr-1 p-3">
-                    <div className="relative mr-4">
-                        <button className="text-xl">
-                            <FaEnvelope size={25}/>
+                    <div className="relative mr-4 group">
+                        <button className="text-xl p-2 rounded-full hover:bg-gray-100 transition-all duration-300 transform group-hover:scale-110">
+                            <FaEnvelope size={25} className="group-hover:text-blue-500"/>
                             {chatCounter > 0 && (
-                                <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-3 w-3 flex items-center justify-center">
-                                    {chatCounter}
-                                </span>
+                                <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    {chatCounter}
+                </span>
                             )}
                         </button>
                     </div>
                 </Link>
 
                 {/* General Notification Icon */}
-                <div className="relative mr-4">
-                    <button onClick={() => setNotificationDropdownOpen(!isNotificationDropdownOpen)} className="text-xl">
-                        <FaBell size={25}/>
+                <div className="relative mr-4 group">
+                    <button
+                        onClick={() => setNotificationDropdownOpen(!isNotificationDropdownOpen)}
+                        className="text-xl p-2 rounded-full hover:bg-gray-100 transition-all duration-300 transform group-hover:scale-110"
+                    >
+                        <FaBell size={25} className="group-hover:text-blue-500"/>
                         {unreadNotificationsCount > 0 && (
-                            <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-3 w-3 flex items-center justify-center">
-                                {unreadNotificationsCount}
+                            <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center group-hover:scale-110 transition-transform">
+                {unreadNotificationsCount}
                             </span>
                         )}
                     </button>
@@ -96,23 +99,23 @@ export default function Header() {
                                 <span className="font-semibold text-gray-700">Notifications</span>
                                 <button
                                     onClick={handleMarkAllAsRead}
-                                    className="text-xs text-blue-500 hover:text-blue-700">
+                                    className="text-xs text-blue-500 hover:text-blue-700"
+                                >
                                     Mark all as read
                                 </button>
                             </div>
                             <div className="max-h-60 overflow-y-auto">
-                                {
-                                    notifications.map(notification => (
-                                        <Link href={`/${notification.actionUrl}`} key={notification.id} onClick={() => handleNotificationClick(notification)}>
-                                            <div
-                                                key={notification.id}
-                                                className={`p-3 mb-2 ${notification.isRead ? 'bg-white hover:bg-gray-50' : 'bg-gray-100 hover:bg-gray-200'} rounded-md border border-gray-200  transition-colors`}>
-                                                <p className="text-sm text-gray-800">{notification.message}</p>
-                                                <span className="text-xs text-gray-500">{new Date(notification.timestamp).toLocaleString()}</span>
-                                            </div>
-                                        </Link>
-                                    ))
-                                }
+                                {notifications.map(notification => (
+                                    <Link href={`/${notification.actionUrl}`} key={notification.id} onClick={() => handleNotificationClick(notification)}>
+                                        <div
+                                            key={notification.id}
+                                            className={`p-3 mb-2 ${notification.isRead ? 'bg-white hover:bg-gray-50' : 'bg-gray-100 hover:bg-gray-200'} rounded-md border border-gray-200 transition-colors`}
+                                        >
+                                            <p className="text-sm text-gray-800">{notification.message}</p>
+                                            <span className="text-xs text-gray-500">{new Date(notification.timestamp).toLocaleString()}</span>
+                                        </div>
+                                    </Link>
+                                ))}
                             </div>
                         </div>
                     )}

@@ -149,7 +149,7 @@ const SearchFilterBar = ({onFilter, onReset}) => {
 
                 <button
                     onClick={handleReset}
-                    className="mt-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 flex-grow min-w-[120px]"
+                    className="mt-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 flex-grow min-w-[120px]"
                 >
                     Reset
                 </button>

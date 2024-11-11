@@ -111,3 +111,8 @@ export function getCategories() {
         "Collectibles": ["Coins", "Stamps", "Trading Cards", "Art", "Other"],
     };
 }
+
+
+export const saniziteCondition = (condition) => {
+    return condition.replace("_", " ");
+}
