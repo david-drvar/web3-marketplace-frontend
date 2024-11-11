@@ -166,13 +166,13 @@ export default function Header() {
                 </div>
 
                 <div className="relative mr-10">
-                    <div className="flex items-center cursor-pointer" onClick={() => setMenuOpen(!isMenuOpen)}>
+                    <div className="flex items-center cursor-pointer">
                         <ConnectButton moralisAuth={false}/>
                         {
-                            !isMenuOpen && <FaChevronDown className="ml-2 text-xl"/>
+                            !isMenuOpen && <FaChevronDown className="ml-2 text-xl" onClick={() => setMenuOpen(!isMenuOpen)}/>
                         }
                         {
-                            isMenuOpen && <FaChevronUp className="ml-2 text-xl"/>
+                            isMenuOpen && <FaChevronUp className="ml-2 text-xl" onClick={() => setMenuOpen(!isMenuOpen)}/>
                         }
                     </div>
                     {isMenuOpen && (
