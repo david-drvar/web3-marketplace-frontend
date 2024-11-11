@@ -42,6 +42,9 @@ export default function UserProfile() {
                 fetchAllTransactionsByUser(id)
             ]);
 
+            if (Array.isArray(userData) && userData.length === 0)
+                throw Error("User does not exist")
+
             // reviews handling
             setReviews(reviewsData);
             let totalGrade = 0;

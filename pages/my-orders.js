@@ -84,7 +84,7 @@ export default function MyOrders() {
 
                         {filteredItems.length === 0 ? (
                             <div className="text-center text-gray-500 italic">
-                                You made no purchases.
+                                You made no orders.
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

@@ -74,7 +74,6 @@ export default function Profile() {
                                 {activeTab === 'advanced' && (
                                     <div className="bg-white p-8 shadow-lg rounded-lg">
                                         <h1 className="text-3xl font-semibold mb-8">Advanced Settings</h1>
-
                                         <AdvancedSettings/>
                                     </div>
                                 )}

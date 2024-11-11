@@ -96,15 +96,6 @@ const Chats = () => {
                 <div className="flex h-screen">
                     {/* Sidebar for Chat List */}
                     <div className="w-1/3 bg-gray-100 border-r border-gray-300 overflow-y-auto">
-                        {/* Search Bar */}
-                        <div className="p-4 border-b border-gray-300">
-                            <input
-                                type="text"
-                                placeholder="Search chats..."
-                                className="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                            />
-                        </div>
-
                         {/* Chat List */}
                         <div>
                             {myChats.map((chat) => (

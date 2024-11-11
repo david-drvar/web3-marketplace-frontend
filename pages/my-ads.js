@@ -113,7 +113,7 @@ export default function MyAds() {
 
                         {filteredItems.length === 0 ? (
                             <div className="text-center text-gray-500 italic">
-                                You don't have any items.
+                                You haven't posted any ads.
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
