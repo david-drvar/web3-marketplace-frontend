@@ -9,7 +9,7 @@ import {ethers} from "ethers";
 import {useSelector} from "react-redux";
 import ChatPopup from "@/components/chat/ChatPopup";
 import {fetchAllReviewsForItem, fetchItemById, fetchTransactionByItemId, fetchUserProfileByAddress} from "@/utils/apolloService";
-import {handleNotification, renderStars, saniziteCondition} from "@/utils/utils";
+import {formatEthAddress, handleNotification, renderStars, saniziteCondition} from "@/utils/utils";
 import ApproveItemModal from "@/components/modals/ApproveItemModal";
 import DisputeItemModal from "@/components/modals/DisputeItemModal";
 import FinalizeTransactionModal from "@/components/modals/FinalizeTransactionModal";
@@ -200,7 +200,7 @@ export default function OrderPage() {
                 handleNotification(dispatch, "info", "Transaction submitted. Waiting for confirmations.", "Waiting for confirmations");
                 tx.wait().then((_) => {
                     handleNotification(dispatch, "success", "Item approved successfully", "Item confirmed");
-                    addNotification(transaction.seller === account ? transaction.buyer : transaction.seller, `User ${account} submitted their approval for order ${title}`, account, id, `order/${id}`, "order_approved")
+                    addNotification(transaction.seller === account ? transaction.buyer : transaction.seller, `${transaction.seller === account ? "Seller" : "Buyer"} approved order ${title}`, account, id, `order/${id}`, "order_approved")
                     setApproveButtonDisabled(true);
                     setShowApproveModal(false);
                 })
@@ -226,7 +226,8 @@ export default function OrderPage() {
                 handleNotification(dispatch, "info", "Transaction submitted. Waiting for confirmations.", "Waiting for confirmations");
                 tx.wait().then((_) => {
                     handleNotification(dispatch, "success", "Item disputed successfully", "Item disputed");
-                    addNotification(transaction.seller === account ? transaction.buyer : transaction.seller, `User ${account} disputed order ${title}`, account, id, `order/${id}`, "order_disputed")
+                    addNotification(transaction.seller === account ? transaction.buyer : transaction.seller, `${transaction.seller === account ? "Seller" : "Buyer"} disputed order ${title}`, account, id, `order/${id}`, "order_disputed")
+                    addNotification(transaction.moderator, `${transaction.seller === account ? "Seller" : "Buyer"} disputed order ${title}`, account, id, `order/${id}`, "order_disputed")
                     setDisputeButtonDisabled(true);
                     setShowDisputeModal(false);
                 })
@@ -253,8 +254,8 @@ export default function OrderPage() {
             onSuccess: (tx) => {
                 handleNotification(dispatch, "info", "Transaction submitted. Waiting for confirmations.", "Waiting for confirmations");
                 tx.wait().then((_) => {
-                    addNotification(transaction.seller, `Moderator ${account} finalized your order ${title}`, account, id, `order/${id}`, "order_finalized")
-                    addNotification(transaction.buyer, `Moderator ${account} finalized your order ${title}`, account, id, `order/${id}`, "order_finalized")
+                    addNotification(transaction.seller, `Moderator ${formatEthAddress(account)} finalized your order ${title}`, account, id, `order/${id}`, "order_finalized")
+                    addNotification(transaction.buyer, `Moderator ${formatEthAddress(account)} finalized your order ${title}`, account, id, `order/${id}`, "order_finalized")
                     handleNotification(dispatch, "success", "Item finalized successfully", "Item finalized");
                     setShowFinalizeModal(false);
                 })
@@ -282,7 +283,7 @@ export default function OrderPage() {
                 handleNotification(dispatch, "info", "Review submitted. Waiting for confirmations.", "Waiting for confirmations");
                 tx.wait().then((_) => {
                     handleNotification(dispatch, "success", "User reviewed successfully", "Review finalized");
-                    addNotification(toWhom, `User ${account} submitted review for you order ${title}`, account, id, `order/${id}`, "review_submitted")
+                    addNotification(toWhom, `${transaction.seller === account ? "Seller" : transaction.buyer === account ? "Buyer" : "Moderator"} submitted review for you order ${title}`, account, id, `order/${id}`, "review_submitted")
                     setShowReviewItemModal(false);
                     setRefreshPage(refreshPage + 1);
                 })

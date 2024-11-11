@@ -116,3 +116,10 @@ export function getCategories() {
 export const saniziteCondition = (condition) => {
     return condition.replace("_", " ");
 }
+
+export const formatEthAddress = (address) => {
+    const firstThree = address.slice(0, 5);
+    const lastThree = address.slice(-3);
+
+    return `${firstThree}...${lastThree}`;
+}

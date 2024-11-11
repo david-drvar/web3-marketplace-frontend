@@ -16,7 +16,7 @@ import {addAddressToOrder, addNotification, getUserIdsWithItemInFavorites} from 
 import {fetchItemById, fetchUserProfileByAddress} from "@/utils/apolloService";
 import ChatPopup from "@/components/chat/ChatPopup";
 import Link from "next/link";
-import {saniziteCondition} from "@/utils/utils";
+import {formatEthAddress, saniziteCondition} from "@/utils/utils";
 
 export default function ItemPage() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -131,8 +131,8 @@ export default function ItemPage() {
                 handleListWaitingConfirmation();
                 tx.wait().then((finalTx) => {
                     addAddressToOrder(id, address);
-                    addNotification(seller, `Your item ${title} has been bought by ${account} with moderator ${moderator}`, account, id, `order/${id}`, "item_bought")
-                    addNotification(moderator, `You have been assigned as moderator for item ${title} by ${account}`, account, id, `order/${id}`, "item_bought")
+                    addNotification(seller, `Your item ${title} has been bought by ${formatEthAddress(account)} with moderator ${formatEthAddress(moderator)}`, account, id, `order/${id}`, "item_bought")
+                    addNotification(moderator, `You have been assigned as moderator for item ${title} by ${formatEthAddress(account)}`, account, id, `order/${id}`, "item_assigned_moderator")
 
                     // notify users who have this item in their favorites
                     getUserIdsWithItemInFavorites(id).then((userIds) => {
@@ -227,7 +227,7 @@ export default function ItemPage() {
                 handleListWaitingConfirmation();
                 tx.wait().then((finalTx) => {
                     addAddressToOrder(id, address);
-                    addNotification(seller, `Your item ${title} has been bought by ${account}`, account, id, `order/${id}`, "item_bought")
+                    addNotification(seller, `Your item ${title} has been bought by ${formatEthAddress(account)}`, account, id, `order/${id}`, "item_bought")
 
                     // notify users who have this item in their favorites
                     getUserIdsWithItemInFavorites(id).then((userIds) => {

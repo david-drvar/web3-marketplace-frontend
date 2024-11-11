@@ -2,7 +2,15 @@ import Link from "next/link";
 import {useMoralis} from "react-moralis";
 import {ConnectButton} from "web3uikit";
 import {useState, useEffect, useRef} from "react";
-import {FaBell, FaEnvelope, FaChevronDown, FaChevronUp} from "react-icons/fa";
+import {
+    FaBell,
+    FaEnvelope,
+    FaChevronDown,
+    FaChevronUp,
+    FaCheckCircle,
+    FaExclamationCircle,
+    FaDollarSign, FaStar, FaGavel, FaHeartBroken
+} from "react-icons/fa";
 import {getAllNotifications, markNotificationsAsRead} from "@/utils/firebaseService";
 import {useDispatch, useSelector} from "react-redux";
 import {setUnreadCount} from "@/store/slices/unreadChatCounterSlice";
@@ -62,6 +70,27 @@ export default function Header() {
         markNotificationsAsRead(account, [notification]).then(() => fetchNotifications());
     }
 
+    const getNotificationIcon = (type) => {
+        switch (type) {
+            case 'order_approved':
+                return <FaCheckCircle className="text-green-500 mr-2" />;
+            case 'order_disputed':
+                return <FaExclamationCircle className="text-red-500 mr-2" />;
+            case 'order_finalized':
+                return <FaCheckCircle className="text-blue-500 mr-2" />;
+            case 'item_bought':
+                return <FaDollarSign className="text-yellow-500 mr-2" />;
+            case 'favorite_item_sold':
+                return <FaHeartBroken className="text-pink-500 mr-2" />;
+            case 'review_submitted':
+                return <FaStar className="text-orange-500 mr-2" />;
+            case 'item_assigned_moderator':
+                return <FaGavel size={30} className="text-purple-500 mr-2" />;
+            default:
+                return null;
+        }
+    }
+
     return (
         <nav className="p-5 border-b-2 flex flex-row justify-between items-center">
             <Link href="/" onClick={() => setMenuOpen(false)}>
@@ -108,17 +137,28 @@ export default function Header() {
                                     Mark all as read
                                 </button>
                             </div>
-                            <div className="max-h-60 overflow-hidden">
-                                {notifications.map(notification => (
-                                    <Link href={`/${notification.actionUrl}`} key={notification.id} onClick={() => handleNotificationClick(notification)}>
-                                        <div
-                                            key={notification.id}
-                                            className={`p-3 mb-2 ${notification.isRead ? 'bg-white hover:bg-gray-50' : 'bg-gray-100 hover:bg-gray-200'} rounded-md border border-gray-200 transition-colors`}
-                                        >
-                                            <p className="text-sm text-gray-800">{notification.message}</p>
-                                            <span className="text-xs text-gray-500">{new Date(notification.timestamp).toLocaleString()}</span>
-                                        </div>
-                                    </Link>
+                            <div className="max-h-60 overflow-y-auto overflow-x-hidden">
+                                {
+                                    notifications.length === 0 ?
+                                        (
+                                            <div className="text-gray-500 text-sm mt-2">You don't have any notifications.</div>
+                                        ) :
+                                        (
+                                            notifications.sort((n1, n2) => n2.timestamp - n1.timestamp).map(notification => (
+                                                <Link href={`/${notification.actionUrl}`} key={notification.id} onClick={() => handleNotificationClick(notification)}>
+                                                    <div
+                                                        key={notification.id}
+                                                        className={`p-3 mb-2 ${notification.isRead ? 'bg-white hover:bg-gray-50' : 'bg-gray-100 hover:bg-gray-200'} rounded-md border border-gray-200 transition-colors flex items-center`}
+                                                    >
+                                                        {getNotificationIcon(notification.type)}
+                                                        <div>
+                                                            <p className="text-sm text-gray-800">{notification.message}</p>
+                                                            <span className="text-xs text-gray-500">{new Date(notification.timestamp).toLocaleString()}</span>
+                                                        </div>
+                                                    </div>
+                                                </Link>
+                                            )
+
                                 ))}
                             </div>
                         </div>
