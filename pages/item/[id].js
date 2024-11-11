@@ -100,6 +100,7 @@ export default function ItemPage() {
 
             setSellerProfile(sellerProfileData);
         } catch (error) {
+            router.push({pathname: `/404`});
             console.error("Error loading data:", error);
         } finally {
             setIsLoading(false);

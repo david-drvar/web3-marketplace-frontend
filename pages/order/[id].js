@@ -67,84 +67,86 @@ export default function OrderPage() {
 
     useEffect(() => {
         // Wrap all fetches in a Promise.all to handle them together
-        const fetchData = async () => {
-            try {
-                // Start loading
-                setIsLoading(true);
-
-                // Fetch all data simultaneously
-                const [itemData, transactionData, orderAddressData, reviewsData] = await Promise.all([
-                    fetchItemById(id),
-                    fetchTransactionByItemId(id),
-                    getOrderAddress(id),
-                    fetchAllReviewsForItem(id)
-                ]);
-
-                // Handle participants' profiles
-                await loadParticipantsProfiles(transactionData);
-
-                // Handle item data
-                const item = itemData[0];
-                setItem(item);
-                setTitle(item.title);
-                setDescription(item.description);
-                setPrice(item.price);
-                setCurrency(item.currency);
-                setPhotosIPFSHashes(typeof item.photosIPFSHashes === "string" ? [item.photosIPFSHashes] : item.photosIPFSHashes);
-                setBlockTimestamp(item.blockTimestamp);
-                setItemStatus(item.itemStatus);
-                setCondition(item.condition);
-                setCategory(item.category);
-                setSubcategory(item.subcategory);
-                setCountry(item.country);
-                setIsGift(item.isGift);
-
-                // Handle transaction data
-                setTransaction(transactionData);
-                if (account === transactionData.buyer) {
-                    setRoleInTransaction("Buyer");
-                } else if (account === transactionData.seller) {
-                    setRoleInTransaction("Seller");
-                } else if (account === transactionData.moderator) {
-                    setRoleInTransaction("Moderator");
-                } else {
-                    router.push('/unauthorized')
-                }
-
-                if (account === transactionData.buyer && !transactionData.buyerApproved) {
-                    setApproveButtonDisabled(false);
-                } else if (account === transactionData.seller && !transactionData.sellerApproved) {
-                    setApproveButtonDisabled(false);
-                }
-
-                if (account === transactionData.buyer && !transactionData.disputedByBuyer) {
-                    setDisputeButtonDisabled(false);
-                } else if (account === transactionData.seller && !transactionData.disputedBySeller) {
-                    setDisputeButtonDisabled(false);
-                }
-
-                if (transactionData.isCompleted) {
-                    setDisputeButtonDisabled(true);
-                    setApproveButtonDisabled(true);
-                }
-
-                // Handle order address
-                setAddress(orderAddressData);
-
-                // Handle reviews given by account user for this item
-                setReviews(reviewsData);
-
-
-            } catch (error) {
-                console.error("Error fetching data: ", error);
-            } finally {
-                // Set loading to false after all data is fetched or if an error occurs
-                setIsLoading(false);
-            }
-        };
-
         fetchData();
     }, [id, account, refreshPage]); // Add account to dependency array if used in conditions
+
+
+    const fetchData = async () => {
+        try {
+            // Start loading
+            setIsLoading(true);
+
+            // Fetch all data simultaneously
+            const [itemData, transactionData, orderAddressData, reviewsData] = await Promise.all([
+                fetchItemById(id),
+                fetchTransactionByItemId(id),
+                getOrderAddress(id),
+                fetchAllReviewsForItem(id)
+            ]);
+
+            // Handle participants' profiles
+            await loadParticipantsProfiles(transactionData);
+
+            // Handle item data
+            const item = itemData[0];
+            setItem(item);
+            setTitle(item.title);
+            setDescription(item.description);
+            setPrice(item.price);
+            setCurrency(item.currency);
+            setPhotosIPFSHashes(typeof item.photosIPFSHashes === "string" ? [item.photosIPFSHashes] : item.photosIPFSHashes);
+            setBlockTimestamp(item.blockTimestamp);
+            setItemStatus(item.itemStatus);
+            setCondition(item.condition);
+            setCategory(item.category);
+            setSubcategory(item.subcategory);
+            setCountry(item.country);
+            setIsGift(item.isGift);
+
+            // Handle transaction data
+            setTransaction(transactionData);
+            if (account === transactionData.buyer) {
+                setRoleInTransaction("Buyer");
+            } else if (account === transactionData.seller) {
+                setRoleInTransaction("Seller");
+            } else if (account === transactionData.moderator) {
+                setRoleInTransaction("Moderator");
+            } else {
+                router.push('/unauthorized')
+            }
+
+            if (account === transactionData.buyer && !transactionData.buyerApproved) {
+                setApproveButtonDisabled(false);
+            } else if (account === transactionData.seller && !transactionData.sellerApproved) {
+                setApproveButtonDisabled(false);
+            }
+
+            if (account === transactionData.buyer && !transactionData.disputedByBuyer) {
+                setDisputeButtonDisabled(false);
+            } else if (account === transactionData.seller && !transactionData.disputedBySeller) {
+                setDisputeButtonDisabled(false);
+            }
+
+            if (transactionData.isCompleted) {
+                setDisputeButtonDisabled(true);
+                setApproveButtonDisabled(true);
+            }
+
+            // Handle order address
+            setAddress(orderAddressData);
+
+            // Handle reviews given by account user for this item
+            setReviews(reviewsData);
+
+
+        } catch (error) {
+            router.push({pathname: `/404`});
+            console.error("Error fetching data: ", error);
+        } finally {
+            // Set loading to false after all data is fetched or if an error occurs
+            setIsLoading(false);
+        }
+    };
 
     const loadParticipantsProfiles = async (transactionData) => {
         let participant1Address, participant2Address, participant1Role, participant2Role;

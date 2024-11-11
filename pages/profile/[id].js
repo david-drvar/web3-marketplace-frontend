@@ -2,8 +2,7 @@ import React, {useEffect, useState} from "react";
 import {useRouter} from "next/router";
 import {
     fetchActiveAdsByUser,
-    fetchAllReviewsByUser,
-    fetchAllTransactionsByUser,
+    fetchAllReviewsByUser, fetchAllTransactionsByUser,
     fetchUserByAddress
 } from "@/utils/apolloService";
 import ItemBox from "@/components/ItemBox";
@@ -27,25 +26,52 @@ export default function UserProfile() {
     const [totalClosedDeals, setTotalClosedDeals] = useState(0);
 
     useEffect(() => {
-        const loadData = async () => {
-            fetchAllReviewsByUser(id).then((reviews) => {
-                setReviews(reviews);
-                let totalGrade = 0;
-                reviews.forEach((review) =>
-                    totalGrade += review.rating
-                )
-                setGpa(totalGrade / reviews.length);
-            });
-            fetchUserByAddress(id).then((user) => setUser(user));
-            await fetchActiveAdsByUser(id).then((items) => setItems(items));
-            getLastSeenForUser(id).then((data) => setLastSeen(data))
-            fetchActiveAdsByUser(id).then((items) => setTotalAdsPosted(items.length));
-            fetchAllTransactionsByUser(id).then((transactions) => setTotalClosedDeals(transactions.length));
-        }
-
-        loadData().then(() => setIsLoading(false))
+        loadData();
     }, [id])
 
+    const loadData = async () => {
+        try {
+            // Start loading
+            setIsLoading(true);
+
+            const [reviewsData, userData, itemsData, lastSeenData, transactionsData] = await Promise.all([
+                fetchAllReviewsByUser(id),
+                fetchUserByAddress(id),
+                fetchActiveAdsByUser(id),
+                getLastSeenForUser(id),
+                fetchAllTransactionsByUser(id)
+            ]);
+
+            // reviews handling
+            setReviews(reviewsData);
+            let totalGrade = 0;
+            reviewsData.forEach((review) =>
+                totalGrade += review.rating
+            )
+            if (reviewsData.length > 0)
+                setGpa(totalGrade / reviewsData.length);
+
+            // user handling
+            setUser(userData);
+
+            // active ads handling
+            setItems(itemsData);
+            setTotalAdsPosted(itemsData.length);
+
+            // last seen handling
+            setLastSeen(lastSeenData);
+
+            // transactions handling
+            setTotalClosedDeals(transactionsData.length)
+
+        } catch (error) {
+            router.push({pathname: `/404`});
+            console.error("Error fetching data: ", error);
+        } finally {
+            // Set loading to false after all data is fetched or if an error occurs
+            setIsLoading(false);
+        }
+    }
 
     const handleProfileNavigation = (address) => {
         setIsLoading(true);
