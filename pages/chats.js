@@ -85,6 +85,7 @@ const Chats = () => {
         // update page
         getAllChats();
         setSelectedChat(chat);
+        console.log("selectedChat", chat)
     }
 
     return (
@@ -110,8 +111,8 @@ const Chats = () => {
                                 <div
                                     key={chat.id}
                                     className={`p-4 hover:bg-gray-200 cursor-pointer border-b border-gray-300 
-                                ${selectedChat && selectedChat.id === chat.id ? "bg-emerald-200" : "bg-gray-300"} 
-                                ${chat.isRead ? 'bg-white' : 'bg-gray-200'}`}
+                                        ${selectedChat && selectedChat.id === chat.id ? "bg-blue-100" : chat.isRead ? 'bg-white' : 'bg-gray-200'} 
+                                    `}
                                     onClick={() => handleChatClick(chat)}
                                 >
                                     <div className="flex items-center space-x-4">
