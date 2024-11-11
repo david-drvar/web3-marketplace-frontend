@@ -20,7 +20,7 @@ const YourReviews = () => {
                 isLoading ? (
                     <LoadingAnimation/>
                 ) : (
-                    <div className="container mx-auto p-8">
+                    <div className="container mx-auto">
                         <h1 className="text-3xl font-semibold mb-8">Your Reviews</h1>
 
                         {reviews.length === 0 ? (

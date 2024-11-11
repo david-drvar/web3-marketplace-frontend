@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useNotification} from "web3uikit";
 import {useMoralis, useWeb3Contract} from "react-moralis";
 import {useDispatch, useSelector} from "react-redux";
@@ -193,8 +193,8 @@ export default function ManageProfile() {
                 <LoadingAnimation/>
             ) : (
                 <div>
-                    <h1 className="text-4xl font-bold mb-6 flex items-center justify-between">
-                <span>
+                    <h1 className="text-3xl font-semibold mb-8 flex items-center justify-between">
+                        <span>
                     {userExists ? <>Update Your Profile</> : <>Create Your Profile</>}
                 </span>
                         {
@@ -210,7 +210,7 @@ export default function ManageProfile() {
                         }
                     </h1>
                     <form onSubmit={handleSubmit} className="space-y-3">
-                        <div>
+                    <div>
                             <label htmlFor="username" className="block text-sm font-medium text-gray-700">
                                 Username
                             </label>

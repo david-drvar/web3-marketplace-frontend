@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useDispatch, useSelector} from "react-redux";
 import {setUser} from "@/store/slices/userSlice";
 import {getCountries} from "@/utils/utils";
@@ -110,7 +110,7 @@ export default function ManageAddresses() {
 
     return (
         <div>
-            <h1 className="text-4xl font-bold mb-6">Manage Addresses</h1>
+            <h1 className="text-3xl font-semibold mb-8">Manage Addresses</h1>
             <form onSubmit={handleSubmit} className="space-y-3">
                 <div>
                     <label htmlFor="country" className="block text-sm font-medium text-gray-700">Country</label>

@@ -77,8 +77,8 @@ export default function ItemBox({id, price, currency, title, description, seller
                                 <div className="flex justify-between items-start mb-2">
                                     <div>
                                         <h2 className="text-xs text-gray-500">{`${category} > ${subcategory}`}</h2>
-                                        <h3 className="text-xl font-semibold text-gray-900 mt-1">{title}</h3>
-                                        <p className="text-gray-600 text-sm mt-1 line-clamp-2">{description}</p>
+                                        <h3 className="text-xl font-semibold text-gray-900 mt-1 line-clamp-1">{title}</h3>
+                                        <p className="text-gray-600 text-sm mt-1 line-clamp-2 h-10 overflow-hidden">{description}</p>
                                     </div>
                                     <p className="text-sm font-medium text-gray-700">{saniziteCondition(condition)}</p>
                                 </div>
