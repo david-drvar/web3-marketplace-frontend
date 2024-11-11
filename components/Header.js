@@ -15,6 +15,7 @@ export default function Header() {
     const [isNotificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
     const [isMenuOpen, setMenuOpen] = useState(false);
     const notificationsRef = useRef(null);
+    const menuRef = useRef(null);
 
     const chatCounter = useSelector((state) => state.chatCounter.unreadCount);
     const dispatch = useDispatch();
@@ -23,6 +24,9 @@ export default function Header() {
         function handleClickOutside(event) {
             if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
                 setNotificationDropdownOpen(false);
+            }
+            if (menuRef.current && !menuRef.current.contains(event.target)) {
+                setMenuOpen(false);
             }
         }
 
@@ -94,7 +98,7 @@ export default function Header() {
                         )}
                     </button>
                     {isNotificationDropdownOpen && (
-                        <div className="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-md p-4" ref={notificationsRef}>
+                        <div className="absolute right-0 mt-2 w-64 bg-white shadow-lg rounded-md p-4 z-50" ref={notificationsRef}>
                             <div className="flex justify-between items-center mb-2">
                                 <span className="font-semibold text-gray-700">Notifications</span>
                                 <button
@@ -104,7 +108,7 @@ export default function Header() {
                                     Mark all as read
                                 </button>
                             </div>
-                            <div className="max-h-60 overflow-y-auto">
+                            <div className="max-h-60 overflow-hidden">
                                 {notifications.map(notification => (
                                     <Link href={`/${notification.actionUrl}`} key={notification.id} onClick={() => handleNotificationClick(notification)}>
                                         <div
@@ -132,7 +136,7 @@ export default function Header() {
                         }
                     </div>
                     {isMenuOpen && (
-                        <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md p-4">
+                        <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md p-4 z-50" ref={menuRef}>
                             <Link href="/" onClick={() => setMenuOpen(!isMenuOpen)} className="flex items-center p-2 hover:bg-gray-200 rounded-md">
                                 <span className="mr-2">🏠</span> Home
                             </Link>
