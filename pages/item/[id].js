@@ -1,8 +1,7 @@
-import Image from "next/image";
 import {useRouter} from "next/router";
 import React, {useEffect, useState} from "react";
 import {useMoralis, useWeb3Contract} from "react-moralis";
-import {Button, useNotification} from "web3uikit";
+import {useNotification} from "web3uikit";
 import marketplaceAbi from "../../constants/Marketplace.json";
 import usdcAbi from "../../constants/USDCAbi.json";
 import eurcAbi from "../../constants/EURCAbi.json";
@@ -17,6 +16,9 @@ import {fetchItemById, fetchUserProfileByAddress} from "@/utils/apolloService";
 import ChatPopup from "@/components/chat/ChatPopup";
 import Link from "next/link";
 import {formatEthAddress, saniziteCondition} from "@/utils/utils";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 export default function ItemPage() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -56,6 +58,19 @@ export default function ItemPage() {
 
 
     const dispatch = useNotification();
+
+    const sliderSettings = {
+        dots: true,
+        infinite: false,
+        speed: 500,
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        lazyLoad: true,
+        arrows: true,
+        centerMode: true,
+        centerPadding: "60px",
+        className: "center"
+    };
 
     const [sellerProfile, setSellerProfile] = useState({
         avatarHash: "",
@@ -309,144 +324,143 @@ export default function ItemPage() {
             {isLoading ? (
                 <LoadingAnimation/>
             ) : (
-                <div className="max-w-4xl mx-auto p-6 bg-white shadow-md rounded-lg">
+                <div className="bg-gray-100 p-6">
                     {isWeb3Enabled ? (<div>
-                        <UpdateItemModal
-                            isVisible={showUpdateModal}
-                            id={id}
-                            title={title}
-                            price={price}
-                            seller={seller}
-                            currency={currency}
-                            description={description}
-                            photosIPFSHashes={photosIPFSHashes}
-                            condition={condition}
-                            category={category}
-                            subcategory={subcategory}
-                            isGift={isGift}
-                            country={country}
+                            <UpdateItemModal
+                                isVisible={showUpdateModal}
+                                id={id}
+                                title={title}
+                                price={price}
+                                seller={seller}
+                                currency={currency}
+                                description={description}
+                                photosIPFSHashes={photosIPFSHashes}
+                                condition={condition}
+                                category={category}
+                                subcategory={subcategory}
+                                isGift={isGift}
+                                country={country}
 
-                            onClose={() => {
-                                loadData().then(() => setShowUpdateModal(false))
+                                onClose={() => {
+                                    loadData().then(() => setShowUpdateModal(false))
 
-                            }}
-                        />
-                        <DeleteItemModal isVisible={showModalDelete} id={id} onClose={() => setShowModalDelete(false)}
-                                         disableButtons={() => setButtonsDisabled(true)}/>
-
-                        <BuyItemModal
-                            isVisible={showBuyModal}
-                            onClose={() => setShowBuyModal(false)}
-                            onBuyItemWithModerator={handleBuyItemWithModerator}
-                            onBuyItemWithoutModerator={handleBuyItemWithoutModerator}
-                        />
-
-                        {showChat &&
-                            <ChatPopup onClose={() => setShowChat(false)}
-                                       transaction={{seller: item.seller, buyer: account, itemId: id, moderator: ""}}
+                                }}
                             />
-                        }
+                            <DeleteItemModal isVisible={showModalDelete} id={id} onClose={() => setShowModalDelete(false)}
+                                             disableButtons={() => setButtonsDisabled(true)}/>
 
+                            <BuyItemModal
+                                isVisible={showBuyModal}
+                                onClose={() => setShowBuyModal(false)}
+                                onBuyItemWithModerator={handleBuyItemWithModerator}
+                                onBuyItemWithoutModerator={handleBuyItemWithoutModerator}
+                            />
 
-                        <div className="text-center">
-                            <h1 className="text-2xl font-bold mb-4">{title}</h1>
-                            <p className="text-lg mb-4">{description}</p>
-                            <p className="text-xl font-semibold text-green-600 mb-2">{isGift ? "FREE" : `Price : ${currency === "ETH" ? ethers.utils.formatEther(price) : price / 1e6} ${currency}`}</p>
-                            <p className="text-gray-400 mb-4">Date
-                                posted: {new Date(blockTimestamp * 1000).toDateString()}</p>
-                            <p className="text-lg mb-4">Condition: {saniziteCondition(condition)}</p>
-                            <p className="text-lg mb-4">Category: {category}</p>
-                            <p className="text-lg mb-4">Subcategory: {subcategory}</p>
-                            <p className="text-lg mb-4">Country: {country}</p>
-                        </div>
+                            {showChat &&
+                                <ChatPopup onClose={() => setShowChat(false)}
+                                           transaction={{seller: item.seller, buyer: account, itemId: id, moderator: ""}}
+                                />
+                            }
 
-                        { /* only show seller's data for user's that are not the item seller */
-                            account !== item.seller &&
-                            <div className="text-center">
-                                <h1 className="text-2xl font-bold mb-4">Seller's profile</h1>
-                                <p className="text-lg mb-4">{sellerProfile.username}</p>
-                                <p className="text-lg mb-4">{sellerProfile.firstName}</p>
-                                <p className="text-lg mb-4">{sellerProfile.lastName}</p>
-                                <p className="text-lg mb-4">{sellerProfile.avatarHash}</p>
-                                <p className="text-lg mb-4">{sellerProfile.averageRating}</p>
-                                <p className="text-lg mb-4">{sellerProfile.numberOfReviews}</p>
-                                <p className="text-lg mb-4">{new Date(sellerProfile.lastSeen).toLocaleString()}</p>
-                                <p className="text-lg mb-4">
-                                    <Link href={`/profile/${item.seller}`} passHref>
-                                                    <span className="text-blue-500 hover:underline font-medium">
+                            <div className="max-w-5xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+
+                                {/* Product Image Carousel */}
+                                <div className="p-6 flex justify-center">
+                                    {photosIPFSHashes.length > 0 ? (
+                                        <Slider {...sliderSettings} className="w-full max-w-3xl"> {/* Adjust max-w-3xl for the width you want */}
+                                            {photosIPFSHashes.map((photoHash, index) => (
+                                                <div key={index} className="flex justify-center">
+                                                    <img
+                                                        src={`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
+                                                        alt={`Product Image ${index + 1}`}
+                                                        className="rounded-lg object-cover"
+                                                        width={400}
+                                                        height={600}
+                                                    />
+                                                </div>
+                                            ))}
+                                        </Slider>
+                                    ) : (
+                                        <p>No images available</p>
+                                    )}
+                                </div>
+
+                                {/* Product Details */}
+                                <div className="p-6">
+                                    <h1 className="text-2xl font-bold mb-2">{title}</h1>
+                                    <p className="text-gray-700 text-lg mb-4">{isGift ? "FREE" : `Price : ${currency === "ETH" ? ethers.utils.formatEther(price) : price / 1e6} ${currency}`}</p>
+                                    <p className="text-sm text-gray-600 mb-2">Posted on: {new Date(blockTimestamp * 1000).toDateString()}</p>
+                                    <p className="text-sm text-gray-600 mb-2">Condition: {saniziteCondition(condition)}</p>
+                                    <p className="text-sm text-gray-600 mb-2">Ships from: {country}</p>
+                                    <p className="text-sm text-gray-600 mb-2">Category: {category} / {subcategory}</p>
+                                    <div className="mt-4 text-gray-800">
+                                        <p>{description}</p>
+                                    </div>
+                                </div>
+
+                                {/* Seller Info */}
+                                {account !== item.seller &&
+                                    <div className="border-t p-6 flex items-center space-x-4">
+                                        <img
+                                            src={`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${sellerProfile.avatarHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
+                                            alt="Seller Profile"
+                                            width={80}
+                                            height={80}
+                                            className="rounded-full object-cover"
+                                        />
+                                        <div>
+                                            <h2 className="text-lg font-semibold">{sellerProfile.username}</h2>
+                                            <p className="text-sm text-gray-500">Name: {sellerProfile.firstName} {sellerProfile.lastName}</p>
+                                            <p className="text-sm text-gray-500">Last seen: {new Date(sellerProfile.lastSeen).toLocaleString()}</p>
+                                            <p className="text-sm text-gray-500">Rating: GPA | # Reviews</p>
+                                            <p className="text-indigo-600 text-sm">
+                                                <Link href={`/profile/${item.seller}`} passHref>
+                                                    <span>
                                                         View profile
                                                     </span>
-                                    </Link>
-                                </p>
+                                                </Link>
+                                            </p>
+                                        </div>
+                                    </div>
+                                }
+
+                                {/* Action Buttons */}
+                                {
+                                    itemStatus === "Listed" &&
+                                    <div className="p-6 flex space-x-4">
+                                        {isAccountSeller ? (
+                                            <>
+                                                <button className="bg-yellow-500 text-white font-semibold py-2 px-4 rounded-lg w-full hover:bg-yellow-600"
+                                                        onClick={() => setShowUpdateModal(true)}>
+                                                    Update Item
+                                                </button>
+
+                                                <button className="bg-red-600 text-white font-semibold py-2 px-4 rounded-lg w-full hover:bg-red-700"
+                                                        onClick={() => setShowModalDelete(true)}>
+                                                    Delete Item
+                                                </button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <button className="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg w-full hover:bg-green-700"
+                                                        onClick={() => setShowChat(!showChat)}>
+                                                    Send Message to Seller
+                                                </button>
+
+                                                <button className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg w-full hover:bg-blue-700"
+                                                        onClick={() => setShowBuyModal(true)}>
+                                                    Buy Item
+                                                </button>
+                                            </>
+                                        )}
+                                    </div>
+                                }
                             </div>
-                        }
-
-
-                        <div className="grid grid-cols-2 gap-4 mt-6">
-                            {photosIPFSHashes.map((photoHash) => (
-                                <Image
-                                    key={photoHash}
-                                    loader={() => `${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
-                                    src={`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
-                                    height="200"
-                                    unoptimized
-                                    priority
-                                    width="200"
-                                    alt="item image"
-                                    className="rounded-lg shadow-md"
-                                />
-                            ))}
                         </div>
-                        {
-                            itemStatus === "Listed" &&
-                            <div className="flex justify-center mt-6">
-                                {isAccountSeller ? (
-                                    <div className="flex space-x-4">
-                                        <Button
-                                            disabled={buttonsDisabled}
-                                            text="Update item"
-                                            id="updateButton"
-                                            onClick={() => setShowUpdateModal(true)}
-                                            theme="primary"
-                                            className="bg-blue-500 hover:bg-blue-600"
-                                        />
-                                        <Button
-                                            disabled={buttonsDisabled}
-                                            text="Delete item"
-                                            id="deleteButton"
-                                            onClick={() => setShowModalDelete(true)}
-                                            theme="colored"
-                                            color="red"
-                                            className="bg-red-500 hover:bg-red-600"
-                                        />
-                                    </div>
-                                ) : (
-                                    <div className="flex space-x-4">
-                                        <Button
-                                            text="Send message"
-                                            id="chatButton"
-                                            theme="primary"
-                                            className="bg-blue-500 hover:bg-blue-600"
-                                            onClick={() => setShowChat(!showChat)}
-                                        />
-
-                                        <Button
-                                            text="Buy item"
-                                            id="buyButton"
-                                            onClick={() => setShowBuyModal(true)}
-                                            theme="primary"
-                                            className="bg-green-500 hover:bg-green-600"
-                                        />
-                                    </div>
-                                )}
-                            </div>
-                        }
-
-
-                    </div>) : (
+                    ) : (
                         <div className="m-4 italic text-center w-full">Please connect your wallet first to use the
-                            platform</div>)}
-
+                            platform</div>
+                    )}
 
                 </div>
             )}
