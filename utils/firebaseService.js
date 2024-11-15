@@ -279,3 +279,25 @@ export const getUserIdsWithItemInFavorites = async (itemId) => {
         throw new Error("Failed to fetch user IDs");
     }
 };
+
+export const isItemFavorited = async (userId, itemId) => {
+    if (!userId || userId.length === 0 || !itemId || itemId.length === 0) {
+        return false;
+    }
+
+    try {
+        const userFavoritesRef = doc(firebase_db, "favorites", userId);
+        const userFavoritesSnap = await getDoc(userFavoritesRef);
+
+        if (userFavoritesSnap.exists()) {
+            const data = userFavoritesSnap.data();
+            const itemIds = data.itemIds || [];
+            return itemIds.includes(itemId);
+        } else {
+            return false;
+        }
+    } catch (error) {
+        console.error("Error checking if item is favorited: ", error);
+        return false;
+    }
+};

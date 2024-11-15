@@ -11,7 +11,7 @@ import DeleteItemModal from "@/components/modals/DeleteItemModal";
 import {useSelector} from "react-redux";
 import BuyItemModal from "@/components/modals/BuyItemModal";
 import LoadingAnimation from "@/components/LoadingAnimation";
-import {addAddressToOrder, addNotification, getUserIdsWithItemInFavorites} from "@/utils/firebaseService";
+import {addAddressToOrder, addNotification, getUserIdsWithItemInFavorites, isItemFavorited, toggleFavoriteItem} from "@/utils/firebaseService";
 import {fetchItemById, fetchUserProfileByAddress} from "@/utils/apolloService";
 import ChatPopup from "@/components/chat/ChatPopup";
 import Link from "next/link";
@@ -19,6 +19,8 @@ import {formatEthAddress, saniziteCondition} from "@/utils/utils";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import {HeartIcon as HeartIconSolid} from "@heroicons/react/solid";
+import {HeartIcon} from "@heroicons/react/outline";
 
 export default function ItemPage() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -55,6 +57,8 @@ export default function ItemPage() {
     const escrowContractAddress = useSelector((state) => state.contract["escrowContractAddress"]);
     const usdcContractAddress = useSelector((state) => state.contract["usdcContractAddress"]);
     const eurcContractAddress = useSelector((state) => state.contract["eurcContractAddress"]);
+
+    const [isFavorite, setIsFavorite] = useState(false);
 
 
     const dispatch = useNotification();
@@ -93,6 +97,7 @@ export default function ItemPage() {
             setIsLoading(true);
 
             const itemData = await fetchItemById(id);
+            const isFavoriteData = await isItemFavorited(account, id);
             const sellerAddress = itemData[0].seller;
 
             setItem(itemData[0]);
@@ -114,6 +119,7 @@ export default function ItemPage() {
             const sellerProfileData = await fetchUserProfileByAddress(sellerAddress);
 
             setSellerProfile(sellerProfileData);
+            setIsFavorite(isFavoriteData);
         } catch (error) {
             router.push({pathname: `/404`});
             console.error("Error loading data:", error);
@@ -318,6 +324,11 @@ export default function ItemPage() {
         });
     };
 
+    const handleFavoriteClick = async () => {
+        setIsFavorite(!isFavorite);
+        await toggleFavoriteItem(account, id)
+    }
+
 
     return (
         <>
@@ -387,7 +398,24 @@ export default function ItemPage() {
 
                                 {/* Product Details */}
                                 <div className="p-6">
-                                    <h1 className="text-2xl font-bold mb-2">{title}</h1>
+                                    <div className="flex justify-between items-center">
+                                        <h1 className="text-2xl font-bold mb-2">{title}</h1>
+
+                                        {account !== item.seller &&
+                                            <button
+                                                onClick={handleFavoriteClick}
+                                                className="text-gray-600 hover:text-red-500 transition-colors duration-200"
+                                                aria-label="Favorite"
+                                            >
+                                                {isFavorite ? (
+                                                    <HeartIconSolid className="w-10 h-10 text-red-500"/>
+                                                ) : (
+                                                    <HeartIcon className="w-10 h-10"/>
+                                                )}
+                                            </button>
+                                        }
+
+                                    </div>
                                     <p className="text-gray-700 text-lg mb-4">{isGift ? "FREE" : `Price : ${currency === "ETH" ? ethers.utils.formatEther(price) : price / 1e6} ${currency}`}</p>
                                     <p className="text-sm text-gray-600 mb-2">Posted on: {new Date(blockTimestamp * 1000).toDateString()}</p>
                                     <p className="text-sm text-gray-600 mb-2">Condition: {saniziteCondition(condition)}</p>

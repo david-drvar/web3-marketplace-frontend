@@ -9,15 +9,6 @@ import {HeartIcon as HeartIconSolid} from "@heroicons/react/solid";
 import {toggleFavoriteItem} from "@/utils/firebaseService";
 import {saniziteCondition} from "@/utils/utils";
 
-const truncateStr = (fullStr, strLen) => {
-    if (fullStr.length <= strLen) return fullStr;
-    const separator = "...";
-    const seperatorLength = separator.length;
-    const charsToShow = strLen - seperatorLength;
-    const frontChars = Math.ceil(charsToShow / 2);
-    const backChars = Math.floor(charsToShow / 2);
-    return fullStr.substring(0, frontChars) + separator + fullStr.substring(fullStr.length - backChars);
-};
 
 export default function ItemBox({id, price, currency, title, description, seller, photosIPFSHashes, itemStatus, blockTimestamp, displayOwnedStatus, category, subcategory, condition, displayFavorite = false, isFavorite = false, loadFavorites = null}) {
     const {isWeb3Enabled, account} = useMoralis();
@@ -31,7 +22,6 @@ export default function ItemBox({id, price, currency, title, description, seller
     }, [isWeb3Enabled, account]);
 
     const isOwnedByUser = seller === account || seller === undefined;
-    const formattedSellerAddress = isOwnedByUser ? "you" : truncateStr(seller || "", 15);
 
     const handleFavoriteClick = async (event) => {
         event.stopPropagation();  // Prevent Link navigation
@@ -110,7 +100,6 @@ export default function ItemBox({id, price, currency, title, description, seller
                 )}
             </div>
         </div>
-
     );
 
 }
