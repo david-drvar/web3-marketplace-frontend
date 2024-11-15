@@ -21,6 +21,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import {HeartIcon as HeartIconSolid} from "@heroicons/react/solid";
 import {HeartIcon} from "@heroicons/react/outline";
+import RatingDisplay from "@/components/RatingDisplay";
 
 export default function ItemPage() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -440,7 +441,8 @@ export default function ItemPage() {
                                             <h2 className="text-lg font-semibold">{sellerProfile.username}</h2>
                                             <p className="text-sm text-gray-500">Name: {sellerProfile.firstName} {sellerProfile.lastName}</p>
                                             <p className="text-sm text-gray-500">Last seen: {new Date(sellerProfile.lastSeen).toLocaleString()}</p>
-                                            <p className="text-sm text-gray-500">Rating: GPA | # Reviews</p>
+                                            <RatingDisplay rating={sellerProfile.averageRating} reviewCount={sellerProfile.numberOfReviews}/>
+
                                             <p className="text-indigo-600 text-sm">
                                                 <Link href={`/profile/${item.seller}`} passHref>
                                                     <span>
