@@ -49,7 +49,7 @@ export default function ItemBox({id, price, currency, title, description, seller
                                         fill
                                         unoptimized
                                         alt="item image"
-                                        className="rounded-t-lg object-cover"
+                                        className="rounded-lg object-cover"
                                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                                         priority
                                     />
