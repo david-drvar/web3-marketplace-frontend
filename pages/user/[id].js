@@ -7,12 +7,15 @@ import {
 } from "@/utils/apolloService";
 import ItemBox from "@/components/ItemBox";
 import LoadingAnimation from "@/components/LoadingAnimation";
-import {getLastSeenForUser} from "@/utils/firebaseService";
+import {getFavoriteItems, getLastSeenForUser} from "@/utils/firebaseService";
 import RatingDisplay from "@/components/RatingDisplay";
 import {renderStars} from "@/utils/utils";
+import {useMoralis} from "react-moralis";
 
 
 export default function UserProfile() {
+    const {account} = useMoralis();
+
     const router = useRouter();
 
     const id = router.query.id;
@@ -27,6 +30,9 @@ export default function UserProfile() {
     const [totalAdsPosted, setTotalAdsPosted] = useState(0);
     const [totalClosedDeals, setTotalClosedDeals] = useState(0);
 
+    const [favoriteItemsIds, setFavoriteItemsIds] = useState([]);
+
+
     useEffect(() => {
         loadData();
     }, [id])
@@ -36,12 +42,13 @@ export default function UserProfile() {
             // Start loading
             setIsLoading(true);
 
-            const [reviewsData, userData, itemsData, lastSeenData, transactionsData] = await Promise.all([
+            const [reviewsData, userData, itemsData, lastSeenData, transactionsData, favoriteItemsIdsData] = await Promise.all([
                 fetchAllReviewsByUser(id),
                 fetchUserByAddress(id),
                 fetchActiveAdsByUser(id),
                 getLastSeenForUser(id),
-                fetchAllTransactionsByUser(id)
+                fetchAllTransactionsByUser(id),
+                getFavoriteItems(account)
             ]);
 
             if (Array.isArray(userData) && userData.length === 0)
@@ -68,6 +75,9 @@ export default function UserProfile() {
 
             // transactions handling
             setTotalClosedDeals(transactionsData.length)
+
+            // favorites handling
+            setFavoriteItemsIds(favoriteItemsIdsData)
 
         } catch (error) {
             router.push({pathname: `/404`});
@@ -140,6 +150,8 @@ export default function UserProfile() {
                                                     category={item.category}
                                                     subcategory={item.subcategory}
                                                     condition={item.condition}
+                                                    displayFavorite={account !== item.seller}
+                                                    isFavorite={favoriteItemsIds.includes(item.id)}
                                                 />
 
                                             ))}
