@@ -1,4 +1,4 @@
-import {Modal, useNotification, Upload} from "web3uikit";
+import {useNotification, Upload} from "web3uikit";
 import {useEffect, useState} from "react";
 import {useWeb3Contract} from "react-moralis";
 import marketplaceAbi from "../../constants/Marketplace.json";
@@ -6,6 +6,7 @@ import {ethers} from "ethers";
 import Image from "next/image";
 import {useSelector} from "react-redux";
 import {getCategories, getCountries} from "@/utils/utils";
+import Modal from "react-modal";
 
 export default function UpdateItemModal({
                                             id,
@@ -278,227 +279,271 @@ export default function UpdateItemModal({
 
     return (
         <Modal
-
-            isCancelDisabled={buttonsDisabled}
-            isOkDisabled={buttonsDisabled || ((newImages.length + imageURIs.length) === 0) || (newImages.every(element => element === null) && imageURIs.length === 0)}
-            isVisible={isVisible}
-            onCancel={() => {
+            isOpen={isVisible}
+            onRequestClose={() => {
                 resetFormData();
                 onClose();
             }}
-            onCloseButtonPressed={() => {
-                resetFormData();
-                onClose();
-            }}
-            onOk={() => {
-                handleSubmit({
-                    onError: (error) => {
-                        handleListError(error);
-                    },
-                    onSuccess: () => {
-                        handleUpdateListingSuccess();
-                        onClose();
-                    },
-                });
-            }}
-            title="Update Item"
+            contentLabel="Update Item Modal"
+            className="bg-white rounded-lg shadow-xl max-w-3xl overflow-y-auto max-h-[75vh] min-w-[50vw] w-full p-4"
+            overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
         >
-            <div className="p-4 space-y-4">
-                <div>
-                    <label htmlFor="title" className="block text-sm font-medium text-gray-700">
-                        Title
-                    </label>
-                    <input
-                        type="text"
-                        id="title"
-                        name="title"
-                        value={formData.title}
-                        onChange={handleChange}
-                        required
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    />
-                </div>
-                <div>
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                        Description
-                    </label>
-                    <input
-                        type="text"
-                        id="description"
-                        name="description"
-                        value={formData.description}
-                        onChange={handleChange}
-                        required
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    />
-                </div>
-                <div>
-                    <label htmlFor="currency" className="block text-sm font-medium text-gray-700">Currency</label>
-                    <select
-                        id="currency"
-                        name="currency"
-                        value={formData.currency}
-                        onChange={handleChange}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    >
-                        {supportedCurrencies.map((currency, key) =>
-                            <option value={currency} key={key}>{currency}</option>
-                        )
-                        }
-                    </select>
-                </div>
-                <div>
-                    <label htmlFor="price" className="block text-sm font-medium text-gray-700">
-                        Price
-                    </label>
-                    <input
-                        type="number"
-                        id="price"
-                        name="price"
-                        value={formData.price}
-                        onChange={handleChange}
-                        required
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    />
-                </div>
+            <div className="bg-white p-4 rounded-lg max-h-full overflow-y-auto">
 
-                <div>
-                    <label htmlFor="condition" className="block text-sm font-medium text-gray-700">Condition</label>
-                    <select
-                        id="condition"
-                        name="condition"
-                        value={formData.condition}
-                        onChange={handleChange}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    >
-                        <option value="0">New</option>
-                        <option value="1">Like New</option>
-                        <option value="2">Excellent</option>
-                        <option value="3">Good</option>
-                        <option value="4">Damaged</option>
-                    </select>
-                </div>
+                <h2 className="text-xl font-bold text-gray-900 mb-4">Update Item</h2>
+                <div className="p-4 space-y-4">
+                    {/* Title */}
+                    <div>
+                        <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                            Title
+                        </label>
+                        <input
+                            type="text"
+                            id="title"
+                            name="title"
+                            value={formData.title}
+                            onChange={handleChange}
+                            required
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        />
+                    </div>
 
+                    {/* Description */}
+                    <div>
+                        <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                            Description
+                        </label>
+                        <input
+                            type="text"
+                            id="description"
+                            name="description"
+                            value={formData.description}
+                            onChange={handleChange}
+                            required
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        />
+                    </div>
 
-                <div>
-                    <label htmlFor="category" className="block text-sm font-medium text-gray-700">Category</label>
-                    <select
-                        id="category"
-                        name="category"
-                        value={formData.category}
-                        onChange={handleCategoryChange}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    >
-                        <option value="">Select a category</option>
-                        {Object.keys(getCategories()).map((category, index) => (
-                            <option key={index} value={category}>{category}</option>
-                        ))}
-                    </select>
-                </div>
+                    {/* Currency */}
+                    <div>
+                        <label htmlFor="currency" className="block text-sm font-medium text-gray-700">
+                            Currency
+                        </label>
+                        <select
+                            id="currency"
+                            name="currency"
+                            value={formData.currency}
+                            onChange={handleChange}
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        >
+                            {supportedCurrencies.map((currency, key) => (
+                                <option value={currency} key={key}>
+                                    {currency}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
-                <div>
-                    <label htmlFor="subcategory" className="block text-sm font-medium text-gray-700">Subcategory</label>
-                    <select
-                        id="subcategory"
-                        name="subcategory"
-                        value={formData.subcategory}
-                        onChange={handleChange}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    >
-                        <option value="">Select a subcategory</option>
-                        {formData.category && getCategories()[formData.category].map((subcategory, index) => (
-                            <option key={index} value={subcategory}>{subcategory}</option>
-                        ))}
-                    </select>
-                </div>
+                    {/* Price */}
+                    <div>
+                        <label htmlFor="price" className="block text-sm font-medium text-gray-700">
+                            Price
+                        </label>
+                        <input
+                            type="number"
+                            id="price"
+                            name="price"
+                            value={formData.price}
+                            onChange={handleChange}
+                            required
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        />
+                    </div>
 
-                <div>
-                    <label htmlFor="country" className="block text-sm font-medium text-gray-700">Country</label>
-                    <select
-                        id="country"
-                        name="country"
-                        value={formData.country}
-                        onChange={handleChange}
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                    >
-                        <option value="">Select a country</option>
-                        {getCountries().map((country, index) => (
-                            <option key={index} value={country}>{country}</option>
-                        ))}
-                    </select>
-                </div>
+                    {/* Condition */}
+                    <div>
+                        <label htmlFor="condition" className="block text-sm font-medium text-gray-700">
+                            Condition
+                        </label>
+                        <select
+                            id="condition"
+                            name="condition"
+                            value={formData.condition}
+                            onChange={handleChange}
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        >
+                            <option value="0">New</option>
+                            <option value="1">Like New</option>
+                            <option value="2">Excellent</option>
+                            <option value="3">Good</option>
+                            <option value="4">Damaged</option>
+                        </select>
+                    </div>
 
-                <div>
-                    <label htmlFor="isGift" className="block text-sm font-medium text-gray-700">Is this a gift?</label>
-                    <input
-                        type="checkbox"
-                        id="isGift"
-                        name="isGift"
-                        checked={formData.isGift}
-                        onChange={() => setFormData((prevState) => ({
-                            ...prevState,
-                            isGift: !prevState.isGift,
-                        }))}
-                        className="mt-1 block w-4 h-4"
-                    />
-                </div>
+                    {/* Category */}
+                    <div>
+                        <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+                            Category
+                        </label>
+                        <select
+                            id="category"
+                            name="category"
+                            value={formData.category}
+                            onChange={handleCategoryChange}
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        >
+                            <option value="">Select a category</option>
+                            {Object.keys(getCategories()).map((category, index) => (
+                                <option key={index} value={category}>
+                                    {category}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
+                    {/* Subcategory */}
+                    <div>
+                        <label htmlFor="subcategory" className="block text-sm font-medium text-gray-700">
+                            Subcategory
+                        </label>
+                        <select
+                            id="subcategory"
+                            name="subcategory"
+                            value={formData.subcategory}
+                            onChange={handleChange}
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        >
+                            <option value="">Select a subcategory</option>
+                            {formData.category &&
+                                getCategories()[formData.category].map((subcategory, index) => (
+                                    <option key={index} value={subcategory}>
+                                        {subcategory}
+                                    </option>
+                                ))}
+                        </select>
+                    </div>
 
-                {newImages.map((newImage, index) => (
-                    <Upload
-                        key={index}
-                        onChange={(event) => handleAddNewImage(event, index)}
-                        theme="withIcon"
-                        className="w-full bg-gray-100 p-2 rounded-lg border border-gray-300"
-                    />
-                ))}
+                    {/* Country */}
+                    <div>
+                        <label htmlFor="country" className="block text-sm font-medium text-gray-700">
+                            Country
+                        </label>
+                        <select
+                            id="country"
+                            name="country"
+                            value={formData.country}
+                            onChange={handleChange}
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        >
+                            <option value="">Select a country</option>
+                            {getCountries().map((country, index) => (
+                                <option key={index} value={country}>
+                                    {country}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
 
-                <button
-                    type="button"
-                    onClick={handleAddImageButton}
-                    className="w-full py-2 bg-green-500 text-white rounded-md shadow hover:bg-green-600 focus:outline-none"
-                >
-                    Add Image
-                </button>
+                    {/* Is Gift */}
+                    <div>
+                        <label htmlFor="isGift" className="block text-sm font-medium text-gray-700">
+                            Is this a gift?
+                        </label>
+                        <input
+                            type="checkbox"
+                            id="isGift"
+                            name="isGift"
+                            checked={formData.isGift}
+                            onChange={() =>
+                                setFormData((prevState) => ({
+                                    ...prevState,
+                                    isGift: !prevState.isGift,
+                                }))
+                            }
+                            className="mt-1 block w-4 h-4"
+                        />
+                    </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {imageURIs.map((photoHash, index) => (
-                        <div key={index} className="relative w-full h-64 rounded-lg overflow-hidden shadow-lg">
-                            <Image
-                                loader={() => `${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
-                                src={`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
-                                alt="Image"
-                                fill
-                                unoptimized
-                                style={{objectFit: 'cover'}}
-                                className="rounded-lg"
-                                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                                priority
+                    {/* Images */}
+                    <div>
+                        {newImages.map((newImage, index) => (
+                            <input
+                                key={index}
+                                type="file"
+                                onChange={(event) => handleAddNewImage(event, index)}
+                                className="w-full bg-gray-100 p-2 rounded-lg border border-gray-300"
                             />
-                            <button
-                                className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 focus:outline-none hover:bg-red-600"
-                                onClick={() => handleDeleteImage(index)}
-                            >
-                                <svg
-                                    className="w-6 h-6"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                    xmlns="http://www.w3.org/2000/svg"
+                        ))}
+                        <button
+                            type="button"
+                            onClick={handleAddImageButton}
+                            className="w-full py-2 bg-green-500 text-white rounded-md shadow hover:bg-green-600 focus:outline-none"
+                        >
+                            Add Image
+                        </button>
+                    </div>
+
+                    {/* Image URIs */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {imageURIs.map((photoHash, index) => (
+                            <div key={index} className="relative w-full h-64 rounded-lg overflow-hidden shadow-lg">
+                                <Image
+                                    loader={() =>
+                                        `${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`
+                                    }
+                                    src={`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${photoHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
+                                    alt="Image"
+                                    fill
+                                    unoptimized
+                                    style={{objectFit: "cover"}}
+                                    className="rounded-lg"
+                                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                                    priority
+                                />
+                                <button
+                                    className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 focus:outline-none hover:bg-red-600"
+                                    onClick={() => handleDeleteImage(index)}
                                 >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-                    ))}
+                                    <svg
+                                        className="w-6 h-6"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                        xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth="2"
+                                            d="M6 18L18 6M6 6l12 12"
+                                        ></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Submit */}
+                    <div className="flex justify-end gap-4">
+                        <button
+                            className="py-2 px-4 bg-gray-300 text-gray-700 rounded-md shadow hover:bg-gray-400 focus:outline-none"
+                            onClick={() => {
+                                resetFormData();
+                                onClose();
+                            }}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            className="py-2 px-4 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 focus:outline-none"
+                            onClick={handleSubmit}
+                            disabled={buttonsDisabled}
+                        >
+                            Submit
+                        </button>
+                    </div>
                 </div>
             </div>
         </Modal>
     );
-
 }
