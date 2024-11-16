@@ -8,6 +8,7 @@ import {
 import ItemBox from "@/components/ItemBox";
 import LoadingAnimation from "@/components/LoadingAnimation";
 import {getLastSeenForUser} from "@/utils/firebaseService";
+import RatingDisplay from "@/components/RatingDisplay";
 
 
 export default function UserProfile() {
@@ -88,57 +89,65 @@ export default function UserProfile() {
                 isLoading ? (
                     <LoadingAnimation/>
                 ) : (
-                    <div className="container mx-auto p-8">
-                        <div className="flex items-center space-x-4 mb-8">
-                            <img
-                                src={`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${user.avatarHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
-                                alt={user.username} className="w-24 h-24 rounded-full"/>
-                            <div>
-                                <h1 className="text-3xl font-semibold">{user.username}</h1>
-                                <p className="text-gray-500 mt-3">Number of reviews - {reviews.length}</p>
-                                <p className="text-gray-500">GPA - {gpa}</p>
-                                <p className="text-gray-500">member since - {new Date(user.blockTimestamp * 1000).toDateString()}</p>
-                                <p className="text-gray-500">last seen - {new Date(lastSeen).toLocaleString()}</p>
-                                <p className="text-gray-500">total ads posted - {totalAdsPosted}</p>
-                                <p className="text-gray-500">total deals closed - {totalClosedDeals}</p>
-                                <button onClick={() => setShowReviews(true)}
-                                        className="mt-2 text-blue-500 underline">See all
-                                    reviews
-                                </button>
+                    <div className="bg-gray-100 p-6">
+
+                        {/* User details */}
+                        <div className="mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
+                            <div className="flex items-center space-x-4 m-5">
+                                <img
+                                    src={`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${user.avatarHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`}
+                                    alt={user.username} className="w-24 h-24 rounded-full"/>
+                                <div>
+                                    <h2 className="text-lg font-semibold mt-1">{user.username}</h2>
+                                    <p className="text-sm text-gray-500 mt-1">Name: {user.firstName} {user.lastName}</p>
+                                    <p className="text-sm text-gray-500 mt-1">Member since: {new Date(user.blockTimestamp * 1000).toDateString()}</p>
+                                    <p className="text-sm text-gray-500 mt-1">Total ads posted: {totalAdsPosted}</p>
+                                    <p className="text-sm text-gray-500 mt-1">Total deals closed: {totalClosedDeals}</p>
+                                    <p className="text-sm text-gray-500 mt-1 mb-2">Last seen: {new Date(lastSeen).toLocaleString()}</p>
+                                    <RatingDisplay rating={gpa} reviewCount={reviews.length}/>
+                                    <button onClick={() => setShowReviews(true)}
+                                            className="mt-2 text-blue-500 underline">See all
+                                        reviews
+                                    </button>
+                                </div>
                             </div>
+
+                            {/* Current ads */}
+                            <div className="border-t p-6 space-x-4">
+                                <h2 className="text-2xl font-semibold mb-4 ml-5">Current ads</h2>
+                                {
+                                    items.length === 0 ? (
+                                        <div className="text-center text-gray-500 italic">
+                                            No listed items available at the moment.
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                                            {items.map((item, index) => (
+                                                item.itemStatus === "Listed" &&
+                                                <ItemBox
+                                                    key={item.id}
+                                                    id={item.id}
+                                                    price={item.price}
+                                                    currency={item.currency}
+                                                    title={item.title}
+                                                    description={item.description}
+                                                    seller={item.seller}
+                                                    photosIPFSHashes={item.photosIPFSHashes}
+                                                    itemStatus={item.itemStatus}
+                                                    blockTimestamp={item.blockTimestamp}
+                                                    displayOwnedStatus={false}
+                                                    category={item.category}
+                                                    subcategory={item.subcategory}
+                                                    condition={item.condition}
+                                                />
+
+                                            ))}
+                                        </div>
+                                    )
+                                }
+                            </div>
+
                         </div>
-
-                        <h2 className="text-2xl font-semibold mb-4">Current ads</h2>
-                        {
-                            items.length === 0 ? (
-                                <div className="text-center text-gray-500 italic">
-                                    No listed items available at the moment.
-                                </div>
-                            ) : (
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    {items.map((item, index) => (
-                                        item.itemStatus === "Listed" &&
-                                        <ItemBox
-                                            key={item.id}
-                                            id={item.id}
-                                            price={item.price}
-                                            currency={item.currency}
-                                            title={item.title}
-                                            description={item.description}
-                                            seller={item.seller}
-                                            photosIPFSHashes={item.photosIPFSHashes}
-                                            itemStatus={item.itemStatus}
-                                            blockTimestamp={item.blockTimestamp}
-                                            displayOwnedStatus={false}
-                                            category={item.category}
-                                            subcategory={item.subcategory}
-                                            condition={item.condition}
-                                        />
-
-                                    ))}
-                                </div>
-                            )
-                        }
 
 
                         {showReviews && (

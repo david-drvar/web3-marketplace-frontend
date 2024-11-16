@@ -438,13 +438,13 @@ export default function ItemPage() {
                                             className="rounded-full object-cover"
                                         />
                                         <div>
-                                            <h2 className="text-lg font-semibold">{sellerProfile.username}</h2>
+                                            <h1 className="text-lg font-semibold">{sellerProfile.username}</h1>
                                             <p className="text-sm text-gray-500">Name: {sellerProfile.firstName} {sellerProfile.lastName}</p>
-                                            <p className="text-sm text-gray-500">Last seen: {new Date(sellerProfile.lastSeen).toLocaleString()}</p>
+                                            <p className="text-sm text-gray-500 mb-1">Last seen: {new Date(sellerProfile.lastSeen).toLocaleString()}</p>
                                             <RatingDisplay rating={sellerProfile.averageRating} reviewCount={sellerProfile.numberOfReviews}/>
 
-                                            <p className="text-indigo-600 text-sm">
-                                                <Link href={`/profile/${item.seller}`} passHref>
+                                            <p className="text-indigo-600 text-sm mt-2 underline">
+                                                <Link href={`/user/${item.seller}`} passHref>
                                                     <span>
                                                         View profile
                                                     </span>

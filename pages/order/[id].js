@@ -426,8 +426,8 @@ export default function OrderPage() {
                                         <p className="text-sm text-gray-500">Last seen: {new Date(participant1Profile.lastSeen).toLocaleString()}</p>
                                         <RatingDisplay rating={participant1Profile.averageRating} reviewCount={participant1Profile.numberOfReviews}/>
 
-                                        <p className="text-indigo-600 text-sm">
-                                            <Link href={`/profile/${participant1Profile.address}`} passHref>
+                                        <p className="text-indigo-600 text-sm underline">
+                                            <Link href={`/user/${participant1Profile.address}`} passHref>
                                                     <span>
                                                         View profile
                                                     </span>
@@ -460,8 +460,8 @@ export default function OrderPage() {
                                             <p className="text-sm text-gray-500">Last seen: {new Date(participant2Profile.lastSeen).toLocaleString()}</p>
                                             <RatingDisplay rating={participant2Profile.averageRating} reviewCount={participant2Profile.numberOfReviews}/>
 
-                                            <p className="text-indigo-600 text-sm">
-                                                <Link href={`/profile/${participant2Profile.address}`} passHref>
+                                            <p className="text-indigo-600 text-sm underline">
+                                                <Link href={`/user/${participant2Profile.address}`} passHref>
                                                     <span>
                                                         View profile
                                                     </span>
