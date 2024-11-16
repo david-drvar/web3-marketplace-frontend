@@ -90,7 +90,7 @@ export function handleNotification(dispatch, type, message, title) {
 export const renderStars = (rating) => {
     const totalStars = 5;
     return Array.from({length: totalStars}, (_, i) => (
-        <span key={i} className={`text-xl ${i < rating ? 'text-yellow-500' : 'text-gray-300'}`}>
+        <span key={i} className={`text-xl ${i < rating ? 'text-yellow-500' : 'text-yellow-500'}`}>
                 {i < rating ? '★' : '☆'}
             </span>
     ));

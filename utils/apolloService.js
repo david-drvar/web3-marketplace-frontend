@@ -330,6 +330,7 @@ export const fetchUserProfileByAddress = async (userAddress) => {
     }
 
     let userProfile = {
+        address: "",
         avatarHash: "",
         username: "",
         firstName: "",
@@ -351,8 +352,9 @@ export const fetchUserProfileByAddress = async (userAddress) => {
 
         const totalRating = reviews.reduce((total, review) => total + review.rating, 0);
         const averageRating = reviews.length ? totalRating / reviews.length : 0;
-
+        
         userProfile = {
+            address: userData.id,
             username: userData.username,
             firstName: userData.firstName,
             lastName: userData.lastName,
