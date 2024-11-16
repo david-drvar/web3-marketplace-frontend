@@ -9,8 +9,6 @@ import {useSelector} from "react-redux";
 import ChatPopup from "@/components/chat/ChatPopup";
 import {fetchAllReviewsForItem, fetchItemById, fetchTransactionByItemId, fetchUserProfileByAddress} from "@/utils/apolloService";
 import {formatEthAddress, handleNotification, renderStars, saniziteCondition} from "@/utils/utils";
-import ApproveItemModal from "@/components/modals/ApproveItemModal";
-import DisputeItemModal from "@/components/modals/DisputeItemModal";
 import FinalizeTransactionModal from "@/components/modals/FinalizeTransactionModal";
 import LoadingAnimation from "@/components/LoadingAnimation";
 import {addNotification, getOrderAddress} from "@/utils/firebaseService";
@@ -40,8 +38,6 @@ export default function OrderPage() {
     const [isGift, setIsGift] = useState(false);
     const [blockTimestamp, setBlockTimestamp] = useState("");
 
-    const [showApproveModal, setShowApproveModal] = useState(false);
-    const [showDisputeModal, setShowDisputeModal] = useState(false);
     const [showFinalizeModal, setShowFinalizeModal] = useState(false);
     const [showReviewItemModal, setShowReviewItemModal] = useState(false);
     const [showChat, setShowChat] = useState(false);
@@ -219,7 +215,6 @@ export default function OrderPage() {
                     handleNotification(dispatch, "success", "Item approved successfully", "Item confirmed");
                     addNotification(transaction.seller === account ? transaction.buyer : transaction.seller, `${transaction.seller === account ? "Seller" : "Buyer"} approved order ${title}`, account, id, `order/${id}`, "order_approved")
                     setApproveButtonDisabled(true);
-                    setShowApproveModal(false);
                 })
             },
             onError: (error) => handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Approval error"),
@@ -246,7 +241,6 @@ export default function OrderPage() {
                     addNotification(transaction.seller === account ? transaction.buyer : transaction.seller, `${transaction.seller === account ? "Seller" : "Buyer"} disputed order ${title}`, account, id, `order/${id}`, "order_disputed")
                     addNotification(transaction.moderator, `${transaction.seller === account ? "Seller" : "Buyer"} disputed order ${title}`, account, id, `order/${id}`, "order_disputed")
                     setDisputeButtonDisabled(true);
-                    setShowDisputeModal(false);
                 })
             },
             onError: (error) => handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Dispute error"),
@@ -318,20 +312,6 @@ export default function OrderPage() {
                 <div className="bg-gray-100 p-6">
                     {isWeb3Enabled ? (
                         <div>
-                            <ApproveItemModal
-                                isVisible={showApproveModal}
-                                onClose={() => setShowApproveModal(false)}
-                                roleInTransaction={roleInTransaction}
-                                onApprove={handleApprove}
-                            />
-
-                            <DisputeItemModal
-                                isVisible={showDisputeModal}
-                                onClose={() => setShowDisputeModal(false)}
-                                roleInTransaction={roleInTransaction}
-                                onDispute={handleDispute}
-                            />
-
                             <FinalizeTransactionModal
                                 isVisible={showFinalizeModal}
                                 onClose={() => setShowFinalizeModal(false)}
@@ -493,7 +473,7 @@ export default function OrderPage() {
                                                     ? "bg-blue-300 text-white cursor-not-allowed" // Disabled style
                                                     : "bg-blue-600 text-white hover:bg-blue-700 cursor-pointer" // Enabled style
                                             }`}
-                                            onClick={() => setShowApproveModal(true)}
+                                            onClick={handleApprove}
                                         >
                                             Approve as {roleInTransaction}
                                         </button>
@@ -508,7 +488,7 @@ export default function OrderPage() {
                                                     ? "bg-red-300 text-white cursor-not-allowed" // Disabled style
                                                     : "bg-red-500 hover:bg-red-600 text-white cursor-pointer" // Enabled style
                                             }`}
-                                            onClick={() => setShowDisputeModal(true)}
+                                            onClick={handleDispute}
                                         >
                                             Dispute as {roleInTransaction}
                                         </button>
