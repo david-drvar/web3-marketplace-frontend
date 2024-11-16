@@ -9,6 +9,7 @@ import ItemBox from "@/components/ItemBox";
 import LoadingAnimation from "@/components/LoadingAnimation";
 import {getLastSeenForUser} from "@/utils/firebaseService";
 import RatingDisplay from "@/components/RatingDisplay";
+import {renderStars} from "@/utils/utils";
 
 
 export default function UserProfile() {
@@ -80,7 +81,7 @@ export default function UserProfile() {
     const handleProfileNavigation = (address) => {
         setIsLoading(true);
         setShowReviews(false);
-        router.push(`/profile/${address}`);
+        router.push(`/user/${address}`);
     };
 
     return (
@@ -151,25 +152,28 @@ export default function UserProfile() {
 
 
                         {showReviews && (
-                            <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75">
+                            <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-75 overflow-y-scroll">
                                 <div className="bg-white rounded-lg shadow-lg p-6 max-w-lg w-full">
-                                    <h2 className="text-xl font-semibold mb-4">Reviews for {user.username}</h2>
-                                    {reviews.map((review) => (
-                                        <div key={review.id} className="mb-4 border-b pb-2">
-                                            <p className="text-gray-700">{review.content}</p>
-                                            <div className="flex justify-between">
-                                                <span className="text-sm text-gray-400">
-                                                  <span
-                                                      className="text-blue-500 hover:underline font-medium cursor-pointer"
-                                                      onClick={() => handleProfileNavigation(review.from)}
-                                                  >
-                                                    {review.fromUsername}
-                                                  </span>
-                                                  - {new Date(review.blockTimestamp * 1000).toDateString()}
-                                                </span>
-                                                <span
-                                                    className="text-yellow-500">{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}
-                                                </span>
+                                    <h2 className="text-xl font-semibold mb-4">Reviews</h2>
+                                    {reviews.map((review, index) => (
+                                        <div key={index}
+                                             className="p-6 border mt-2 border-gray-200 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 flex items-center"> {/* Added items-center */}
+                                            <div className="flex-grow">
+                                                <div className="flex justify-between items-center mb-2">
+                                                    <p className="text-gray-700">{review.content}</p>
+                                                    <div className="flex">{renderStars(review.rating)}</div>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                   <span className="text-sm text-gray-400 font-medium">
+                                                    <span
+                                                        className="text-blue-500 hover:underline font-medium cursor-pointer underline"
+                                                        onClick={() => handleProfileNavigation(review.from)}
+                                                    >
+                                                        {review.fromUsername}
+                                                      </span>
+                                                       {"  "} - {new Date(review.blockTimestamp * 1000).toDateString()}
+                                                    </span>
+                                                </div>
                                             </div>
                                         </div>
                                     ))}
