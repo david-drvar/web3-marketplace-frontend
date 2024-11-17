@@ -239,7 +239,7 @@ export const toggleFavoriteItem = async (userId, itemId) => {
     }
 }
 
-export const getFavoriteItems = async (userId) => {
+export const getFavoriteItemsIds = async (userId) => {
     if (!userId || userId.length === 0) return [];
 
     try {

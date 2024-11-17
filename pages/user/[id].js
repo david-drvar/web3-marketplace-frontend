@@ -7,7 +7,7 @@ import {
 } from "@/utils/apolloService";
 import ItemBox from "@/components/ItemBox";
 import LoadingAnimation from "@/components/LoadingAnimation";
-import {getFavoriteItems, getLastSeenForUser} from "@/utils/firebaseService";
+import {getFavoriteItemsIds, getLastSeenForUser} from "@/utils/firebaseService";
 import RatingDisplay from "@/components/RatingDisplay";
 import {renderStars} from "@/utils/utils";
 import {useMoralis} from "react-moralis";
@@ -48,7 +48,7 @@ export default function UserProfile() {
                 fetchActiveAdsByUser(id),
                 getLastSeenForUser(id),
                 fetchAllTransactionsByUser(id),
-                getFavoriteItems(account)
+                getFavoriteItemsIds(account)
             ]);
 
             if (Array.isArray(userData) && userData.length === 0)

@@ -11,7 +11,7 @@ import {
 import LoadingAnimation from "@/components/LoadingAnimation";
 import {fetchItemsPaginated} from "@/utils/apolloService";
 import SearchFilterBar from "@/components/SearchFilterBar";
-import {getFavoriteItems} from "@/utils/firebaseService";
+import {getFavoriteItemsIds} from "@/utils/firebaseService";
 
 
 export default function Home() {
@@ -85,7 +85,7 @@ export default function Home() {
         const skip = (page - 1) * pageSize;
 
         const fetchedItems = await fetchItemsPaginated(pageSize, skip);
-        const favoriteItemsIds = await getFavoriteItems(account);
+        const favoriteItemsIds = await getFavoriteItemsIds(account);
 
         setItems(fetchedItems);
         setFilteredItems(fetchedItems);

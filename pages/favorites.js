@@ -3,25 +3,53 @@ import ItemBox from "@/components/ItemBox";
 import {useEffect, useState} from "react";
 import LoadingAnimation from "@/components/LoadingAnimation";
 import {fetchItemsByIdsList} from "@/utils/apolloService";
-import {getFavoriteItems} from "@/utils/firebaseService";
+import {getFavoriteItemsIds} from "@/utils/firebaseService";
 
 export default function Favorites() {
     const {isWeb3Enabled, account} = useMoralis();
 
     const [items, setItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-
+    
+    const [page, setPage] = useState(1);
+    const pageSize = 12;
+    const [nextPageButtonDisabled, setNextPageButtonDisabled] = useState(false);
 
     useEffect(() => {
-        if (isWeb3Enabled && account)
-            loadFavorites().then(() => setIsLoading(false));
-    }, [isWeb3Enabled, account]);
+        loadFavorites();
+        loadFavoritesNextPage();
+    }, [isWeb3Enabled, account, page]);
 
     const loadFavorites = async () => {
-        const fetchedItems = await getFavoriteItems(account);
-        const items = await fetchItemsByIdsList(fetchedItems);
+        setIsLoading(true);
 
-        setItems(items.filter(item => item.itemStatus === "Listed"));
+        const skip = (page - 1) * pageSize;
+
+        const favoriteItemsIds = await getFavoriteItemsIds(account);
+        const items = await fetchItemsByIdsList(favoriteItemsIds, pageSize, skip);
+
+        await setItems(items);
+        setIsLoading(false);
+    };
+
+    const loadFavoritesNextPage = async () => {
+        setIsLoading(true);
+
+        const skip = page * pageSize;
+
+        const fetchedItems = await getFavoriteItemsIds(account);
+        const items = await fetchItemsByIdsList(fetchedItems, pageSize, skip);
+        items.length > 0 ? setNextPageButtonDisabled(false) : setNextPageButtonDisabled(true);
+
+        setIsLoading(false);
+    };
+
+    const handleNextPage = () => {
+        setPage((prevPage) => prevPage + 1);
+    };
+
+    const handlePreviousPage = () => {
+        setPage((prevPage) => Math.max(prevPage - 1, 1));
     };
 
 
@@ -79,6 +107,34 @@ export default function Favorites() {
                                 })}
                             </div>
                         )}
+
+                        {/* Pagination buttons */}
+                        <div className="flex justify-center mt-4 space-x-4">
+                            <button
+                                onClick={handlePreviousPage}
+                                disabled={page === 1}
+                                className={`w-10 h-10 flex items-center justify-center rounded-full text-lg font-bold transition ${
+                                    page === 1
+                                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                        : "bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-800"
+                                }`}
+                            >
+                                &lt;
+                            </button>
+                            <span className="flex items-center text-lg">Page {page}</span>
+                            <button
+                                onClick={handleNextPage}
+                                disabled={nextPageButtonDisabled}
+                                className={`w-10 h-10 flex items-center justify-center rounded-full text-lg font-bold transition ${
+                                    nextPageButtonDisabled
+                                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                        : "bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-800"
+                                }`}
+                            >
+                                &gt;
+                            </button>
+                        </div>
+
                     </div>
                 )
             ) : (

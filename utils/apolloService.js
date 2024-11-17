@@ -202,14 +202,14 @@ export const fetchActiveAdsByUser = async (userAddress) => {
     }
 }
 
-export const fetchItemsByIdsList = async (itemIds) => {
+export const fetchItemsByIdsList = async (itemIds, first, skip) => {
     if (!itemIds || itemIds.length === 0) {
         return [];
     }
 
     const getItemsQuery = gql`
-        query GetItemsByIds($itemIds: [String!]) {
-            items(where: { id_in: $itemIds }) {
+        query GetItemsByIds($itemIds: [String!], $first: Int!, $skip: Int!) {
+            items(first: $first, skip: $skip, where: { id_in: $itemIds, itemStatus: "Listed" }) {
                 id
                 buyer
                 seller
@@ -232,7 +232,7 @@ export const fetchItemsByIdsList = async (itemIds) => {
     try {
         const {data} = await apolloClient.query({
             query: getItemsQuery,
-            variables: {itemIds},
+            variables: {itemIds, first, skip},
             fetchPolicy: 'network-only',
         });
 
