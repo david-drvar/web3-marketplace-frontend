@@ -100,8 +100,7 @@ export default function Home() {
         const skip = page * pageSize;
 
         const fetchedItems = await fetchItemsPaginated(pageSize, skip);
-        if (fetchedItems.length > 0) setNextPageButtonDisabled(false);
-        else setNextPageButtonDisabled(true);
+        fetchedItems.length > 0 ? setNextPageButtonDisabled(false) : setNextPageButtonDisabled(true);
 
         setIsLoading(false);
     };

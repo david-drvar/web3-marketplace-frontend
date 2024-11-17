@@ -202,6 +202,46 @@ export const fetchActiveAdsByUser = async (userAddress) => {
     }
 }
 
+export const fetchActiveAdsByUserPaginated = async (userAddress, first, skip) => {
+    if (!userAddress) {
+        return [];
+    }
+    const getItemsQuery = gql`
+    query GetActiveAddsByUser($userAddress: String!, $first: Int!, $skip: Int!) {
+      items(first: $first, skip: $skip, where: { seller: $userAddress, itemStatus_not: "Deleted" }) {
+        id
+        buyer
+        seller
+        price
+        currency
+        title
+        description
+        blockTimestamp
+        itemStatus
+        photosIPFSHashes
+        condition
+        category
+        subcategory
+        country
+        isGift
+      }
+    }
+  `;
+
+    try {
+        const {data} = await apolloClient.query({
+            query: getItemsQuery,
+            variables: {userAddress, first, skip},
+            fetchPolicy: 'network-only', // ensures fresh data
+        });
+
+        return data.items || [];
+    } catch (error) {
+        console.error("Error fetching active ads by user", error);
+        return [];
+    }
+}
+
 export const fetchItemsByIdsList = async (itemIds, first, skip) => {
     if (!itemIds || itemIds.length === 0) {
         return [];
