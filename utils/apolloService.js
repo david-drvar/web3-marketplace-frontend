@@ -454,13 +454,13 @@ export const fetchTransactionByItemId = async (itemId) => {
 }
 
 
-export const fetchAllItemsByModerator = async (moderator) => {
+export const fetchAllItemsByModerator = async (moderator, first, skip) => {
     if (!moderator) {
         return [];
     }
     const getTransactionByModerator = gql`
-    query getTransactionByModerator($moderator: String!) {
-      transactions(where: { moderator: $moderator }) {
+    query getTransactionByModerator($moderator: String!, $first: Int!, $skip: Int!) {
+      transactions(first: $first, skip: $skip, where: { moderator: $moderator }) {
         id
         itemId
         buyer
@@ -512,7 +512,7 @@ export const fetchAllItemsByModerator = async (moderator) => {
 
         const {data} = await apolloClient.query({
             query: getTransactionByModerator,
-            variables: {moderator: moderator},
+            variables: {moderator: moderator, first, skip},
             fetchPolicy: 'network-only', // ensures fresh data
         });
 
