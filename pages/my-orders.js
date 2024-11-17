@@ -13,23 +13,44 @@ export default function MyOrders() {
     const [filter, setFilter] = useState('all');
     const [transactions, setTransactions] = useState([]);
 
+    const [page, setPage] = useState(1);
+    const pageSize = 12;
+    const [nextPageButtonDisabled, setNextPageButtonDisabled] = useState(false);
+
 
     useEffect(() => {
-        const loadItems = async () => {
-            const fetchedItems = await fetchItemsOrderedByUser(account);
-            setItems(fetchedItems);
-            setFilteredItems(fetchedItems)
-
-            const itemIds = fetchedItems.map(item => item.id);
-            const fetchedTransactions = await fetchTransactionsByItemIds(itemIds);
-            setTransactions(fetchedTransactions);
-
-            setIsLoading(false);
-        };
         if (isWeb3Enabled && account) {
             loadItems();
+            loadItemsNextPage();
         }
-    }, [isWeb3Enabled, account]);
+    }, [isWeb3Enabled, account, page]);
+
+    const loadItems = async () => {
+        setIsLoading(true);
+
+        const skip = (page - 1) * pageSize;
+
+        const fetchedItems = await fetchItemsOrderedByUser(account, pageSize, skip);
+        setItems(fetchedItems);
+        setFilteredItems(fetchedItems)
+
+        const itemIds = fetchedItems.map(item => item.id);
+        const fetchedTransactions = await fetchTransactionsByItemIds(itemIds);
+        setTransactions(fetchedTransactions);
+
+        setIsLoading(false);
+    };
+
+    const loadItemsNextPage = async () => {
+        setIsLoading(true);
+
+        const skip = page * pageSize;
+
+        const fetchedItems = await fetchItemsOrderedByUser(account, pageSize, skip);
+        fetchedItems.length > 0 ? setNextPageButtonDisabled(false) : setNextPageButtonDisabled(true);
+
+        setIsLoading(false);
+    };
 
 
     const handleFilterChange = (status) => {
@@ -43,6 +64,14 @@ export default function MyOrders() {
         else if (status === 'waitingForApproval')
             setFilteredItems(items.filter(item => transactions.find(tx => tx.itemId === item.id && !tx.isCompleted && !tx.disputed) !== undefined))
     }
+
+    const handleNextPage = () => {
+        setPage((prevPage) => prevPage + 1);
+    };
+
+    const handlePreviousPage = () => {
+        setPage((prevPage) => Math.max(prevPage - 1, 1));
+    };
 
 
     return (
@@ -124,6 +153,34 @@ export default function MyOrders() {
                                 })}
                             </div>
                         )}
+
+                        {/* Pagination buttons */}
+                        <div className="flex justify-center mt-4 space-x-4">
+                            <button
+                                onClick={handlePreviousPage}
+                                disabled={page === 1}
+                                className={`w-10 h-10 flex items-center justify-center rounded-full text-lg font-bold transition ${
+                                    page === 1
+                                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                        : "bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-800"
+                                }`}
+                            >
+                                &lt;
+                            </button>
+                            <span className="flex items-center text-lg">Page {page}</span>
+                            <button
+                                onClick={handleNextPage}
+                                disabled={nextPageButtonDisabled}
+                                className={`w-10 h-10 flex items-center justify-center rounded-full text-lg font-bold transition ${
+                                    nextPageButtonDisabled
+                                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                        : "bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-800"
+                                }`}
+                            >
+                                &gt;
+                            </button>
+                        </div>
+
                     </div>
                 )
             ) : (

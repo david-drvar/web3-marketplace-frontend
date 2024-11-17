@@ -121,13 +121,13 @@ export const fetchItemById = async (id) => {
     }
 }
 
-export const fetchItemsOrderedByUser = async (userAddress) => {
+export const fetchItemsOrderedByUser = async (userAddress, first, skip) => {
     if (!userAddress) {
         return [];
     }
     const getItemsQuery = gql`
-    query GetOrders($userAddress: String!) {
-      items(where: { buyer: $userAddress }) {
+    query GetOrders($userAddress: String!, $first: Int!, $skip: Int!) {
+      items(first: $first, skip: $skip, where: { buyer: $userAddress }) {
         id
         buyer
         seller
@@ -150,7 +150,7 @@ export const fetchItemsOrderedByUser = async (userAddress) => {
     try {
         const {data} = await apolloClient.query({
             query: getItemsQuery,
-            variables: {userAddress: userAddress},
+            variables: {userAddress, first, skip},
             fetchPolicy: 'network-only', // ensures fresh data
         });
 
@@ -191,7 +191,7 @@ export const fetchActiveAdsByUser = async (userAddress) => {
     try {
         const {data} = await apolloClient.query({
             query: getItemsQuery,
-            variables: {userAddress: userAddress},
+            variables: {userAddress},
             fetchPolicy: 'network-only', // ensures fresh data
         });
 
@@ -349,7 +349,7 @@ export const fetchUserByAddress = async (userAddress) => {
     try {
         const {data} = await apolloClient.query({
             query: getUserQuery,
-            variables: {userAddress: userAddress},
+            variables: {userAddress},
             fetchPolicy: 'network-only', // ensures fresh data
         });
 
@@ -442,7 +442,7 @@ export const fetchTransactionByItemId = async (itemId) => {
     try {
         const {data} = await apolloClient.query({
             query: getTransactionByItemId,
-            variables: {itemId: itemId},
+            variables: {itemId},
             fetchPolicy: 'network-only', // ensures fresh data
         });
 
@@ -512,7 +512,7 @@ export const fetchAllItemsByModerator = async (moderator, first, skip) => {
 
         const {data} = await apolloClient.query({
             query: getTransactionByModerator,
-            variables: {moderator: moderator, first, skip},
+            variables: {moderator, first, skip},
             fetchPolicy: 'network-only', // ensures fresh data
         });
 
@@ -607,11 +607,7 @@ export const checkReviewExistence = async (from, to, itemId) => {
     try {
         const {data} = await apolloClient.query({
             query: checkReviewExistenceQuery,
-            variables: {
-                from: from,
-                to: to,
-                itemId: itemId,
-            },
+            variables: {from, to, itemId},
             fetchPolicy: 'network-only', // ensures fresh data
         });
 
@@ -650,9 +646,7 @@ export const fetchAllReviewsByUser = async (userAddress) => {
     try {
         const {data} = await apolloClient.query({
             query: fetchAllReviewsByUser,
-            variables: {
-                userAddress: userAddress,
-            },
+            variables: {userAddress},
             fetchPolicy: 'network-only',
         });
 
@@ -710,9 +704,7 @@ export const fetchAllReviewsForItem = async (itemId) => {
     try {
         const {data} = await apolloClient.query({
             query: fetchAllReviewsForItem,
-            variables: {
-                itemId: itemId,
-            },
+            variables: {itemId},
             fetchPolicy: 'network-only',
         });
 
