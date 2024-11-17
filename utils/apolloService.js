@@ -7,42 +7,6 @@ export const apolloClient = new ApolloClient({
 });
 
 
-export const fetchAllItemsListed = async () => {
-    const getItemsQuery = gql`
-    {
-      items (where : { itemStatus: "Listed" }) {
-        id
-        buyer
-        seller
-        price
-        currency
-        title
-        description
-        blockTimestamp
-        itemStatus
-        photosIPFSHashes
-        condition
-        category
-        subcategory
-        country
-        isGift
-      }
-    }
-  `;
-
-    try {
-        const {data} = await apolloClient.query({
-            query: getItemsQuery,
-            fetchPolicy: 'network-only', // ensures fresh data
-        });
-
-        return data.items || [];
-    } catch (error) {
-        console.error("Error fetching items", error);
-        return [];
-    }
-}
-
 export const fetchItemsPaginated = async (first, skip) => {
     const getItemsQuery = gql`
     query GetItems($first: Int!, $skip: Int!) {
@@ -162,7 +126,7 @@ export const fetchItemsOrderedByUser = async (userAddress, first, skip) => {
 }
 
 
-export const fetchActiveAdsByUser = async (userAddress) => {
+export const fetchAllAdsByUser = async (userAddress) => {
     if (!userAddress) {
         return [];
     }
@@ -192,6 +156,46 @@ export const fetchActiveAdsByUser = async (userAddress) => {
         const {data} = await apolloClient.query({
             query: getItemsQuery,
             variables: {userAddress},
+            fetchPolicy: 'network-only', // ensures fresh data
+        });
+
+        return data.items || [];
+    } catch (error) {
+        console.error("Error fetching active ads by user", error);
+        return [];
+    }
+}
+
+export const fetchListedAdsByUserPaginated = async (userAddress, first, skip) => {
+    if (!userAddress) {
+        return [];
+    }
+    const getItemsQuery = gql`
+    query GetActiveAddsByUser($userAddress: String!, $first: Int!, $skip: Int!) {
+      items(first: $first, skip: $skip, where: { seller: $userAddress, itemStatus: "Listed" }) {
+        id
+        buyer
+        seller
+        price
+        currency
+        title
+        description
+        blockTimestamp
+        itemStatus
+        photosIPFSHashes
+        condition
+        category
+        subcategory
+        country
+        isGift
+      }
+    }
+  `;
+
+    try {
+        const {data} = await apolloClient.query({
+            query: getItemsQuery,
+            variables: {userAddress, first, skip},
             fetchPolicy: 'network-only', // ensures fresh data
         });
 

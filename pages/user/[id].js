@@ -1,8 +1,8 @@
 import React, {useEffect, useState} from "react";
 import {useRouter} from "next/router";
 import {
-    fetchActiveAdsByUser,
-    fetchAllReviewsByUser, fetchAllTransactionsByUser,
+    fetchAllAdsByUser,
+    fetchAllReviewsByUser, fetchAllTransactionsByUser, fetchListedAdsByUserPaginated,
     fetchUserByAddress
 } from "@/utils/apolloService";
 import ItemBox from "@/components/ItemBox";
@@ -32,10 +32,29 @@ export default function UserProfile() {
 
     const [favoriteItemsIds, setFavoriteItemsIds] = useState([]);
 
+    const [page, setPage] = useState(1);
+    const pageSize = 12;
+    const [nextPageButtonDisabled, setNextPageButtonDisabled] = useState(false);
+
 
     useEffect(() => {
         loadData();
+        loadItems(); // loads listed items only
+        loadItemsNextPage();
     }, [id])
+
+    useEffect(() => {
+        loadItems();
+        loadItemsNextPage();
+    }, [page])
+
+    const handleNextPage = () => {
+        setPage((prevPage) => prevPage + 1);
+    };
+
+    const handlePreviousPage = () => {
+        setPage((prevPage) => Math.max(prevPage - 1, 1));
+    };
 
     const loadData = async () => {
         try {
@@ -45,7 +64,7 @@ export default function UserProfile() {
             const [reviewsData, userData, itemsData, lastSeenData, transactionsData, favoriteItemsIdsData] = await Promise.all([
                 fetchAllReviewsByUser(id),
                 fetchUserByAddress(id),
-                fetchActiveAdsByUser(id),
+                fetchAllAdsByUser(id),
                 getLastSeenForUser(id),
                 fetchAllTransactionsByUser(id),
                 getFavoriteItemsIds(account)
@@ -67,7 +86,6 @@ export default function UserProfile() {
             setUser(userData);
 
             // active ads handling
-            setItems(itemsData);
             setTotalAdsPosted(itemsData.length);
 
             // last seen handling
@@ -86,6 +104,28 @@ export default function UserProfile() {
             // Set loading to false after all data is fetched or if an error occurs
             setIsLoading(false);
         }
+    }
+
+    const loadItems = async () => {
+        setIsLoading(true);
+
+        const skip = (page - 1) * pageSize;
+
+        const fetchedItems = await fetchListedAdsByUserPaginated(id, pageSize, skip);
+        setItems(fetchedItems);
+
+        setIsLoading(false);
+    }
+
+    const loadItemsNextPage = async () => {
+        setIsLoading(true);
+
+        const skip = page * pageSize;
+
+        const fetchedItems = await fetchListedAdsByUserPaginated(id, pageSize, skip);
+        fetchedItems.length > 0 ? setNextPageButtonDisabled(false) : setNextPageButtonDisabled(true);
+
+        setIsLoading(false);
     }
 
     const handleProfileNavigation = (address) => {
@@ -159,6 +199,34 @@ export default function UserProfile() {
                                     )
                                 }
                             </div>
+
+                            {/* Pagination buttons */}
+                            <div className="flex justify-center mt-4 space-x-4 mb-5">
+                                <button
+                                    onClick={handlePreviousPage}
+                                    disabled={page === 1}
+                                    className={`w-10 h-10 flex items-center justify-center rounded-full text-lg font-bold transition ${
+                                        page === 1
+                                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                            : "bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-800"
+                                    }`}
+                                >
+                                    &lt;
+                                </button>
+                                <span className="flex items-center text-lg">Page {page}</span>
+                                <button
+                                    onClick={handleNextPage}
+                                    disabled={nextPageButtonDisabled}
+                                    className={`w-10 h-10 flex items-center justify-center rounded-full text-lg font-bold transition ${
+                                        nextPageButtonDisabled
+                                            ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                            : "bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-800"
+                                    }`}
+                                >
+                                    &gt;
+                                </button>
+                            </div>
+
 
                         </div>
 

@@ -29,7 +29,7 @@ export default function Home() {
     const [favoriteItemsIds, setFavoriteItemsIds] = useState([]);
 
     const [page, setPage] = useState(1);
-    const [pageSize, setPageSize] = useState(12);
+    const pageSize = 12;
 
     const [nextPageButtonDisabled, setNextPageButtonDisabled] = useState(false);
 
