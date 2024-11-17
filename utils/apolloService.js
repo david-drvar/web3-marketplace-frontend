@@ -43,6 +43,43 @@ export const fetchAllItemsListed = async () => {
     }
 }
 
+export const fetchItemsPaginated = async (first, skip) => {
+    const getItemsQuery = gql`
+    query GetItems($first: Int!, $skip: Int!) {
+      items(first: $first, skip: $skip, where: { itemStatus: "Listed" }) {
+        id
+        buyer
+        seller
+        price
+        currency
+        title
+        description
+        blockTimestamp
+        itemStatus
+        photosIPFSHashes
+        condition
+        category
+        subcategory
+        country
+        isGift
+      }
+    }
+  `;
+
+    try {
+        const {data} = await apolloClient.query({
+            query: getItemsQuery,
+            variables: {first, skip},
+            fetchPolicy: 'network-only', // ensures fresh data
+        });
+
+        return data.items || [];
+    } catch (error) {
+        console.error('Error fetching paginated items', error);
+        return [];
+    }
+};
+
 
 export const fetchItemById = async (id) => {
     if (!id) {
@@ -352,7 +389,7 @@ export const fetchUserProfileByAddress = async (userAddress) => {
 
         const totalRating = reviews.reduce((total, review) => total + review.rating, 0);
         const averageRating = reviews.length ? totalRating / reviews.length : 0;
-        
+
         userProfile = {
             address: userData.id,
             username: userData.username,

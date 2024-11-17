@@ -1,5 +1,5 @@
 import {useEffect, useState} from "react";
-import ReactModal from "react-modal";
+import Modal from "react-modal";
 import {fetchModerators} from "@/utils/apolloService";
 import {getUserAddresses} from "@/utils/firebaseService";
 import {useMoralis} from "react-moralis";
@@ -20,7 +20,7 @@ export default function BuyItemModal({isVisible, onClose, onBuyItemWithModerator
     }, [account]);
 
     return (
-        <ReactModal
+        <Modal
             isOpen={isVisible}
             onRequestClose={onClose}
             className="bg-white p-6 rounded-lg shadow-lg max-w-4xl mx-auto min-w-[700px]" // Adjust max-w here
@@ -150,6 +150,6 @@ export default function BuyItemModal({isVisible, onClose, onBuyItemWithModerator
                     Buy Item
                 </button>
             </div>
-        </ReactModal>
+        </Modal>
     );
 }

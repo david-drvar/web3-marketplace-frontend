@@ -9,7 +9,7 @@ import {
     setUsersContractAddress
 } from "@/store/slices/contractSlice";
 import LoadingAnimation from "@/components/LoadingAnimation";
-import {fetchAllItemsListed} from "@/utils/apolloService";
+import {fetchItemsPaginated} from "@/utils/apolloService";
 import SearchFilterBar from "@/components/SearchFilterBar";
 import {getFavoriteItems} from "@/utils/firebaseService";
 
@@ -27,6 +27,11 @@ export default function Home() {
     const [filteredItems, setFilteredItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [favoriteItemsIds, setFavoriteItemsIds] = useState([]);
+
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(12);
+
+    const [nextPageButtonDisabled, setNextPageButtonDisabled] = useState(false);
 
 
     const handleFilter = (filter) => {
@@ -57,17 +62,48 @@ export default function Home() {
             dispatch(setEscrowContractAddress(escrowContractAddress))
         }
 
-        loadData().then(() => setIsLoading(false));
+        loadData();
+        loadNextPage();
     }, [marketplaceContractAddress, usersContractAddress, escrowContractAddress, dispatch, account]);
+
+    useEffect(() => {
+        loadData();
+        loadNextPage();
+    }, [page]);
+
+    const handleNextPage = () => {
+        setPage((prevPage) => prevPage + 1);
+    };
+
+    const handlePreviousPage = () => {
+        setPage((prevPage) => Math.max(prevPage - 1, 1));
+    };
 
     const loadData = async () => {
         setIsLoading(true);
-        const fetchedItems = await fetchAllItemsListed();
+
+        const skip = (page - 1) * pageSize;
+
+        const fetchedItems = await fetchItemsPaginated(pageSize, skip);
         const favoriteItemsIds = await getFavoriteItems(account);
 
         setItems(fetchedItems);
         setFilteredItems(fetchedItems);
         setFavoriteItemsIds(favoriteItemsIds);
+
+        setIsLoading(false);
+    };
+
+    const loadNextPage = async () => {
+        setIsLoading(true);
+
+        const skip = page * pageSize;
+
+        const fetchedItems = await fetchItemsPaginated(pageSize, skip);
+        if (fetchedItems.length > 0) setNextPageButtonDisabled(false);
+        else setNextPageButtonDisabled(true);
+
+        setIsLoading(false);
     };
 
     return (
@@ -122,6 +158,34 @@ export default function Home() {
                                 })}
                             </div>
                         )}
+
+                        {/* Pagination buttons */}
+                        <div className="flex justify-center mt-4 space-x-4">
+                            <button
+                                onClick={handlePreviousPage}
+                                disabled={page === 1}
+                                className={`w-10 h-10 flex items-center justify-center rounded-full text-lg font-bold transition ${
+                                    page === 1
+                                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                        : "bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-800"
+                                }`}
+                            >
+                                &lt;
+                            </button>
+                            <span className="flex items-center text-lg">Page {page}</span>
+                            <button
+                                onClick={handleNextPage}
+                                disabled={nextPageButtonDisabled}
+                                className={`w-10 h-10 flex items-center justify-center rounded-full text-lg font-bold transition ${
+                                    nextPageButtonDisabled
+                                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                        : "bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-800"
+                                }`}
+                            >
+                                &gt;
+                            </button>
+                        </div>
+
                     </div>
                 )
             ) : (
