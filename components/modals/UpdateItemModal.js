@@ -4,9 +4,9 @@ import {useWeb3Contract} from "react-moralis";
 import marketplaceAbi from "../../constants/Marketplace.json";
 import {ethers} from "ethers";
 import Image from "next/image";
-import {useSelector} from "react-redux";
 import {getCategories, getCountries} from "@/utils/utils";
 import Modal from "react-modal";
+import {marketplaceContractAddress} from "@/constants/constants";
 
 export default function UpdateItemModal({
                                             id,
@@ -47,8 +47,6 @@ export default function UpdateItemModal({
     const [imageURIs, setImageURIs] = useState([]); //item images, ipfs hashes
     const [newImages, setNewImages] = useState([]); //new images
     const [buttonsDisabled, setButtonsDisabled] = useState(false); //new images
-
-    const marketplaceContractAddress = useSelector((state) => state.contract["marketplaceContractAddress"]);
 
     const {runContractFunction} = useWeb3Contract();
 

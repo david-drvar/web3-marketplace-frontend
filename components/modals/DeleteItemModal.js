@@ -2,13 +2,11 @@ import {useNotification} from "web3uikit";
 import {useWeb3Contract} from "react-moralis";
 import marketplaceAbi from "../../constants/Marketplace.json";
 import {useRouter} from "next/router";
-import {useSelector} from "react-redux";
 import Modal from "react-modal";
+import {marketplaceContractAddress} from "@/constants/constants";
 
 export default function DeleteItemModal({id, onClose, isVisible, disableButtons}) {
     const dispatch = useNotification();
-
-    const marketplaceContractAddress = useSelector((state) => state.contract["marketplaceContractAddress"]);
 
     const {runContractFunction} = useWeb3Contract();
 

@@ -8,7 +8,6 @@ import eurcAbi from "../../constants/EURCAbi.json";
 import {ethers} from "ethers";
 import UpdateItemModal from "@/components/modals/UpdateItemModal";
 import DeleteItemModal from "@/components/modals/DeleteItemModal";
-import {useSelector} from "react-redux";
 import BuyItemModal from "@/components/modals/BuyItemModal";
 import LoadingAnimation from "@/components/LoadingAnimation";
 import {addAddressToOrder, addNotification, getUserIdsWithItemInFavorites, isItemFavorited, toggleFavoriteItem} from "@/utils/firebaseService";
@@ -22,6 +21,12 @@ import "slick-carousel/slick/slick-theme.css";
 import {HeartIcon as HeartIconSolid} from "@heroicons/react/solid";
 import {HeartIcon} from "@heroicons/react/outline";
 import RatingDisplay from "@/components/RatingDisplay";
+import {
+    escrowContractAddress,
+    eurcContractAddress,
+    marketplaceContractAddress,
+    usdcContractAddress
+} from "@/constants/constants";
 
 export default function ItemPage() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -54,10 +59,6 @@ export default function ItemPage() {
 
     const [isAccountSeller, setIsAccountSeller] = useState(false);
     const {runContractFunction} = useWeb3Contract();
-    const marketplaceContractAddress = useSelector((state) => state.contract["marketplaceContractAddress"]);
-    const escrowContractAddress = useSelector((state) => state.contract["escrowContractAddress"]);
-    const usdcContractAddress = useSelector((state) => state.contract["usdcContractAddress"]);
-    const eurcContractAddress = useSelector((state) => state.contract["eurcContractAddress"]);
 
     const [isFavorite, setIsFavorite] = useState(false);
 
@@ -191,6 +192,7 @@ export default function ItemPage() {
                     spender: whichContractToAllowAddress,
                 },
             };
+            console.log("allowance params", allowanceParams);
             const allowance = await runContractFunction({params: allowanceParams});
 
             // 2. approve more if not enough

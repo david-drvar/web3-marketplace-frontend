@@ -4,14 +4,14 @@ import {ethers} from "ethers";
 import marketplaceAbi from "../constants/Marketplace.json";
 import {useState} from "react";
 import {useRouter} from "next/router";
-import {useDispatch, useSelector} from "react-redux";
+import {useDispatch} from "react-redux";
 import {getCategories, getCountries} from "@/utils/utils";
+import {marketplaceContractAddress} from "@/constants/constants";
 
 export default function ListItem() {
     const {chainId, isWeb3Enabled, account} = useMoralis();
     const dispatch = useNotification();
 
-    const marketplaceContractAddress = useSelector((state) => state.contract["marketplaceContractAddress"]);
     const dispatchRedux = useDispatch();
     const supportedCurrencies = ["ETH", "USDC", "EURC"]
 

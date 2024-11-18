@@ -5,7 +5,6 @@ import {useNotification} from "web3uikit";
 import escrowAbi from "../../constants/Escrow.json";
 import usersAbi from "../../constants/Users.json";
 import {ethers} from "ethers";
-import {useSelector} from "react-redux";
 import ChatPopup from "@/components/chat/ChatPopup";
 import {fetchAllReviewsForItem, fetchItemById, fetchTransactionByItemId, fetchUserProfileByAddress} from "@/utils/apolloService";
 import {formatDate, formatEthAddress, handleNotification, renderStars, saniziteCondition} from "@/utils/utils";
@@ -16,6 +15,7 @@ import ReviewItemModal from "@/components/modals/ReviewItemModal";
 import Slider from "react-slick";
 import RatingDisplay from "@/components/RatingDisplay";
 import Link from "next/link";
+import {escrowContractAddress, usersContractAddress} from "@/constants/constants";
 
 export default function OrderPage() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -46,9 +46,6 @@ export default function OrderPage() {
     const [disputeButtonDisabled, setDisputeButtonDisabled] = useState(true);
 
     const {runContractFunction} = useWeb3Contract();
-    const marketplaceContractAddress = useSelector((state) => state.contract["marketplaceContractAddress"]);
-    const escrowContractAddress = useSelector((state) => state.contract["escrowContractAddress"]);
-    const usersContractAddress = useSelector((state) => state.contract["usersContractAddress"]);
 
     const [transaction, setTransaction] = useState({});
     const [address, setAddress] = useState({});

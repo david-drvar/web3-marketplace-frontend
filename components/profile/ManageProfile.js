@@ -6,6 +6,7 @@ import usersAbi from "@/constants/Users.json";
 import {getCountries, removePinnedImage, uploadFile} from "@/utils/utils";
 import {setUser} from "@/store/slices/userSlice";
 import LoadingAnimation from "@/components/LoadingAnimation";
+import {usersContractAddress} from "@/constants/constants";
 
 export default function ManageProfile() {
     const {isWeb3Enabled} = useMoralis();
@@ -27,7 +28,6 @@ export default function ManageProfile() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const dispatch = useNotification();
     const {runContractFunction} = useWeb3Contract();
-    const usersContractAddress = useSelector((state) => state.contract["usersContractAddress"]);
     const dispatchState = useDispatch();
     const [avatarImage, setAvatarImage] = useState(null);
     const [imageURI, setImageURI] = useState("");

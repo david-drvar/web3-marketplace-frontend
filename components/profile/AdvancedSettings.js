@@ -1,16 +1,16 @@
 import React, {useState} from 'react';
 import {useNotification} from "web3uikit";
 import {useWeb3Contract} from "react-moralis";
-import {useDispatch, useSelector} from "react-redux";
+import {useDispatch} from "react-redux";
 import usersAbi from "@/constants/Users.json";
 import {clearUser} from "@/store/slices/userSlice";
+import {usersContractAddress} from "@/constants/constants";
 
 const AdvancedSettings = () => {
     // State to control modal visibility
     const [isModalOpen, setIsModalOpen] = useState(false);
     const dispatch = useNotification();
     const {runContractFunction} = useWeb3Contract();
-    const usersContractAddress = useSelector((state) => state.contract["usersContractAddress"]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const dispatchState = useDispatch();
 
