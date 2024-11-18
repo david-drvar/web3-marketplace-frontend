@@ -249,7 +249,7 @@ export default function ListItem() {
                                 value={formData.title}
                                 onChange={handleChange}
                                 required
-                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                             />
                         </div>
                         <div>
@@ -263,7 +263,7 @@ export default function ListItem() {
                                 value={formData.description}
                                 onChange={handleChange}
                                 required
-                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                             />
                         </div>
 
@@ -274,7 +274,7 @@ export default function ListItem() {
                                 name="currency"
                                 value={formData.currency}
                                 onChange={handleChange}
-                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                             >
                                 {supportedCurrencies.map((currency, key) =>
                                     <option value={currency} key={key}>{currency}</option>
@@ -294,7 +294,7 @@ export default function ListItem() {
                                 value={formData.price}
                                 onChange={handleChange}
                                 required
-                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                             />
                         </div>
 
@@ -306,7 +306,7 @@ export default function ListItem() {
                                 name="condition"
                                 value={formData.condition}
                                 onChange={handleChange}
-                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                             >
                                 <option value="0">New</option>
                                 <option value="1">Like New</option>
@@ -323,7 +323,7 @@ export default function ListItem() {
                                 name="category"
                                 value={formData.category}
                                 onChange={handleCategoryChange}
-                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                             >
                                 <option value="">Select a category</option>
                                 {Object.keys(getCategories()).map((category, index) => (
@@ -339,7 +339,7 @@ export default function ListItem() {
                                 name="subcategory"
                                 value={formData.subcategory}
                                 onChange={handleChange}
-                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                 disabled={!formData.category} // Disable if no category is selected
                             >
                                 <option value="">Select a subcategory</option>
@@ -356,7 +356,7 @@ export default function ListItem() {
                                 name="country"
                                 value={formData.country}
                                 onChange={handleChange}
-                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                             >
                                 <option value="">Select a country</option>
                                 {getCountries().map((country, index) => (
@@ -392,7 +392,7 @@ export default function ListItem() {
                                     />
                                     <label
                                         htmlFor={`img${index}`}
-                                        className="cursor-pointer px-4 py-2 bg-indigo-600 text-white rounded-md shadow hover:bg-indigo-700"
+                                        className="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700"
                                     >
                                         Select File
                                     </label>

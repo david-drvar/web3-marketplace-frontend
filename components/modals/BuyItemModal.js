@@ -47,7 +47,7 @@ export default function BuyItemModal({isVisible, onClose, onBuyItemWithModerator
                             <li
                                 key={moderator.id}
                                 className={`flex items-center p-4 bg-gray-100 rounded-lg ${
-                                    selectedModerator === moderator.id ? "ring-2 ring-indigo-500" : ""
+                                    selectedModerator === moderator.id ? "ring-2 ring-blue-500" : ""
                                 }`}
                             >
                                 <input
@@ -84,7 +84,7 @@ export default function BuyItemModal({isVisible, onClose, onBuyItemWithModerator
                             <li
                                 key={index}
                                 className={`flex items-center p-4 bg-gray-100 rounded-lg ${
-                                    selectedAddress === address.id ? "ring-2 ring-indigo-500" : ""
+                                    selectedAddress === address.id ? "ring-2 ring-blue-500" : ""
                                 }`}
                             >
                                 <input

@@ -32,19 +32,19 @@ export default function Profile() {
                             <div className="w-1/4 bg-white p-6 shadow-md">
                                 <h2 className="text-xl font-semibold mb-4">Profile Settings</h2>
                                 <ul>
-                                    <li className={`py-2 cursor-pointer ${activeTab === 'manageProfile' ? 'text-blue-600 font-bold' : 'text-gray-600'}`}
+                                    <li className={`py-2 cursor-pointer hover:bg-gray-200 rounded-md ${activeTab === 'manageProfile' ? 'text-blue-500 font-bold' : 'text-gray-500'}`}
                                         onClick={() => setActiveTab('manageProfile')}>
                                         Manage Profile
                                     </li>
-                                    <li className={`py-2 cursor-pointer ${activeTab === 'manageAddresses' ? 'text-blue-600 font-bold' : 'text-gray-600'}`}
+                                    <li className={`py-2 cursor-pointer hover:bg-gray-200 rounded-md ${activeTab === 'manageAddresses' ? 'text-blue-500 font-bold' : 'text-gray-500'}`}
                                         onClick={() => setActiveTab('manageAddresses')}>
                                         Manage Addresses
                                     </li>
-                                    <li className={`py-2 cursor-pointer ${activeTab === 'reviews' ? 'text-blue-600 font-bold' : 'text-gray-600'}`}
+                                    <li className={`py-2 cursor-pointer hover:bg-gray-200 rounded-md ${activeTab === 'reviews' ? 'text-blue-500 font-bold' : 'text-gray-500'}`}
                                         onClick={() => setActiveTab('reviews')}>
                                         Your Reviews
                                     </li>
-                                    <li className={`py-2 cursor-pointer ${activeTab === 'advanced' ? 'text-blue-600 font-bold' : 'text-gray-600'}`}
+                                    <li className={`py-2 cursor-pointer hover:bg-gray-200 rounded-md ${activeTab === 'advanced' ? 'text-blue-500 font-bold' : 'text-gray-500'}`}
                                         onClick={() => setActiveTab('advanced')}>
                                         Advanced
                                     </li>

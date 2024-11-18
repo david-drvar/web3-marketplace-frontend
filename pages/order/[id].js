@@ -406,7 +406,7 @@ export default function OrderPage() {
                                         <p className="text-sm text-gray-500">Last seen: {formatDate(participant1Profile.lastSeen)}</p>
                                         <RatingDisplay rating={participant1Profile.averageRating} reviewCount={participant1Profile.numberOfReviews}/>
 
-                                        <p className="text-indigo-600 text-sm underline">
+                                        <p className="text-blue-600 text-sm hover:underline">
                                             <Link href={`/user/${participant1Profile.address}`} passHref>
                                                     <span>
                                                         View profile
@@ -440,7 +440,7 @@ export default function OrderPage() {
                                             <p className="text-sm text-gray-500">Last seen: {formatDate(participant2Profile.lastSeen)}</p>
                                             <RatingDisplay rating={participant2Profile.averageRating} reviewCount={participant2Profile.numberOfReviews}/>
 
-                                            <p className="text-indigo-600 text-sm underline">
+                                            <p className="text-blue-600 text-sm hover:underline">
                                                 <Link href={`/user/${participant2Profile.address}`} passHref>
                                                     <span>
                                                         View profile

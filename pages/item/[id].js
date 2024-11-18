@@ -443,7 +443,7 @@ export default function ItemPage() {
                                             <p className="text-sm text-gray-500 mb-1">Last seen: {formatDate(sellerProfile.lastSeen)}</p>
                                             <RatingDisplay rating={sellerProfile.averageRating} reviewCount={sellerProfile.numberOfReviews}/>
 
-                                            <p className="text-indigo-600 text-sm mt-2 underline">
+                                            <p className="text-blue-600 text-sm mt-2 hover:underline">
                                                 <Link href={`/user/${item.seller}`} passHref>
                                                     <span>
                                                         View profile

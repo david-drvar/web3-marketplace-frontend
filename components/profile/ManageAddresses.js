@@ -139,7 +139,7 @@ export default function ManageAddresses() {
                         id="city"
                         value={formData.city}
                         onChange={handleInputChange}
-                        className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         placeholder="City"
                         required
                     />
@@ -155,7 +155,7 @@ export default function ManageAddresses() {
                         id="street"
                         value={formData.street}
                         onChange={handleInputChange}
-                        className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         placeholder="Street"
                         required
                     />
@@ -171,7 +171,7 @@ export default function ManageAddresses() {
                         id="zipCode"
                         value={formData.zipCode}
                         onChange={handleInputChange}
-                        className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         placeholder="Zip Code"
                         required
                     />
@@ -187,17 +187,17 @@ export default function ManageAddresses() {
                         id="phoneNumber"
                         value={formData.phoneNumber}
                         onChange={handleInputChange}
-                        className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         placeholder="Phone Number"
                         required
                     />
                 </div>
 
-                <div>
+                <div className="flex justify-center">
                     <button
                         disabled={isSubmitting}
                         type="submit"
-                        className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md shadow-sm text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        className="w-auto bg-blue-500 text-white py-3 px-4 rounded-md shadow-sm text-sm font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                     >
                         {editingIndex !== null ? "Update Address" : "Add Address"}
                     </button>

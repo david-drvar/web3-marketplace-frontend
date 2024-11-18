@@ -1,4 +1,4 @@
-import {useNotification, Upload} from "web3uikit";
+import {useNotification} from "web3uikit";
 import {useEffect, useState} from "react";
 import {useWeb3Contract} from "react-moralis";
 import marketplaceAbi from "../../constants/Marketplace.json";
@@ -304,7 +304,7 @@ export default function UpdateItemModal({
                             value={formData.title}
                             onChange={handleChange}
                             required
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         />
                     </div>
 
@@ -320,7 +320,7 @@ export default function UpdateItemModal({
                             value={formData.description}
                             onChange={handleChange}
                             required
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         />
                     </div>
 
@@ -334,7 +334,7 @@ export default function UpdateItemModal({
                             name="currency"
                             value={formData.currency}
                             onChange={handleChange}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         >
                             {supportedCurrencies.map((currency, key) => (
                                 <option value={currency} key={key}>
@@ -356,7 +356,7 @@ export default function UpdateItemModal({
                             value={formData.price}
                             onChange={handleChange}
                             required
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         />
                     </div>
 
@@ -370,7 +370,7 @@ export default function UpdateItemModal({
                             name="condition"
                             value={formData.condition}
                             onChange={handleChange}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         >
                             <option value="0">New</option>
                             <option value="1">Like New</option>
@@ -390,7 +390,7 @@ export default function UpdateItemModal({
                             name="category"
                             value={formData.category}
                             onChange={handleCategoryChange}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         >
                             <option value="">Select a category</option>
                             {Object.keys(getCategories()).map((category, index) => (
@@ -411,7 +411,7 @@ export default function UpdateItemModal({
                             name="subcategory"
                             value={formData.subcategory}
                             onChange={handleChange}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         >
                             <option value="">Select a subcategory</option>
                             {formData.category &&
@@ -433,7 +433,7 @@ export default function UpdateItemModal({
                             name="country"
                             value={formData.country}
                             onChange={handleChange}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                         >
                             <option value="">Select a country</option>
                             {getCountries().map((country, index) => (
