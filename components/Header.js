@@ -133,7 +133,7 @@ export default function Header() {
                                 <span className="font-semibold text-gray-700">Notifications</span>
                                 <button
                                     onClick={handleMarkAllAsRead}
-                                    className="text-xs text-blue-500 hover:text-blue-700"
+                                    className="text-xs text-blue-500 hover:text-blue-700 hover:underline"
                                 >
                                     Mark all as read
                                 </button>
@@ -166,14 +166,27 @@ export default function Header() {
                     )}
                 </div>
 
-                <div className="relative mr-10">
+                { /* Arrow menu */ }
+                <div className="relative mr-10 group">
                     <div className="flex items-center cursor-pointer">
                         <ConnectButton moralisAuth={false}/>
                         {
-                            !isMenuOpen && <FaChevronDown className="ml-2 text-xl" onClick={() => setMenuOpen(!isMenuOpen)}/>
+                            !isMenuOpen &&
+                            <button
+                                onClick={() => setMenuOpen(!isMenuOpen)}
+                                className="text-xl p-2 rounded-full hover:bg-gray-100 transition-all duration-300 transform group-hover:scale-110"
+                            >
+                                <FaChevronDown size={25} className="group-hover:text-blue-500"/>
+                            </button>
                         }
                         {
-                            isMenuOpen && <FaChevronUp className="ml-2 text-xl" onClick={() => setMenuOpen(!isMenuOpen)}/>
+                            isMenuOpen &&
+                            <button
+                                onClick={() => setMenuOpen(!isMenuOpen)}
+                                className="text-xl p-2 rounded-full hover:bg-gray-100 transition-all duration-300 transform group-hover:scale-110"
+                            >
+                                <FaChevronUp size={25} className="group-hover:text-blue-500"/>
+                            </button>
                         }
                     </div>
                     {isMenuOpen && (
