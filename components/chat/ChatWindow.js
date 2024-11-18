@@ -80,13 +80,13 @@ const ChatWindow = ({chat}) => {
             </div>
 
             {/* Message Input */}
-            <div className="p-4 border-t border-gray-300 flex items-center space-x-4">
+            <div className="p-4 border-t border-gray-300 items-center space-x-4">
                 {/*<input*/}
                 {/*    type="text"*/}
                 {/*    placeholder="Type a message..."*/}
-                {/*    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"*/}
+                {/*    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"*/}
                 {/*/>*/}
-                {/*<button className="px-4 py-2 bg-indigo-500 text-white rounded-lg hover:bg-indigo-600 focus:outline-none focus:ring-2 focus:ring-indigo-500">*/}
+                {/*<button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">*/}
                 {/*    Send*/}
                 {/*</button>*/}
 

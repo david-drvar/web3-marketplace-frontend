@@ -3,7 +3,7 @@ import {useMoralis} from "react-moralis";
 import {fetchAllReviewsByUser} from "@/utils/apolloService";
 import Link from 'next/link';
 import LoadingAnimation from "@/components/LoadingAnimation";
-import {renderStars} from "@/utils/utils";
+import {formatDate, renderStars} from "@/utils/utils";
 
 const YourReviews = () => {
     const [reviews, setReviews] = useState([]);
@@ -20,7 +20,7 @@ const YourReviews = () => {
                 isLoading ? (
                     <LoadingAnimation/>
                 ) : (
-                    <div className="container mx-auto p-8">
+                    <div className="container mx-auto">
                         <h1 className="text-3xl font-semibold mb-8">Your Reviews</h1>
 
                         {reviews.length === 0 ? (
@@ -50,9 +50,9 @@ const YourReviews = () => {
                                                 <div className="flex">{renderStars(review.rating)}</div>
                                             </div>
                                             <p className="text-gray-700">{review.content}</p>
-                                            <p className="text-sm text-gray-400 mt-2">Reviewed on: {new Date(review.blockTimestamp * 1000).toDateString()}</p>
+                                            <p className="text-sm text-gray-400 mt-2">Reviewed on: {formatDate(review.blockTimestamp * 1000)}</p>
                                             <p className="text-sm text-gray-500 mt-2">Reviewed by: {" "}
-                                                <Link href={`/profile/${review.from}`} passHref>
+                                                <Link href={`/user/${review.from}`} passHref>
                                                     <span className="text-blue-500 hover:underline font-medium">
                                                         {review.fromUsername}
                                                     </span>

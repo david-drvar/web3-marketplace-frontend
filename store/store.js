@@ -1,4 +1,4 @@
-import {configureStore, s} from '@reduxjs/toolkit';
+import {configureStore} from '@reduxjs/toolkit';
 import rootReducer from './rootReducer';
 import storage from 'redux-persist/lib/storage'; // default is localStorage
 import {persistReducer, persistStore} from "redux-persist"; // default is localStorage
@@ -7,7 +7,7 @@ import {persistReducer, persistStore} from "redux-persist"; // default is localS
 const persistConfig = {
     key: 'root', // key for the storage
     storage,    // storage engine (localStorage in this case)
-    whitelist: ['items', 'contract', 'user'], // List of reducers to persist
+    whitelist: ['items', 'contract', 'user', 'chatCounter'], // List of reducers to persist
     debug: true,
 };
 

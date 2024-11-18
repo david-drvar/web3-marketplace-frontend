@@ -90,9 +90,15 @@ export function handleNotification(dispatch, type, message, title) {
 export const renderStars = (rating) => {
     const totalStars = 5;
     return Array.from({length: totalStars}, (_, i) => (
-        <span key={i} className={`text-xl ${i < rating ? 'text-yellow-500' : 'text-gray-300'}`}>
-                {i < rating ? '★' : '☆'}
-            </span>
+        i < rating ?
+            <svg key={`full-${i}`} className="w-5 h-5 text-yellow-500 inline-block" fill="currentColor"
+                 viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg> :
+            <svg key={`empty-${i}`} className="w-5 h-5 text-gray-300 inline-block" fill="currentColor"
+                 viewBox="0 0 24 24">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
     ));
 };
 
@@ -111,3 +117,28 @@ export function getCategories() {
         "Collectibles": ["Coins", "Stamps", "Trading Cards", "Art", "Other"],
     };
 }
+
+
+export const saniziteCondition = (condition) => {
+    return condition.replace("_", " ");
+}
+
+export const formatEthAddress = (address) => {
+    const firstThree = address.slice(0, 5);
+    const lastThree = address.slice(-3);
+
+    return `${firstThree}...${lastThree}`;
+}
+
+export const formatDate = (date) => {
+    const d = new Date(date);
+
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+
+    return `${day}.${month}.${year}. ${hours}:${minutes}`;
+};

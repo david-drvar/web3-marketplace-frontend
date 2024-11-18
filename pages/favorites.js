@@ -2,68 +2,47 @@ import {useMoralis} from "react-moralis";
 import ItemBox from "@/components/ItemBox";
 import {useEffect, useState} from "react";
 import LoadingAnimation from "@/components/LoadingAnimation";
-import {fetchItemsOrderedByUser, fetchTransactionsByItemIds} from "@/utils/apolloService";
+import {fetchItemsByIdsList} from "@/utils/apolloService";
+import {getFavoriteItemsIds} from "@/utils/firebaseService";
 
-export default function MyOrders() {
+export default function Favorites() {
     const {isWeb3Enabled, account} = useMoralis();
 
     const [items, setItems] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
-    const [filteredItems, setFilteredItems] = useState([]);
-    const [filter, setFilter] = useState('all');
-    const [transactions, setTransactions] = useState([]);
-
+    
     const [page, setPage] = useState(1);
     const pageSize = 12;
     const [nextPageButtonDisabled, setNextPageButtonDisabled] = useState(false);
 
-
     useEffect(() => {
-        if (isWeb3Enabled && account) {
-            loadItems();
-            loadItemsNextPage();
-        }
+        loadFavorites();
+        loadFavoritesNextPage();
     }, [isWeb3Enabled, account, page]);
 
-    const loadItems = async () => {
+    const loadFavorites = async () => {
         setIsLoading(true);
 
         const skip = (page - 1) * pageSize;
 
-        const fetchedItems = await fetchItemsOrderedByUser(account, pageSize, skip);
-        setItems(fetchedItems);
-        setFilteredItems(fetchedItems)
+        const favoriteItemsIds = await getFavoriteItemsIds(account);
+        const items = await fetchItemsByIdsList(favoriteItemsIds, pageSize, skip);
 
-        const itemIds = fetchedItems.map(item => item.id);
-        const fetchedTransactions = await fetchTransactionsByItemIds(itemIds);
-        setTransactions(fetchedTransactions);
-
+        await setItems(items);
         setIsLoading(false);
     };
 
-    const loadItemsNextPage = async () => {
+    const loadFavoritesNextPage = async () => {
         setIsLoading(true);
 
         const skip = page * pageSize;
 
-        const fetchedItems = await fetchItemsOrderedByUser(account, pageSize, skip);
-        fetchedItems.length > 0 ? setNextPageButtonDisabled(false) : setNextPageButtonDisabled(true);
+        const fetchedItems = await getFavoriteItemsIds(account);
+        const items = await fetchItemsByIdsList(fetchedItems, pageSize, skip);
+        items.length > 0 ? setNextPageButtonDisabled(false) : setNextPageButtonDisabled(true);
 
         setIsLoading(false);
     };
-
-
-    const handleFilterChange = (status) => {
-        setFilter(status);
-        if (status === 'all')
-            setFilteredItems(items);
-        else if (status === 'completed')
-            setFilteredItems(items.filter(item => transactions.find(tx => tx.itemId === item.id && tx.isCompleted) !== undefined))
-        else if (status === 'inDispute')
-            setFilteredItems(items.filter(item => transactions.find(tx => tx.itemId === item.id && !tx.isCompleted && tx.disputed) !== undefined))
-        else if (status === 'waitingForApproval')
-            setFilteredItems(items.filter(item => transactions.find(tx => tx.itemId === item.id && !tx.isCompleted && !tx.disputed) !== undefined))
-    }
 
     const handleNextPage = () => {
         setPage((prevPage) => prevPage + 1);
@@ -81,43 +60,15 @@ export default function MyOrders() {
                     <LoadingAnimation/>
                 ) : (
                     <div className="container mx-auto px-4 py-8">
-                        <h1 className="text-3xl font-bold text-gray-800 mb-8">My orders</h1>
+                        <h1 className="text-3xl font-bold text-gray-800 mb-8">Favorites</h1>
 
-                        <div className="mb-6 flex flex-wrap gap-2">
-                            <button
-                                onClick={() => handleFilterChange('all')}
-                                className={`px-2 py-1 rounded ${filter === 'all' ? 'bg-blue-400 text-white' : 'bg-gray-200'}`}
-                            >
-                                All
-                            </button>
-                            <button
-                                onClick={() => handleFilterChange('completed')}
-                                className={`px-2 py-1 rounded ${filter === 'completed' ? 'bg-blue-400 text-white' : 'bg-gray-200'}`}
-                            >
-                                Completed
-                            </button>
-                            <button
-                                onClick={() => handleFilterChange('inDispute')}
-                                className={`px-2 py-1 rounded ${filter === 'inDispute' ? 'bg-blue-400 text-white' : 'bg-gray-200'}`}
-                            >
-                                In Dispute
-                            </button>
-                            <button
-                                onClick={() => handleFilterChange('waitingForApproval')}
-                                className={`px-2 py-1 rounded ${filter === 'waitingForApproval' ? 'bg-blue-400 text-white' : 'bg-gray-200'}`}
-                            >
-                                Waiting for Approval
-                            </button>
-                        </div>
-
-
-                        {filteredItems.length === 0 ? (
+                        {items.length === 0 ? (
                             <div className="text-center text-gray-500 italic">
-                                You made no orders.
+                                You don't have any favorites.
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                                {filteredItems.map((item) => {
+                                {items.map((item) => {
                                     const {
                                         price,
                                         title,
@@ -148,6 +99,9 @@ export default function MyOrders() {
                                             category={category}
                                             subcategory={subcategory}
                                             condition={condition}
+                                            displayFavorite={true}
+                                            isFavorite={true}
+                                            loadFavorites={loadFavorites}
                                         />
                                     );
                                 })}
@@ -190,6 +144,4 @@ export default function MyOrders() {
             )}
         </>
     );
-
-
 }

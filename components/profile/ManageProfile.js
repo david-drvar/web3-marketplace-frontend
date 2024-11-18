@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {useNotification} from "web3uikit";
 import {useMoralis, useWeb3Contract} from "react-moralis";
 import {useDispatch, useSelector} from "react-redux";
@@ -193,8 +193,8 @@ export default function ManageProfile() {
                 <LoadingAnimation/>
             ) : (
                 <div>
-                    <h1 className="text-4xl font-bold mb-6 flex items-center justify-between">
-                <span>
+                    <h1 className="text-3xl font-semibold mb-8 flex items-center justify-between">
+                        <span>
                     {userExists ? <>Update Your Profile</> : <>Create Your Profile</>}
                 </span>
                         {
@@ -210,7 +210,7 @@ export default function ManageProfile() {
                         }
                     </h1>
                     <form onSubmit={handleSubmit} className="space-y-3">
-                        <div>
+                    <div>
                             <label htmlFor="username" className="block text-sm font-medium text-gray-700">
                                 Username
                             </label>
@@ -220,7 +220,7 @@ export default function ManageProfile() {
                                 id="username"
                                 value={formData.username}
                                 onChange={handleChange}
-                                className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                 placeholder="Your username"
                                 required
                             />
@@ -237,7 +237,7 @@ export default function ManageProfile() {
                                     id="firstName"
                                     value={formData.firstName}
                                     onChange={handleChange}
-                                    className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                    className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                     placeholder="First name"
                                     required
                                 />
@@ -252,7 +252,7 @@ export default function ManageProfile() {
                                     id="lastName"
                                     value={formData.lastName}
                                     onChange={handleChange}
-                                    className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                    className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                     placeholder="Last name"
                                     required
                                 />
@@ -268,7 +268,7 @@ export default function ManageProfile() {
                                 id="country"
                                 value={formData.country}
                                 onChange={handleChange}
-                                className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                 required
                             >
                                 <option value="">Select your country</option>
@@ -291,7 +291,7 @@ export default function ManageProfile() {
                                 id="description"
                                 value={formData.description}
                                 onChange={handleChange}
-                                className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                 placeholder="Tell us about yourself"
                                 rows={4}
                                 required
@@ -308,7 +308,7 @@ export default function ManageProfile() {
                                 id="email"
                                 value={formData.email}
                                 onChange={handleChange}
-                                className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                 placeholder="Your email"
                                 required
                             />
@@ -324,7 +324,7 @@ export default function ManageProfile() {
                                 type="checkbox"
                                 checked={formData.isModerator}
                                 onChange={handleChange}
-                                className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
+                                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                             />
                             <label htmlFor="isModerator" className="ml-2 block text-sm text-gray-900">
                                 Set as Moderator
@@ -342,7 +342,7 @@ export default function ManageProfile() {
                                 id="moderatorFee"
                                 value={formData.moderatorFee}
                                 onChange={handleChange}
-                                className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                className="mt-1 p-3 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                                 placeholder="Enter moderator fee"
                                 required={formData.isModerator} // Required if user is a moderator
                             />
@@ -368,13 +368,13 @@ export default function ManageProfile() {
                             )}
                         </div>
 
-                        <div>
+                        <div className="flex justify-center">
                             <button
                                 disabled={isSubmitting}
                                 type="submit"
-                                className="w-full bg-indigo-600 text-white py-3 px-4 rounded-md shadow-sm text-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                className="w-auto bg-blue-500 text-white py-3 px-4 rounded-md shadow-sm text-sm font-medium hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                             >
-                                {userExists ? <>update profile</> : <>create profile</>}
+                                {userExists ? <>Update Profile</> : <>Create Profile</>}
                             </button>
                         </div>
                     </form>

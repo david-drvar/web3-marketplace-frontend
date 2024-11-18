@@ -1,7 +1,9 @@
-import {collection, doc, getDoc, query, setDoc, where, getDocs, addDoc, serverTimestamp} from "firebase/firestore";
+import {collection, doc, getDoc, query, setDoc, where, getDocs, addDoc, serverTimestamp, writeBatch, arrayRemove, arrayUnion} from "firebase/firestore";
 import {firebase_db} from "@/utils/firebaseConfig";
 
 export const getUserAddresses = async (userId) => {
+    if (!userId || userId.length === 0) return [];
+
     try {
         const userDocRef = doc(collection(firebase_db, "addresses"), userId);
         const userDocSnap = await getDoc(userDocRef);
@@ -20,6 +22,8 @@ export const getUserAddresses = async (userId) => {
 }
 
 export const getOrderAddress = async (orderId) => {
+    if (!orderId || orderId.length === 0) return [];
+
     try {
         const orderDocRef = doc(collection(firebase_db, "orders"), orderId);
         const orderDocSnap = await getDoc(orderDocRef);
@@ -42,13 +46,14 @@ export const addAddressToOrder = async (itemId, address) => {
     try {
         const orderRef = doc(firebase_db, "orders", itemId);
         await setDoc(orderRef, {address});
-        console.log("Address added to order successfully.");
     } catch (error) {
         console.error("Error adding address to order: ", error);
     }
 };
 
 export const getChatsByUser = async (userId) => {
+    if (!userId || userId.length === 0) return [];
+
     // Reference to the chats collection
     const chatsRef = collection(firebase_db, "chats");
 
@@ -90,16 +95,19 @@ export const getChatsByUser = async (userId) => {
 };
 
 export const setLastSeenForUser = async (address) => {
+    if (!address || address.length === 0) return;
+
     try {
         const userRef = doc(firebase_db, "users", address);
         await setDoc(userRef, {lastSeen: Date.now()});
-        console.log("User set last seen successfully.");
     } catch (error) {
         console.error("Error setting last seen for user ", error);
     }
 };
 
 export const getLastSeenForUser = async (address) => {
+    if (!address || address.length === 0) return "";
+
     try {
         const userRef = doc(firebase_db, "users", address);
         const lastSeenDocSnap = await getDoc(userRef);
@@ -109,7 +117,7 @@ export const getLastSeenForUser = async (address) => {
             return (lastSeenData.lastSeen || null);
         } else {
             console.log("No last seen found for this user.");
-            return [];
+            return "";
         }
     } catch (error) {
         console.error("Error getting last seen for user ", error);
@@ -153,17 +161,144 @@ export const addNotification = async (userId, message, from, itemId, actionUrl, 
         timestamp: Date.now()
     };
 
-    console.log("notification data", notificationData)
-    console.log("userId", userId)
-
     try {
         // Define the subcollection path
         const userNotificationsRef = collection(firebase_db, 'notifications', userId, 'userNotifications');
 
         // Add a new notification document with an auto-generated ID
-        const notificationRef = await addDoc(userNotificationsRef, notificationData);
-        console.log('Notification added with ID:', notificationRef.id);
+        await addDoc(userNotificationsRef, notificationData);
     } catch (e) {
         console.error('Error adding notification:', e);
     }
 }
+
+export const getAllNotifications = async (userId, fetchOnlyChat = false) => {
+    if (!userId || userId.length === 0) return [];
+
+    try {
+        const userNotificationsRef = collection(firebase_db, 'notifications', userId, 'userNotifications');
+
+        let notificationsQuery;
+        if (fetchOnlyChat) {
+            notificationsQuery = query(userNotificationsRef, where("type", "==", "chat"));
+        } else {
+            notificationsQuery = query(userNotificationsRef, where("type", "!=", "chat"));
+        }
+
+        const querySnapshot = await getDocs(notificationsQuery);
+        const notifications = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+
+        return notifications;
+    } catch (e) {
+        console.error('Error fetching notifications:', e);
+        return [];
+    }
+};
+
+export const markNotificationsAsRead = async (userId, notifications) => {
+    if (!notifications || notifications.length === 0) return;
+
+    const batch = writeBatch(firebase_db);
+
+    try {
+        notifications.forEach((notification) => {
+            const notificationRef = doc(firebase_db, 'notifications', userId, 'userNotifications', notification.id);
+            batch.update(notificationRef, {isRead: true});
+        });
+
+        await batch.commit();
+    } catch (error) {
+        console.error('Error marking notifications as read:', error);
+    }
+};
+
+export const toggleFavoriteItem = async (userId, itemId) => {
+    if (!userId || userId.length === 0 || !itemId || itemId.length === 0) return;
+
+    try {
+        const userFavoritesRef = doc(firebase_db, "favorites", userId);
+
+        const userFavoritesSnap = await getDoc(userFavoritesRef);
+        let currentItemIds = [];
+
+        if (userFavoritesSnap.exists())
+            currentItemIds = userFavoritesSnap.data().itemIds || [];
+
+        const itemExists = currentItemIds.includes(itemId);
+
+        if (itemExists)
+            await setDoc(userFavoritesRef, {itemIds: arrayRemove(itemId)}, {merge: true});
+        else
+            await setDoc(userFavoritesRef, {itemIds: arrayUnion(itemId)}, {merge: true});
+
+    } catch (error) {
+        console.error("Error toggling favorite item: ", error);
+    }
+}
+
+export const getFavoriteItemsIds = async (userId) => {
+    if (!userId || userId.length === 0) return [];
+
+    try {
+        const userFavoritesRef = doc(firebase_db, "favorites", userId);
+        const userFavoritesSnap = await getDoc(userFavoritesRef);
+
+        if (userFavoritesSnap.exists()) {
+            const data = userFavoritesSnap.data();
+            console.log("fav data", data)
+            return data.itemIds || [];
+        } else {
+            return [];
+        }
+    } catch (error) {
+        console.error("Error retrieving favorite items: ", error);
+        return [];
+    }
+}
+
+export const getUserIdsWithItemInFavorites = async (itemId) => {
+    if (!itemId || itemId.length === 0) return [];
+
+    try {
+        const favoritesCollection = collection(firebase_db, "favorites");
+
+        const q = query(favoritesCollection, where("itemIds", "array-contains", itemId));
+
+        const querySnapshot = await getDocs(q);
+
+        const userIds = [];
+        querySnapshot.forEach((doc) => {
+            userIds.push(doc.id); // doc.id is the userId
+        });
+
+        return userIds || [];
+    } catch (error) {
+        console.error("Error getting user IDs:", error);
+        throw new Error("Failed to fetch user IDs");
+    }
+};
+
+export const isItemFavorited = async (userId, itemId) => {
+    if (!userId || userId.length === 0 || !itemId || itemId.length === 0) {
+        return false;
+    }
+
+    try {
+        const userFavoritesRef = doc(firebase_db, "favorites", userId);
+        const userFavoritesSnap = await getDoc(userFavoritesRef);
+
+        if (userFavoritesSnap.exists()) {
+            const data = userFavoritesSnap.data();
+            const itemIds = data.itemIds || [];
+            return itemIds.includes(itemId);
+        } else {
+            return false;
+        }
+    } catch (error) {
+        console.error("Error checking if item is favorited: ", error);
+        return false;
+    }
+};

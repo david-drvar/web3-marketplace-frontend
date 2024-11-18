@@ -42,7 +42,7 @@ const SearchFilterBar = ({onFilter, onReset}) => {
 
     return (
         <div className="bg-gray-100 p-4 rounded-md mb-6">
-            <div className="flex flex-wrap justify-between items-center gap-2">
+            <div className="flex flex-wrap  gap-2">
                 <input
                     type="text"
                     placeholder="Search by title or description"
@@ -142,14 +142,14 @@ const SearchFilterBar = ({onFilter, onReset}) => {
 
                 <button
                     onClick={handleSearch}
-                    className="mt-2 sm:mt-0 bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 flex-grow min-w-[120px]"
+                    className="mt-2 sm:mt-0 bg-blue-500 max-w-5 text-white px-4 py-2 rounded-md hover:bg-blue-600 flex-grow min-w-[120px]"
                 >
-                    Search & Filter
+                    Search
                 </button>
 
                 <button
                     onClick={handleReset}
-                    className="mt-2 sm:mt-0 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-blue-600 flex-grow min-w-[120px]"
+                    className="mt-2 sm:mt-0 bg-red-500 max-w-5 text-white px-4 py-2 rounded-md hover:bg-red-600 flex-grow min-w-[120px]"
                 >
                     Reset
                 </button>

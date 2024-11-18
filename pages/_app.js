@@ -9,7 +9,7 @@ import {Provider} from "react-redux";
 import {PersistGate} from "redux-persist/integration/react";
 import {apolloClient} from "@/utils/apolloService"
 import AccountChangedListener from "@/components/AccountChangedListener";
-import { SpeedInsights } from '@vercel/speed-insights/next';
+import {SpeedInsights} from '@vercel/speed-insights/next';
 
 function App({Component, pageProps}) {
     return (
@@ -17,7 +17,7 @@ function App({Component, pageProps}) {
             <PersistGate loading={null} persistor={persistor}>
                 <div>
                     <Head>
-                        <title>DecentWear</title>
+                        <title>DecentMarkt</title>
                         <meta name="description" content="Marketplace dApp"/>
                         <meta name="viewport" content="width=device-width, initial-scale=1"/>
                         <link rel="icon" href="/favicon.ico"/>
@@ -28,7 +28,7 @@ function App({Component, pageProps}) {
                             <NotificationProvider>
                                 <Header/>
                                 <Component {...pageProps} />
-                                <SpeedInsights />
+                                <SpeedInsights/>
                             </NotificationProvider>
                         </ApolloProvider>
                     </MoralisProvider>

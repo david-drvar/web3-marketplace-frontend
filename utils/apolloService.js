@@ -7,10 +7,10 @@ export const apolloClient = new ApolloClient({
 });
 
 
-export const fetchAllItemsListed = async () => {
+export const fetchItemsPaginated = async (first, skip) => {
     const getItemsQuery = gql`
-    {
-      items (where : { itemStatus: "Listed" }) {
+    query GetItems($first: Int!, $skip: Int!) {
+      items(first: $first, skip: $skip, where: { itemStatus: "Listed" }) {
         id
         buyer
         seller
@@ -33,15 +33,16 @@ export const fetchAllItemsListed = async () => {
     try {
         const {data} = await apolloClient.query({
             query: getItemsQuery,
+            variables: {first, skip},
             fetchPolicy: 'network-only', // ensures fresh data
         });
 
         return data.items || [];
     } catch (error) {
-        console.error("Error fetching items", error);
+        console.error('Error fetching paginated items', error);
         return [];
     }
-}
+};
 
 
 export const fetchItemById = async (id) => {
@@ -84,13 +85,13 @@ export const fetchItemById = async (id) => {
     }
 }
 
-export const fetchItemsOrderedByUser = async (userAddress) => {
+export const fetchItemsOrderedByUser = async (userAddress, first, skip) => {
     if (!userAddress) {
         return [];
     }
     const getItemsQuery = gql`
-    query GetOrders($userAddress: String!) {
-      items(where: { buyer: $userAddress }) {
+    query GetOrders($userAddress: String!, $first: Int!, $skip: Int!) {
+      items(first: $first, skip: $skip, where: { buyer: $userAddress }) {
         id
         buyer
         seller
@@ -113,7 +114,7 @@ export const fetchItemsOrderedByUser = async (userAddress) => {
     try {
         const {data} = await apolloClient.query({
             query: getItemsQuery,
-            variables: {userAddress: userAddress},
+            variables: {userAddress, first, skip},
             fetchPolicy: 'network-only', // ensures fresh data
         });
 
@@ -125,7 +126,7 @@ export const fetchItemsOrderedByUser = async (userAddress) => {
 }
 
 
-export const fetchActiveAdsByUser = async (userAddress) => {
+export const fetchAllAdsByUser = async (userAddress) => {
     if (!userAddress) {
         return [];
     }
@@ -154,13 +155,134 @@ export const fetchActiveAdsByUser = async (userAddress) => {
     try {
         const {data} = await apolloClient.query({
             query: getItemsQuery,
-            variables: {userAddress: userAddress},
+            variables: {userAddress},
             fetchPolicy: 'network-only', // ensures fresh data
         });
 
         return data.items || [];
     } catch (error) {
         console.error("Error fetching active ads by user", error);
+        return [];
+    }
+}
+
+export const fetchListedAdsByUserPaginated = async (userAddress, first, skip) => {
+    if (!userAddress) {
+        return [];
+    }
+    const getItemsQuery = gql`
+    query GetActiveAddsByUser($userAddress: String!, $first: Int!, $skip: Int!) {
+      items(first: $first, skip: $skip, where: { seller: $userAddress, itemStatus: "Listed" }) {
+        id
+        buyer
+        seller
+        price
+        currency
+        title
+        description
+        blockTimestamp
+        itemStatus
+        photosIPFSHashes
+        condition
+        category
+        subcategory
+        country
+        isGift
+      }
+    }
+  `;
+
+    try {
+        const {data} = await apolloClient.query({
+            query: getItemsQuery,
+            variables: {userAddress, first, skip},
+            fetchPolicy: 'network-only', // ensures fresh data
+        });
+
+        return data.items || [];
+    } catch (error) {
+        console.error("Error fetching active ads by user", error);
+        return [];
+    }
+}
+
+export const fetchActiveAdsByUserPaginated = async (userAddress, first, skip) => {
+    if (!userAddress) {
+        return [];
+    }
+    const getItemsQuery = gql`
+    query GetActiveAddsByUser($userAddress: String!, $first: Int!, $skip: Int!) {
+      items(first: $first, skip: $skip, where: { seller: $userAddress, itemStatus_not: "Deleted" }) {
+        id
+        buyer
+        seller
+        price
+        currency
+        title
+        description
+        blockTimestamp
+        itemStatus
+        photosIPFSHashes
+        condition
+        category
+        subcategory
+        country
+        isGift
+      }
+    }
+  `;
+
+    try {
+        const {data} = await apolloClient.query({
+            query: getItemsQuery,
+            variables: {userAddress, first, skip},
+            fetchPolicy: 'network-only', // ensures fresh data
+        });
+
+        return data.items || [];
+    } catch (error) {
+        console.error("Error fetching active ads by user", error);
+        return [];
+    }
+}
+
+export const fetchItemsByIdsList = async (itemIds, first, skip) => {
+    if (!itemIds || itemIds.length === 0) {
+        return [];
+    }
+
+    const getItemsQuery = gql`
+        query GetItemsByIds($itemIds: [String!], $first: Int!, $skip: Int!) {
+            items(first: $first, skip: $skip, where: { id_in: $itemIds, itemStatus: "Listed" }) {
+                id
+                buyer
+                seller
+                price
+                currency
+                title
+                description
+                blockTimestamp
+                itemStatus
+                photosIPFSHashes
+                condition
+                category
+                subcategory
+                country
+                isGift
+            }
+        }
+    `;
+
+    try {
+        const {data} = await apolloClient.query({
+            query: getItemsQuery,
+            variables: {itemIds, first, skip},
+            fetchPolicy: 'network-only',
+        });
+
+        return data.items || [];
+    } catch (error) {
+        console.error("Error fetching items with item ids array", error);
         return [];
     }
 }
@@ -271,7 +393,7 @@ export const fetchUserByAddress = async (userAddress) => {
     try {
         const {data} = await apolloClient.query({
             query: getUserQuery,
-            variables: {userAddress: userAddress},
+            variables: {userAddress},
             fetchPolicy: 'network-only', // ensures fresh data
         });
 
@@ -289,6 +411,7 @@ export const fetchUserProfileByAddress = async (userAddress) => {
     }
 
     let userProfile = {
+        address: "",
         avatarHash: "",
         username: "",
         firstName: "",
@@ -312,6 +435,7 @@ export const fetchUserProfileByAddress = async (userAddress) => {
         const averageRating = reviews.length ? totalRating / reviews.length : 0;
 
         userProfile = {
+            address: userData.id,
             username: userData.username,
             firstName: userData.firstName,
             lastName: userData.lastName,
@@ -362,7 +486,7 @@ export const fetchTransactionByItemId = async (itemId) => {
     try {
         const {data} = await apolloClient.query({
             query: getTransactionByItemId,
-            variables: {itemId: itemId},
+            variables: {itemId},
             fetchPolicy: 'network-only', // ensures fresh data
         });
 
@@ -374,13 +498,13 @@ export const fetchTransactionByItemId = async (itemId) => {
 }
 
 
-export const fetchAllItemsByModerator = async (moderator) => {
+export const fetchAllItemsByModerator = async (moderator, first, skip) => {
     if (!moderator) {
         return [];
     }
     const getTransactionByModerator = gql`
-    query getTransactionByModerator($moderator: String!) {
-      transactions(where: { moderator: $moderator }) {
+    query getTransactionByModerator($moderator: String!, $first: Int!, $skip: Int!) {
+      transactions(first: $first, skip: $skip, where: { moderator: $moderator }) {
         id
         itemId
         buyer
@@ -432,7 +556,7 @@ export const fetchAllItemsByModerator = async (moderator) => {
 
         const {data} = await apolloClient.query({
             query: getTransactionByModerator,
-            variables: {moderator: moderator},
+            variables: {moderator, first, skip},
             fetchPolicy: 'network-only', // ensures fresh data
         });
 
@@ -527,11 +651,7 @@ export const checkReviewExistence = async (from, to, itemId) => {
     try {
         const {data} = await apolloClient.query({
             query: checkReviewExistenceQuery,
-            variables: {
-                from: from,
-                to: to,
-                itemId: itemId,
-            },
+            variables: {from, to, itemId},
             fetchPolicy: 'network-only', // ensures fresh data
         });
 
@@ -570,9 +690,7 @@ export const fetchAllReviewsByUser = async (userAddress) => {
     try {
         const {data} = await apolloClient.query({
             query: fetchAllReviewsByUser,
-            variables: {
-                userAddress: userAddress,
-            },
+            variables: {userAddress},
             fetchPolicy: 'network-only',
         });
 
@@ -630,9 +748,7 @@ export const fetchAllReviewsForItem = async (itemId) => {
     try {
         const {data} = await apolloClient.query({
             query: fetchAllReviewsForItem,
-            variables: {
-                itemId: itemId,
-            },
+            variables: {itemId},
             fetchPolicy: 'network-only',
         });
 
