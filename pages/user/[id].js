@@ -163,7 +163,13 @@ export default function UserProfile() {
                                 <div>
                                     <h2 className="text-lg font-semibold mt-1">{user.username}</h2>
                                     <p className="text-sm text-gray-500 mt-1">Name: {user.firstName} {user.lastName}</p>
-                                    <p className="text-sm text-gray-500 mt-1">Member since: {formatDate(user.blockTimestamp * 1000)}</p>
+                                    <p className="text-sm text-gray-500 mt-1">Description: {user.description}</p>
+                                    {
+                                        user.isModerator &&
+                                        <p className="text-sm text-gray-500 mt-1">Moderator fee: {user.moderatorFee}</p>
+                                    }
+                                    <p className="text-sm text-gray-500 mt-1">Member
+                                        since: {formatDate(user.blockTimestamp * 1000)}</p>
                                     <p className="text-sm text-gray-500 mt-1">Total ads posted: {totalAdsPosted}</p>
                                     <p className="text-sm text-gray-500 mt-1">Total deals closed: {totalClosedDeals}</p>
                                     <p className="text-sm text-gray-500 mt-1 mb-2">Last seen: {formatDate(lastSeen)}</p>
