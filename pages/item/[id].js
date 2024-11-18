@@ -402,7 +402,7 @@ export default function ItemPage() {
                                     <div className="flex justify-between items-center">
                                         <h1 className="text-2xl font-bold mb-2">{title}</h1>
 
-                                        {account !== item.seller &&
+                                        {account !== item.seller && item.itemStatus === "Listed" &&
                                             <button
                                                 onClick={handleFavoriteClick}
                                                 className="text-gray-600 hover:text-red-500 transition-colors duration-200"

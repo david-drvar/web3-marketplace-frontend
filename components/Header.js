@@ -166,10 +166,11 @@ export default function Header() {
                     )}
                 </div>
 
+                <ConnectButton moralisAuth={false}/>
+
                 { /* Arrow menu */ }
                 <div className="relative mr-10 group">
                     <div className="flex items-center cursor-pointer">
-                        <ConnectButton moralisAuth={false}/>
                         {
                             !isMenuOpen &&
                             <button
