@@ -36,6 +36,9 @@ export default function UserProfile() {
     const pageSize = 12;
     const [nextPageButtonDisabled, setNextPageButtonDisabled] = useState(false);
 
+    useEffect(() => {
+        loadUserIndependentData();
+    }, [account]);
 
     useEffect(() => {
         loadData();
@@ -47,6 +50,15 @@ export default function UserProfile() {
         loadItems();
         loadItemsNextPage();
     }, [page])
+
+    const loadUserIndependentData = async () => {
+        try {
+            const favoriteItemsIdsData = await getFavoriteItemsIds(account);
+            setFavoriteItemsIds(favoriteItemsIdsData);
+        } catch (error) {
+            console.error("Error fetching favorite items: ", error);
+        }
+    };
 
     const handleNextPage = () => {
         setPage((prevPage) => prevPage + 1);

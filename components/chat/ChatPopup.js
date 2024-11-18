@@ -117,7 +117,8 @@ const ChatPopup = ({onClose, transaction}) => {
 
     return (
         <div className="fixed bottom-0 right-10 bg-white rounded-lg shadow-lg w-[512px] max-h-[512px] flex flex-col">
-            <div className="flex justify-between items-center p-4 bg-cyan-600 text-white">
+            <div className="flex justify-between items-center rounded-t-lg
+             p-4 bg-blue-500 text-white">
                 <h3 className="text-lg">Chat</h3>
                 <button onClick={onClose} className="text-lg">&times;</button>
             </div>
