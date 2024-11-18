@@ -134,7 +134,6 @@ export default function ItemPage() {
     const handleBuyItemWithModerator = async (moderator, address) => {
         try {
             await handleApprovals(marketplaceContractAddress);
-            await handleApprovals(escrowContractAddress);
 
             const finalPrice = currency === "ETH" ? price : 0;
 
@@ -150,36 +149,93 @@ export default function ItemPage() {
                 },
             };
 
-            console.log("contract params with moderator", contractParams)
+            return new Promise((resolve, reject) => {
+                runContractFunction({
+                    params: contractParams,
+                    onSuccess: (tx) => {
+                        handleListWaitingConfirmation();
+                        tx.wait().then((finalTx) => {
+                            addAddressToOrder(id, address);
+                            addNotification(seller, `Your item ${title} has been bought by ${formatEthAddress(account)} with moderator ${formatEthAddress(moderator)}`, account, id, `order/${id}`, "item_bought")
+                            addNotification(moderator, `You have been assigned as moderator for item ${title} by ${formatEthAddress(account)}`, account, id, `order/${id}`, "item_assigned_moderator")
 
-
-            await runContractFunction({
-                params: contractParams,
-                onSuccess: (tx) => {
-                    handleListWaitingConfirmation();
-                    tx.wait().then((finalTx) => {
-                        addAddressToOrder(id, address);
-                        addNotification(seller, `Your item ${title} has been bought by ${formatEthAddress(account)} with moderator ${formatEthAddress(moderator)}`, account, id, `order/${id}`, "item_bought")
-                        addNotification(moderator, `You have been assigned as moderator for item ${title} by ${formatEthAddress(account)}`, account, id, `order/${id}`, "item_assigned_moderator")
-
-                        // notify users who have this item in their favorites
-                        getUserIdsWithItemInFavorites(id).then((userIds) => {
-                            userIds.forEach((userId) => {
-                                if (userId !== account)
-                                    addNotification(userId, `Your favorite item ${title} has been sold`, account, id, `item/${id}`, "favorite_item_sold")
+                            // notify users who have this item in their favorites
+                            getUserIdsWithItemInFavorites(id).then((userIds) => {
+                                userIds.forEach((userId) => {
+                                    if (userId !== account)
+                                        addNotification(userId, `Your favorite item ${title} has been sold`, account, id, `item/${id}`, "favorite_item_sold")
+                                })
                             })
-                        })
 
-                        handleBuyItemSuccess();
-                        setShowBuyModal(false);
-                        router.push({pathname: `/order/${id}`});
-                    })
-                },
-                onError: (error) => handleBuyItemError(error),
+                            handleBuyItemSuccess();
+                            resolve(finalTx);
+                            router.push({pathname: `/order/${id}`});
+                        })
+                    },
+                    onError: (error) => {
+                        reject(error);
+                        handleBuyItemError(error);
+                    },
+                });
             });
+
         } catch (error) {
             console.error("Error during purchase:", error);
             handleBuyItemError(error);
+            return Promise.resolve();
+        }
+    }
+
+    const handleBuyItemWithoutModerator = async (address) => {
+        try {
+            await handleApprovals(escrowContractAddress);
+
+            const finalPrice = currency === "ETH" ? price : 0;
+
+            const contractParams = {
+                abi: marketplaceAbi,
+                contractAddress: marketplaceContractAddress,
+                functionName: "buyItemWithoutModerator",
+                msgValue: finalPrice,
+                params: {
+                    sellerAddress: seller,
+                    id: id,
+                },
+            };
+
+            return new Promise((resolve, reject) => {
+                runContractFunction({
+                    params: contractParams,
+                    onSuccess: (tx) => {
+                        handleListWaitingConfirmation();
+                        tx.wait().then((finalTx) => {
+                            addAddressToOrder(id, address);
+                            addNotification(seller, `Your item ${title} has been bought by ${formatEthAddress(account)}`, account, id, `order/${id}`, "item_bought")
+
+                            // notify users who have this item in their favorites
+                            getUserIdsWithItemInFavorites(id).then((userIds) => {
+                                userIds.forEach((userId) => {
+                                    if (userId !== account)
+                                        addNotification(userId, `Your favorite item ${title} has been sold`, account, id, `item/${id}`, "favorite_item_sold")
+                                })
+                            })
+
+                            handleBuyItemSuccess();
+                            resolve(finalTx);
+                            router.push({pathname: `/order/${id}`});
+                        })
+                    },
+                    onError: (error) => {
+                        reject(error);
+                        handleBuyItemError(error);
+                    },
+                });
+            });
+
+        } catch (error) {
+            console.error("Error during purchase:", error);
+            handleBuyItemError(error);
+            return Promise.resolve();
         }
     }
 
@@ -200,7 +256,6 @@ export default function ItemPage() {
                     spender: whichContractToAllowAddress,
                 },
             };
-            // console.log("allowance params", allowanceParams);
             const allowance = await runContractFunction({params: allowanceParams});
 
             // 2. approve more if not enough
@@ -242,55 +297,6 @@ export default function ItemPage() {
                 console.log("Sufficient allowance exists; no need to approve.", allowance);
                 return Promise.resolve(); // Resolve immediately if no approval is needed
             }
-        }
-    }
-
-    const handleBuyItemWithoutModerator = async (address) => {
-        try {
-            await handleApprovals(marketplaceContractAddress);
-            await handleApprovals(escrowContractAddress);
-
-            const finalPrice = currency === "ETH" ? price : 0;
-
-            const contractParams = {
-                abi: marketplaceAbi,
-                contractAddress: marketplaceContractAddress,
-                functionName: "buyItemWithoutModerator",
-                msgValue: finalPrice,
-                params: {
-                    sellerAddress: seller,
-                    id: id,
-                },
-            };
-
-            console.log("contract params no moderator", contractParams)
-
-            await runContractFunction({
-                params: contractParams,
-                onSuccess: (tx) => {
-                    handleListWaitingConfirmation();
-                    tx.wait().then((finalTx) => {
-                        addAddressToOrder(id, address);
-                        addNotification(seller, `Your item ${title} has been bought by ${formatEthAddress(account)}`, account, id, `order/${id}`, "item_bought")
-
-                        // notify users who have this item in their favorites
-                        getUserIdsWithItemInFavorites(id).then((userIds) => {
-                            userIds.forEach((userId) => {
-                                if (userId !== account)
-                                    addNotification(userId, `Your favorite item ${title} has been sold`, account, id, `item/${id}`, "favorite_item_sold")
-                            })
-                        })
-
-                        handleBuyItemSuccess();
-                        setShowBuyModal(false);
-                        router.push({pathname: `/order/${id}`});
-                    })
-                },
-                onError: (error) => handleBuyItemError(error),
-            });
-        } catch (error) {
-            console.error("Error during purchase:", error);
-            handleBuyItemError(error);
         }
     }
 
