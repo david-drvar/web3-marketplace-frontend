@@ -14,6 +14,7 @@ import {
 import {getAllNotifications, markNotificationsAsRead} from "@/utils/firebaseService";
 import {useDispatch, useSelector} from "react-redux";
 import {setUnreadCount} from "@/store/slices/unreadChatCounterSlice";
+import {formatDate} from "@/utils/utils";
 
 export default function Header() {
     const {account} = useMoralis();
@@ -153,7 +154,7 @@ export default function Header() {
                                                         {getNotificationIcon(notification.type)}
                                                         <div>
                                                             <p className="text-sm text-gray-800">{notification.message}</p>
-                                                            <span className="text-xs text-gray-500">{new Date(notification.timestamp).toLocaleString()}</span>
+                                                            <span className="text-xs text-gray-500">{formatDate(notification.timestamp)}</span>
                                                         </div>
                                                     </div>
                                                 </Link>

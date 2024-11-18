@@ -15,7 +15,7 @@ import {addAddressToOrder, addNotification, getUserIdsWithItemInFavorites, isIte
 import {fetchItemById, fetchUserProfileByAddress} from "@/utils/apolloService";
 import ChatPopup from "@/components/chat/ChatPopup";
 import Link from "next/link";
-import {formatEthAddress, saniziteCondition} from "@/utils/utils";
+import {formatDate, formatEthAddress, saniziteCondition} from "@/utils/utils";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -418,7 +418,7 @@ export default function ItemPage() {
 
                                     </div>
                                     <p className="text-gray-700 text-lg mb-4">{isGift ? "FREE" : `Price : ${currency === "ETH" ? ethers.utils.formatEther(price) : price / 1e6} ${currency}`}</p>
-                                    <p className="text-sm text-gray-600 mb-2">Posted on: {new Date(blockTimestamp * 1000).toDateString()}</p>
+                                    <p className="text-sm text-gray-600 mb-2">Posted on: {formatDate(blockTimestamp * 1000)}</p>
                                     <p className="text-sm text-gray-600 mb-2">Condition: {saniziteCondition(condition)}</p>
                                     <p className="text-sm text-gray-600 mb-2">Ships from: {country}</p>
                                     <p className="text-sm text-gray-600 mb-2">Category: {category} / {subcategory}</p>
@@ -440,7 +440,7 @@ export default function ItemPage() {
                                         <div>
                                             <h1 className="text-lg font-semibold">{sellerProfile.username}</h1>
                                             <p className="text-sm text-gray-500">Name: {sellerProfile.firstName} {sellerProfile.lastName}</p>
-                                            <p className="text-sm text-gray-500 mb-1">Last seen: {new Date(sellerProfile.lastSeen).toLocaleString()}</p>
+                                            <p className="text-sm text-gray-500 mb-1">Last seen: {formatDate(sellerProfile.lastSeen)}</p>
                                             <RatingDisplay rating={sellerProfile.averageRating} reviewCount={sellerProfile.numberOfReviews}/>
 
                                             <p className="text-indigo-600 text-sm mt-2 underline">

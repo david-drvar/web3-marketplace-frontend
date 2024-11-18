@@ -8,7 +8,7 @@ import {ethers} from "ethers";
 import {useSelector} from "react-redux";
 import ChatPopup from "@/components/chat/ChatPopup";
 import {fetchAllReviewsForItem, fetchItemById, fetchTransactionByItemId, fetchUserProfileByAddress} from "@/utils/apolloService";
-import {formatEthAddress, handleNotification, renderStars, saniziteCondition} from "@/utils/utils";
+import {formatDate, formatEthAddress, handleNotification, renderStars, saniziteCondition} from "@/utils/utils";
 import FinalizeTransactionModal from "@/components/modals/FinalizeTransactionModal";
 import LoadingAnimation from "@/components/LoadingAnimation";
 import {addNotification, getOrderAddress} from "@/utils/firebaseService";
@@ -361,7 +361,7 @@ export default function OrderPage() {
                                         <h1 className="text-2xl font-bold mb-2">{title}</h1>
                                     </div>
                                     <p className="text-gray-700 text-lg mb-4">{isGift ? "FREE" : `Price : ${currency === "ETH" ? ethers.utils.formatEther(price) : price / 1e6} ${currency}`}</p>
-                                    <p className="text-sm text-gray-600 mb-2">Posted on: {new Date(blockTimestamp * 1000).toDateString()}</p>
+                                    <p className="text-sm text-gray-600 mb-2">Posted on: {formatDate(blockTimestamp * 1000)}</p>
                                     <p className="text-sm text-gray-600 mb-2">Condition: {saniziteCondition(condition)}</p>
                                     <p className="text-sm text-gray-600 mb-2">Ships from: {country}</p>
                                     <p className="text-sm text-gray-600 mb-2">Category: {category} / {subcategory}</p>
@@ -378,7 +378,7 @@ export default function OrderPage() {
                                     <div className="flex justify-between items-center">
                                         <h1 className="text-2xl font-bold mb-2">Order details</h1>
                                     </div>
-                                    <p className="text-sm text-gray-600 mb-2"><strong>Date purchased:</strong> {new Date(transaction.blockTimestamp * 1000).toDateString()}</p>
+                                    <p className="text-sm text-gray-600 mb-2"><strong>Date purchased:</strong> {formatDate(transaction.blockTimestamp * 1000)}</p>
                                     <p className="text-sm text-gray-600 mb-2"><strong>Moderator's fee:</strong> {transaction.moderatorFee}%</p>
                                     <p className="text-sm text-gray-600 mb-2"><strong>Address:</strong> {`${address.street},${address.city},${address.zipCode},${address.country}`}</p>
                                     <p className="text-sm text-gray-600 mb-2"><strong>Approved by buyer:</strong> {transaction.buyerApproved ? "Yes" : "No"}</p>
@@ -403,7 +403,7 @@ export default function OrderPage() {
                                         <h1 className="text-2xl font-semibold mb-4">{participant1Profile.role}</h1>
                                         <h2 className="text-lg font-semibold">{participant1Profile.username}</h2>
                                         <p className="text-sm text-gray-500">Name: {participant1Profile.firstName} {participant1Profile.lastName}</p>
-                                        <p className="text-sm text-gray-500">Last seen: {new Date(participant1Profile.lastSeen).toLocaleString()}</p>
+                                        <p className="text-sm text-gray-500">Last seen: {formatDate(participant1Profile.lastSeen)}</p>
                                         <RatingDisplay rating={participant1Profile.averageRating} reviewCount={participant1Profile.numberOfReviews}/>
 
                                         <p className="text-indigo-600 text-sm underline">
@@ -437,7 +437,7 @@ export default function OrderPage() {
                                             <h1 className="text-2xl font-semibold mb-4">{participant2Profile.role}</h1>
                                             <h2 className="text-lg font-semibold">{participant2Profile.username}</h2>
                                             <p className="text-sm text-gray-500">Name: {participant2Profile.firstName} {participant2Profile.lastName}</p>
-                                            <p className="text-sm text-gray-500">Last seen: {new Date(participant2Profile.lastSeen).toLocaleString()}</p>
+                                            <p className="text-sm text-gray-500">Last seen: {formatDate(participant2Profile.lastSeen)}</p>
                                             <RatingDisplay rating={participant2Profile.averageRating} reviewCount={participant2Profile.numberOfReviews}/>
 
                                             <p className="text-indigo-600 text-sm underline">
@@ -541,7 +541,7 @@ export default function OrderPage() {
                                                             <div className="flex">{renderStars(review.rating)}</div>
                                                         </div>
                                                         <p className="text-gray-700">{review.content}</p>
-                                                        <p className="text-sm text-gray-400 mt-2">Reviewed on: {new Date(review.blockTimestamp * 1000).toDateString()}</p>
+                                                        <p className="text-sm text-gray-400 mt-2">Reviewed on: {formatDate(review.blockTimestamp * 1000)}</p>
                                                     </div>
                                                 </div>
                                             ))
@@ -574,7 +574,7 @@ export default function OrderPage() {
                                                                 {renderStars(review.rating)}</div>
                                                         </div>
                                                         <p className="text-gray-700">{review.content}</p>
-                                                        <p className="text-sm text-gray-400 mt-2">Reviewed on: {new Date(review.blockTimestamp * 1000).toDateString()}</p>
+                                                        <p className="text-sm text-gray-400 mt-2">Reviewed on: {formatDate(review.blockTimestamp * 1000)}</p>
                                                     </div>
                                                 </div>
                                             ))

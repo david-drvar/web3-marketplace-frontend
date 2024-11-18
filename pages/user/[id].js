@@ -9,7 +9,7 @@ import ItemBox from "@/components/ItemBox";
 import LoadingAnimation from "@/components/LoadingAnimation";
 import {getFavoriteItemsIds, getLastSeenForUser} from "@/utils/firebaseService";
 import RatingDisplay from "@/components/RatingDisplay";
-import {renderStars} from "@/utils/utils";
+import {formatDate, renderStars} from "@/utils/utils";
 import {useMoralis} from "react-moralis";
 
 
@@ -163,10 +163,10 @@ export default function UserProfile() {
                                 <div>
                                     <h2 className="text-lg font-semibold mt-1">{user.username}</h2>
                                     <p className="text-sm text-gray-500 mt-1">Name: {user.firstName} {user.lastName}</p>
-                                    <p className="text-sm text-gray-500 mt-1">Member since: {new Date(user.blockTimestamp * 1000).toDateString()}</p>
+                                    <p className="text-sm text-gray-500 mt-1">Member since: {formatDate(user.blockTimestamp * 1000)}</p>
                                     <p className="text-sm text-gray-500 mt-1">Total ads posted: {totalAdsPosted}</p>
                                     <p className="text-sm text-gray-500 mt-1">Total deals closed: {totalClosedDeals}</p>
-                                    <p className="text-sm text-gray-500 mt-1 mb-2">Last seen: {new Date(lastSeen).toLocaleString()}</p>
+                                    <p className="text-sm text-gray-500 mt-1 mb-2">Last seen: {formatDate(lastSeen)}</p>
                                     <RatingDisplay rating={gpa} reviewCount={reviews.length}/>
                                     <button onClick={() => setShowReviews(true)}
                                             className="mt-2 text-blue-500 underline">See all
@@ -256,14 +256,14 @@ export default function UserProfile() {
                                                     <div className="flex">{renderStars(review.rating)}</div>
                                                 </div>
                                                 <div className="flex justify-between">
-                                                   <span className="text-sm text-gray-400 font-medium">
+                                                   <span className="text-sm text-gray-400">
                                                     <span
                                                         className="text-blue-500 hover:underline font-medium cursor-pointer underline"
                                                         onClick={() => handleProfileNavigation(review.from)}
                                                     >
                                                         {review.fromUsername}
                                                       </span>
-                                                       {"  "} - {new Date(review.blockTimestamp * 1000).toDateString()}
+                                                       {"  "} - {formatDate(review.blockTimestamp * 1000)}
                                                     </span>
                                                 </div>
                                             </div>
