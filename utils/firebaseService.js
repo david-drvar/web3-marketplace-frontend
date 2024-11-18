@@ -248,7 +248,6 @@ export const getFavoriteItemsIds = async (userId) => {
 
         if (userFavoritesSnap.exists()) {
             const data = userFavoritesSnap.data();
-            console.log("fav data", data)
             return data.itemIds || [];
         } else {
             return [];

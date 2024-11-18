@@ -21,6 +21,7 @@ export default function BuyItemModal({isVisible, onClose, onBuyItemWithModerator
 
     return (
         <Modal
+            appElement={document.getElementById('__next')}
             isOpen={isVisible}
             onRequestClose={onClose}
             className="bg-white p-6 rounded-lg shadow-lg max-w-4xl mx-auto min-w-[700px]" // Adjust max-w here

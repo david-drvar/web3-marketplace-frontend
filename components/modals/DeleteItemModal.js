@@ -69,6 +69,7 @@ export default function DeleteItemModal({id, onClose, isVisible, disableButtons}
 
     return (
         <Modal
+            appElement={document.getElementById('__next')}
             isOpen={isVisible}
             onRequestClose={onClose}
             contentLabel="Delete Item Modal"

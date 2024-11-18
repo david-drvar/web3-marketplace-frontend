@@ -46,6 +46,7 @@ export default function ReviewItemModal({isVisible, onClose, onSubmit, transacti
 
     return (
         <Modal
+            appElement={document.getElementById('__next')}
             isOpen={isVisible}
             onRequestClose={resetAndCloseForm}
             contentLabel="Leave a Review"

@@ -7,6 +7,7 @@ const FinalizeTransactionModal = ({isVisible, onClose, onFinalize}) => {
 
     return (
         <Modal
+            appElement={document.getElementById('__next')}
             isOpen={isVisible}
             onRequestClose={onClose}
             contentLabel="Finalize transaction"

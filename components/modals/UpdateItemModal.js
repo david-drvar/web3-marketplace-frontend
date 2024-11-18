@@ -279,6 +279,7 @@ export default function UpdateItemModal({
 
     return (
         <Modal
+            appElement={document.getElementById('__next')}
             isOpen={isVisible}
             onRequestClose={() => {
                 resetFormData();
