@@ -43,6 +43,7 @@ export default function ListItem() {
                 message: "Cannot add more than 3 images",
                 title: "Item listing",
                 position: "topR",
+                id: `notification-${Date.now()}`
             });
             return;
         }
@@ -108,6 +109,7 @@ export default function ListItem() {
                 message: "Uploading images to IPFS failed.",
                 title: "Listing item error",
                 position: "topR",
+                id: `notification-${Date.now()}`
             });
             removePinnedImages(hashes);
             setIsSubmitting(false);
@@ -193,6 +195,7 @@ export default function ListItem() {
             message: "Item listed successfully!",
             title: "Item listed",
             position: "topR",
+            id: `notification-${Date.now()}`
         });
     }
 
@@ -202,6 +205,7 @@ export default function ListItem() {
             message: "Transaction submitted. Waiting for confirmations.",
             title: "Waiting for confirmations",
             position: "topR",
+            id: `notification-${Date.now()}`
         });
     }
 
@@ -212,6 +216,7 @@ export default function ListItem() {
             message: error.data.message,
             title: "Listing item error",
             position: "topR",
+            id: `notification-${Date.now()}`
         });
     }
 

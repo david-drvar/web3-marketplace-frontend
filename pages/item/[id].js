@@ -55,8 +55,6 @@ export default function ItemPage() {
     const [showModalDelete, setShowModalDelete] = useState(false);
     const [showChat, setShowChat] = useState(false);
 
-    const [buttonsDisabled, setButtonsDisabled] = useState(false);
-
     const [isAccountSeller, setIsAccountSeller] = useState(false);
     const {runContractFunction} = useWeb3Contract();
 
@@ -306,6 +304,7 @@ export default function ItemPage() {
             message: "Transaction submitted. Waiting for confirmations.",
             title: "Waiting for confirmations",
             position: "topR",
+            id: `notification-${Date.now()}`
         });
     }
 
@@ -315,6 +314,7 @@ export default function ItemPage() {
             message: "Approval submitted. Waiting for confirmations.",
             title: "Waiting for confirmations",
             position: "topR",
+            id: `notification-${Date.now()}`
         });
     }
 
@@ -324,6 +324,7 @@ export default function ItemPage() {
             message: "Item bought!",
             title: "Item Bought",
             position: "topR",
+            id: `notification-${Date.now()}`
         });
     };
 
@@ -333,6 +334,7 @@ export default function ItemPage() {
             message: "Token approval success",
             title: "Approval confirmed",
             position: "topR",
+            id: `notification-${Date.now()}`
         });
     };
 
@@ -343,6 +345,7 @@ export default function ItemPage() {
             message: "Token approval error",
             title: "Approval error",
             position: "topR",
+            id: `notification-${Date.now()}`
         });
     };
 
@@ -353,6 +356,7 @@ export default function ItemPage() {
             message: error?.message ? error.message : "Insufficient funds",
             title: "Item buying error",
             position: "topR",
+            id: `notification-${Date.now()}`
         });
     };
 
@@ -368,39 +372,58 @@ export default function ItemPage() {
                 <LoadingAnimation/>
             ) : (
                 <div className="bg-gray-100 p-6">
-                    {isWeb3Enabled ? (<div>
-                            <UpdateItemModal
-                                isVisible={showUpdateModal}
-                                id={id}
-                                title={title}
-                                price={price}
-                                seller={seller}
-                                currency={currency}
-                                description={description}
-                                photosIPFSHashes={photosIPFSHashes}
-                                condition={condition}
-                                category={category}
-                                subcategory={subcategory}
-                                isGift={isGift}
-                                country={country}
+                    {isWeb3Enabled ? (
+                        <div>
+                            {
+                                showUpdateModal && (
+                                    <UpdateItemModal
+                                        key = {1}
+                                        isVisible={showUpdateModal}
+                                        id={id}
+                                        title={title}
+                                        price={price}
+                                        seller={seller}
+                                        currency={currency}
+                                        description={description}
+                                        photosIPFSHashes={photosIPFSHashes}
+                                        condition={condition}
+                                        category={category}
+                                        subcategory={subcategory}
+                                        isGift={isGift}
+                                        country={country}
 
-                                onClose={() => {
-                                    loadData().then(() => setShowUpdateModal(false))
+                                        onClose={() => {
+                                            loadData().then(() => setShowUpdateModal(false))
+                                        }}
+                                    />
+                                )
+                            }
 
-                                }}
-                            />
-                            <DeleteItemModal isVisible={showModalDelete} id={id} onClose={() => setShowModalDelete(false)}
-                                             disableButtons={() => setButtonsDisabled(true)}/>
+                            {
+                                showModalDelete && (
+                                    <DeleteItemModal
+                                        key = {2}
+                                        isVisible={showModalDelete}
+                                        id={id}
+                                        onClose={() => setShowModalDelete(false)}
+                                    />
+                                )
+                            }
 
-                            <BuyItemModal
-                                isVisible={showBuyModal}
-                                onClose={() => setShowBuyModal(false)}
-                                onBuyItemWithModerator={handleBuyItemWithModerator}
-                                onBuyItemWithoutModerator={handleBuyItemWithoutModerator}
-                            />
+                            {
+                                showBuyModal && (
+                                    <BuyItemModal
+                                        key = {3}
+                                        isVisible={showBuyModal}
+                                        onClose={() => setShowBuyModal(false)}
+                                        onBuyItemWithModerator={handleBuyItemWithModerator}
+                                        onBuyItemWithoutModerator={handleBuyItemWithoutModerator}
+                                    />
+                                )
+                            }
 
                             {showChat &&
-                                <ChatPopup onClose={() => setShowChat(false)}
+                                <ChatPopup key={4} onClose={() => setShowChat(false)}
                                            transaction={{seller: item.seller, buyer: account, itemId: id, moderator: ""}}
                                 />
                             }

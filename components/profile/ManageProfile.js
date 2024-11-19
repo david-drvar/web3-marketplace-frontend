@@ -165,6 +165,7 @@ export default function ManageProfile() {
             message: "Transaction submitted. Waiting for confirmations.",
             title: "Waiting for confirmations",
             position: "topR",
+            id: `notification-${Date.now()}`
         });
     }
 
@@ -174,6 +175,7 @@ export default function ManageProfile() {
             message: userExists ? "User updated successfully!" : "User created successfully!",
             title: userExists ? "User updated" : "User created",
             position: "topR",
+            id: `notification-${Date.now()}`
         });
     }
 
@@ -184,6 +186,7 @@ export default function ManageProfile() {
             message: userExists ? "Error while updating user. Please try again" : "Error while creating user. Please try again",
             title: userExists ? "User update error" : "User creation error",
             position: "topR",
+            id: `notification-${Date.now()}`
         });
     }
 

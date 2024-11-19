@@ -32,7 +32,10 @@ export default function BuyItemModal({isVisible, onClose, onBuyItemWithModerator
             }
 
             handleClose();
-        } finally {
+        } catch (error) {
+            console.log(error)
+        }
+        finally {
 
             setButtonsDisabled(false);
         }

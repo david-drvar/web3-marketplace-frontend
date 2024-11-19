@@ -256,19 +256,24 @@ export default function OrderPage() {
                 percentageBuyer: percentageBuyer,
             },
         };
-
-        await runContractFunction({
-            params: contractParams,
-            onSuccess: (tx) => {
-                handleNotification(dispatch, "info", "Transaction submitted. Waiting for confirmations.", "Waiting for confirmations");
-                tx.wait().then((_) => {
-                    addNotification(transaction.seller, `Moderator ${formatEthAddress(account)} finalized your order ${title}`, account, id, `order/${id}`, "order_finalized")
-                    addNotification(transaction.buyer, `Moderator ${formatEthAddress(account)} finalized your order ${title}`, account, id, `order/${id}`, "order_finalized")
-                    handleNotification(dispatch, "success", "Item finalized successfully", "Item finalized");
-                    setShowFinalizeModal(false);
-                })
-            },
-            onError: (error) => handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Finalize error"),
+        return new Promise((resolve, reject) => {
+            runContractFunction({
+                params: contractParams,
+                onSuccess: (tx) => {
+                    handleNotification(dispatch, "info", "Transaction submitted. Waiting for confirmations.", "Waiting for confirmations");
+                    tx.wait().then((finalTx) => {
+                        addNotification(transaction.seller, `Moderator ${formatEthAddress(account)} finalized your order ${title}`, account, id, `order/${id}`, "order_finalized")
+                        addNotification(transaction.buyer, `Moderator ${formatEthAddress(account)} finalized your order ${title}`, account, id, `order/${id}`, "order_finalized")
+                        handleNotification(dispatch, "success", "Item finalized successfully", "Item finalized");
+                        resolve(finalTx);
+                        setRefreshPage(refreshPage + 1);
+                    })
+                },
+                onError: (error) => {
+                    handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Finalize error");
+                    reject(error);
+                },
+            });
         });
     }
 
@@ -285,18 +290,23 @@ export default function OrderPage() {
             },
         };
 
-        await runContractFunction({
-            params: contractParams,
-            onSuccess: (tx) => {
-                handleNotification(dispatch, "info", "Review submitted. Waiting for confirmations.", "Waiting for confirmations");
-                tx.wait().then((_) => {
-                    handleNotification(dispatch, "success", "User reviewed successfully", "Review finalized");
-                    addNotification(toWhom, `${transaction.seller === account ? "Seller" : transaction.buyer === account ? "Buyer" : "Moderator"} submitted review for you order ${title}`, account, id, `order/${id}`, "review_submitted")
-                    setShowReviewItemModal(false);
-                    setRefreshPage(refreshPage + 1);
-                })
-            },
-            onError: (error) => handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Finalize error"),
+        return new Promise((resolve, reject) => {
+            runContractFunction({
+                params: contractParams,
+                onSuccess: (tx) => {
+                    handleNotification(dispatch, "info", "Review submitted. Waiting for confirmations.", "Waiting for confirmations");
+                    tx.wait().then((finalTx) => {
+                        handleNotification(dispatch, "success", "User reviewed successfully", "Review finalized");
+                        addNotification(toWhom, `${transaction.seller === account ? "Seller" : transaction.buyer === account ? "Buyer" : "Moderator"} submitted review for you order ${title}`, account, id, `order/${id}`, "review_submitted")
+                        resolve(finalTx);
+                        setRefreshPage(refreshPage + 1);
+                    })
+                },
+                onError: (error) => {
+                    reject(error);
+                    handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Finalize error");
+                },
+            });
         });
     }
 

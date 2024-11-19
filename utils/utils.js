@@ -84,6 +84,7 @@ export function handleNotification(dispatch, type, message, title) {
         message: message,
         title: title,
         position: "topR",
+        id: `notification-${Date.now()}`
     });
 }
 

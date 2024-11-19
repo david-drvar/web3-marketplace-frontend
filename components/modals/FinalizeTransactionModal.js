@@ -1,20 +1,47 @@
 import React, {useState} from "react";
 import Modal from "react-modal";
+import LoadingAnimation from "@/components/LoadingAnimation";
 
 const FinalizeTransactionModal = ({isVisible, onClose, onFinalize}) => {
     const [percentageBuyer, setPercentageBuyer] = useState("");
     const [percentageSeller, setPercentageSeller] = useState("");
 
+    const [buttonsDisabled, setButtonsDisabled] = useState(false);
+
+    const handleSubmit = async () => {
+        setButtonsDisabled(true);
+        try {
+            await onFinalize(percentageSeller, percentageBuyer)
+            handleClose();
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setButtonsDisabled(false);
+        }
+    };
+
+    const handleClose = () => {
+        setPercentageBuyer("");
+        setPercentageSeller("");
+        onClose();
+    }
+
     return (
         <Modal
             appElement={document.getElementById('__next')}
             isOpen={isVisible}
-            onRequestClose={onClose}
             contentLabel="Finalize transaction"
             className="bg-white rounded-lg shadow-xl max-w-lg w-full p-6"
             overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
         >
-            <div>
+            {/* Loading Overlay */}
+            {buttonsDisabled && (
+                <div className="absolute inset-0 bg-white bg-opacity-40 flex justify-center items-center z-20">
+                    <LoadingAnimation/>
+                </div>
+            )}
+
+            <div className={buttonsDisabled ? "pointer-events-none" : ""}>
                 <h2 className="text-xl font-semibold text-gray-800 mb-4">
                     Finalize transaction
                 </h2>
@@ -45,22 +72,20 @@ const FinalizeTransactionModal = ({isVisible, onClose, onFinalize}) => {
 
                 <div className="flex justify-between gap-4 mt-6">
                     <button
-                        onClick={() => {
-                            setPercentageBuyer("");
-                            setPercentageSeller("");
-                            onClose();
-                        }}
-                        className="py-2 px-4 bg-gray-300 text-gray-700 rounded-md shadow hover:bg-gray-400 focus:outline-none"
-                    >
+                        onClick={handleClose}
+                        disabled={buttonsDisabled}
+                        className={`px-4 py-2 rounded-lg ${
+                            buttonsDisabled ? "bg-gray-200 text-gray-500 cursor-not-allowed" : "bg-gray-300 text-gray-800"
+                        }`}                    >
                         Cancel
                     </button>
                     <button
-                        onClick={() => onFinalize(percentageSeller, percentageBuyer)}
-                        disabled={!percentageBuyer || !percentageSeller}
-                        className={`py-2 px-4 ${
-                            !percentageBuyer || !percentageSeller
-                                ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                                : 'bg-blue-500 text-white hover:bg-blue-600'
+                        onClick={handleSubmit}
+                        disabled={!percentageBuyer || !percentageSeller || buttonsDisabled}
+                        className={`py-2 px-4 rounded-lg ${
+                            !percentageBuyer || !percentageSeller || buttonsDisabled
+                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                : 'bg-blue-500 hover:bg-blue-600 text-white'
                         } rounded-md shadow focus:outline-none`}
                     >
                         Finalize

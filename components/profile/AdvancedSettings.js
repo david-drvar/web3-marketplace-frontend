@@ -52,6 +52,7 @@ const AdvancedSettings = () => {
             message: "Transaction submitted. Waiting for confirmations.",
             title: "Waiting for confirmations",
             position: "topR",
+            id: `notification-${Date.now()}`
         });
     }
 
@@ -61,6 +62,7 @@ const AdvancedSettings = () => {
             message: "User deleted successfully!",
             title: "User deleted",
             position: "topR",
+            id: `notification-${Date.now()}`
         });
     }
 
@@ -70,6 +72,7 @@ const AdvancedSettings = () => {
             message: `error`, //todo fix error.data.message not always accessible, depends on error if it is from metamask or contract itself
             title: "User delete error",
             position: "topR",
+            id: `notification-${Date.now()}`
         });
     }
 
