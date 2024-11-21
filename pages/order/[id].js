@@ -60,6 +60,8 @@ export default function OrderPage() {
     const [isLoading, setIsLoading] = useState(true);
     const [refreshPage, setRefreshPage] = useState(0);
 
+    const [buttonsDisabled, setButtonsDisabled] = useState(false);
+
     const sliderSettings = {
         dots: true,
         infinite: false,
@@ -195,6 +197,7 @@ export default function OrderPage() {
     };
 
     const handleApprove = async () => {
+        setButtonsDisabled(true);
         const contractParams = {
             abi: escrowAbi,
             contractAddress: escrowContractAddress,
@@ -212,13 +215,18 @@ export default function OrderPage() {
                     handleNotification(dispatch, "success", "Item approved successfully", "Item confirmed");
                     addNotification(transaction.seller === account ? transaction.buyer : transaction.seller, `${transaction.seller === account ? "Seller" : "Buyer"} approved order ${title}`, account, id, `order/${id}`, "order_approved")
                     setApproveButtonDisabled(true);
+                    setButtonsDisabled(false);
                 })
             },
-            onError: (error) => handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Approval error"),
+            onError: (error) => {
+                handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Approval error");
+                setButtonsDisabled(false);
+            },
         });
     }
 
     const handleDispute = async () => {
+        setButtonsDisabled(true);
         const contractParams = {
             abi: escrowAbi,
             contractAddress: escrowContractAddress,
@@ -238,9 +246,13 @@ export default function OrderPage() {
                     addNotification(transaction.seller === account ? transaction.buyer : transaction.seller, `${transaction.seller === account ? "Seller" : "Buyer"} disputed order ${title}`, account, id, `order/${id}`, "order_disputed")
                     addNotification(transaction.moderator, `${transaction.seller === account ? "Seller" : "Buyer"} disputed order ${title}`, account, id, `order/${id}`, "order_disputed")
                     setDisputeButtonDisabled(true);
+                    setButtonsDisabled(false);
                 })
             },
-            onError: (error) => handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Dispute error"),
+            onError: (error) => {
+                handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Dispute error");
+                setButtonsDisabled(false);
+            },
         });
     }
 
@@ -318,7 +330,15 @@ export default function OrderPage() {
             ) : (
                 <div className="bg-gray-100 p-6">
                     {isWeb3Enabled ? (
-                        <div>
+                        <div className={buttonsDisabled ? "pointer-events-none" : ""}>
+
+                            {/* Loading Overlay */}
+                            {buttonsDisabled && (
+                                <div className="fixed inset-0 bg-white bg-opacity-50 flex justify-center items-center z-50">
+                                    <LoadingAnimation/>
+                                </div>
+                            )}
+
                             <FinalizeTransactionModal
                                 isVisible={showFinalizeModal}
                                 onClose={() => setShowFinalizeModal(false)}
@@ -473,10 +493,10 @@ export default function OrderPage() {
 
                                     {(roleInTransaction === "Buyer" || roleInTransaction === "Seller") && (
                                         <button
-                                            disabled={approveButtonDisabled}
+                                            disabled={approveButtonDisabled || buttonsDisabled}
                                             id="approveButton"
                                             className={`font-semibold py-2 px-4 rounded-lg w-full ${
-                                                approveButtonDisabled
+                                                approveButtonDisabled || buttonsDisabled
                                                     ? "bg-blue-300 text-white cursor-not-allowed" // Disabled style
                                                     : "bg-blue-600 text-white hover:bg-blue-700 cursor-pointer" // Enabled style
                                             }`}
@@ -488,10 +508,10 @@ export default function OrderPage() {
 
                                     {(roleInTransaction === "Buyer" || roleInTransaction === "Seller") && (
                                         <button
-                                            disabled={disputeButtonDisabled}
+                                            disabled={disputeButtonDisabled || buttonsDisabled}
                                             id="disputeButton"
                                             className={`font-semibold py-2 px-4 rounded-lg w-full ${
-                                                disputeButtonDisabled
+                                                disputeButtonDisabled || buttonsDisabled
                                                     ? "bg-red-300 text-white cursor-not-allowed" // Disabled style
                                                     : "bg-red-500 hover:bg-red-600 text-white cursor-pointer" // Enabled style
                                             }`}

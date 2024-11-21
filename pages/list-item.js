@@ -244,7 +244,7 @@ export default function ListItem() {
                 <div className={buttonsDisabled ? "pointer-events-none" : ""}>
                     {/* Loading Overlay */}
                     {buttonsDisabled && (
-                        <div className="absolute inset-0 bg-white bg-opacity-50 flex justify-center items-center z-20">
+                        <div className="fixed inset-0 bg-white bg-opacity-50 flex justify-center items-center z-50">
                             <LoadingAnimation/>
                         </div>
                     )}
