@@ -8,7 +8,7 @@ import {setUser} from "@/store/slices/userSlice";
 import LoadingAnimation from "@/components/LoadingAnimation";
 import {usersContractAddress} from "@/constants/constants";
 
-export default function ManageProfile() {
+export default function ManageProfile({setButtonsDisabledTrue, setButtonsDisabledFalse}) {
     const {isWeb3Enabled} = useMoralis();
 
     const user = useSelector((state) => state.user);
@@ -90,6 +90,7 @@ export default function ManageProfile() {
     };
 
     const handleSubmit = async (e) => {
+        setButtonsDisabledTrue();
         e.preventDefault();
         if (!validateEmail(formData.email)) {
             setEmailError('Invalid email format');
@@ -148,6 +149,7 @@ export default function ManageProfile() {
                         moderatorFee: formData.moderatorFee,
                         avatarHash: avatarImageHash
                     }));
+                    setButtonsDisabledFalse();
                     setImageURI(`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${avatarImageHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`);
                     setUserExists(true);
                 });
@@ -155,6 +157,7 @@ export default function ManageProfile() {
             onError: (error) => {
                 handleUserError(error);
                 setIsSubmitting(false);
+                setButtonsDisabledFalse();
             },
         });
     };
@@ -213,7 +216,7 @@ export default function ManageProfile() {
                         }
                     </h1>
                     <form onSubmit={handleSubmit} className="space-y-3">
-                    <div>
+                        <div>
                             <label htmlFor="username" className="block text-sm font-medium text-gray-700">
                                 Username
                             </label>

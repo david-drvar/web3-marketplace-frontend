@@ -16,6 +16,11 @@ export default function Profile() {
     const dispatch = useDispatch();
     const [isLoading, setIsLoading] = useState(true);
 
+    const [buttonsDisabled, setButtonsDisabled] = useState(false);
+
+    const setButtonsDisabledTrue = () => setButtonsDisabled(true);
+    const setButtonsDisabledFalse = () => setButtonsDisabled(false);
+
     useEffect(() => {
         fetchUserByAddress(account).then((data) => dispatch(setUser(data))).then(() => setIsLoading(false));
     }, [account]);
@@ -27,7 +32,15 @@ export default function Profile() {
                     isLoading ? (
                         <LoadingAnimation/>
                     ) : (
-                        <div className="flex min-h-screen bg-gray-100">
+                        <div className={`flex min-h-screen bg-gray-100 ${buttonsDisabled ? 'pointer-events-none' : ''}`}>
+
+                            {/* Loading Overlay */}
+                            {buttonsDisabled && (
+                                <div className="fixed inset-0 bg-white bg-opacity-50 flex justify-center items-center z-50">
+                                    <LoadingAnimation/>
+                                </div>
+                            )}
+
                             {/* Sidebar */}
                             <div className="w-1/4 bg-white p-6 shadow-md">
                                 <h2 className="text-xl font-semibold mb-4">Profile Settings</h2>
@@ -55,7 +68,7 @@ export default function Profile() {
                             <div className="w-3/4 p-8">
                                 {activeTab === 'manageProfile' && (
                                     <div className="bg-white p-8 shadow-lg rounded-lg">
-                                        <ManageProfile/>
+                                        <ManageProfile setButtonsDisabledTrue={setButtonsDisabledTrue} setButtonsDisabledFalse={setButtonsDisabledFalse}/>
                                     </div>
                                 )}
 
