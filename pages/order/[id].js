@@ -216,6 +216,7 @@ export default function OrderPage() {
                     addNotification(transaction.seller === account ? transaction.buyer : transaction.seller, `${transaction.seller === account ? "Seller" : "Buyer"} approved order ${title}`, account, id, `order/${id}`, "order_approved")
                     setApproveButtonDisabled(true);
                     setButtonsDisabled(false);
+                    setRefreshPage(refreshPage + 1);
                 })
             },
             onError: (error) => {
@@ -247,6 +248,7 @@ export default function OrderPage() {
                     addNotification(transaction.moderator, `${transaction.seller === account ? "Seller" : "Buyer"} disputed order ${title}`, account, id, `order/${id}`, "order_disputed")
                     setDisputeButtonDisabled(true);
                     setButtonsDisabled(false);
+                    setRefreshPage(refreshPage + 1);
                 })
             },
             onError: (error) => {
@@ -339,11 +341,14 @@ export default function OrderPage() {
                                 </div>
                             )}
 
-                            <FinalizeTransactionModal
-                                isVisible={showFinalizeModal}
-                                onClose={() => setShowFinalizeModal(false)}
-                                onFinalize={handleFinalize}
-                            />
+                            {showFinalizeModal &&
+                                <FinalizeTransactionModal
+                                    isVisible={showFinalizeModal}
+                                    onClose={() => setShowFinalizeModal(false)}
+                                    onFinalize={handleFinalize}
+                                    moderatorFee={transaction.moderatorFee}
+                                />
+                            }
 
                             {showReviewItemModal && <ReviewItemModal
                                 isVisible={showReviewItemModal}

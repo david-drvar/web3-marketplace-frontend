@@ -2,11 +2,12 @@ import React, {useState} from "react";
 import Modal from "react-modal";
 import LoadingAnimation from "@/components/LoadingAnimation";
 
-const FinalizeTransactionModal = ({isVisible, onClose, onFinalize}) => {
+const FinalizeTransactionModal = ({isVisible, onClose, onFinalize, moderatorFee}) => {
     const [percentageBuyer, setPercentageBuyer] = useState("");
     const [percentageSeller, setPercentageSeller] = useState("");
 
     const [buttonsDisabled, setButtonsDisabled] = useState(false);
+    const [submitDisabled, setSubmitDisabled] = useState(true);
 
     const handleSubmit = async () => {
         setButtonsDisabled(true);
@@ -45,6 +46,12 @@ const FinalizeTransactionModal = ({isVisible, onClose, onFinalize}) => {
                 <h2 className="text-xl font-semibold text-gray-800 mb-4">
                     Finalize transaction
                 </h2>
+                <p className="text-red-500">
+                    {`Your part is ${moderatorFee}% as moderator.`}
+                </p>
+                <p className="text-red-500 mb-4">
+                    {`The sum of buyer, seller, and your percentage must equal 100.`}
+                </p>
 
                 <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700">
@@ -53,7 +60,10 @@ const FinalizeTransactionModal = ({isVisible, onClose, onFinalize}) => {
                     <input
                         type="number"
                         value={percentageBuyer}
-                        onChange={(e) => setPercentageBuyer(e.target.value)}
+                        onChange={(e) => {
+                            setPercentageBuyer(e.target.value);
+                            setSubmitDisabled(Number(e.target.value) + Number(percentageSeller) + Number(moderatorFee) !== 100);
+                        }}
                         className="mt-1 block w-full border-2 border-gray-300 rounded-md shadow-sm p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     />
                 </div>
@@ -65,10 +75,14 @@ const FinalizeTransactionModal = ({isVisible, onClose, onFinalize}) => {
                     <input
                         type="number"
                         value={percentageSeller}
-                        onChange={(e) => setPercentageSeller(e.target.value)}
+                        onChange={(e) => {
+                            setPercentageSeller(e.target.value);
+                            setSubmitDisabled(Number(e.target.value) + Number(percentageBuyer) + Number(moderatorFee) !== 100);
+                        }}
                         className="mt-1 block w-full border-2 border-gray-300 rounded-md shadow-sm p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     />
                 </div>
+
 
                 <div className="flex justify-between gap-4 mt-6">
                     <button
@@ -76,14 +90,14 @@ const FinalizeTransactionModal = ({isVisible, onClose, onFinalize}) => {
                         disabled={buttonsDisabled}
                         className={`px-4 py-2 rounded-lg ${
                             buttonsDisabled ? "bg-gray-200 text-gray-500 cursor-not-allowed" : "bg-gray-300 text-gray-800"
-                        }`}                    >
+                        }`}>
                         Cancel
                     </button>
                     <button
                         onClick={handleSubmit}
-                        disabled={!percentageBuyer || !percentageSeller || buttonsDisabled}
+                        disabled={!percentageBuyer || !percentageSeller || buttonsDisabled || submitDisabled}
                         className={`py-2 px-4 rounded-lg ${
-                            !percentageBuyer || !percentageSeller || buttonsDisabled
+                            !percentageBuyer || !percentageSeller || buttonsDisabled || submitDisabled
                                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                 : 'bg-blue-500 hover:bg-blue-600 text-white'
                         } rounded-md shadow focus:outline-none`}
