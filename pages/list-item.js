@@ -2,11 +2,12 @@ import {useNotification} from "web3uikit";
 import {useMoralis, useWeb3Contract} from "react-moralis";
 import {ethers} from "ethers";
 import marketplaceAbi from "../constants/Marketplace.json";
-import {useState} from "react";
+import React, {useState} from "react";
 import {useRouter} from "next/router";
 import {useDispatch} from "react-redux";
 import {getCategories, getCountries} from "@/utils/utils";
 import {marketplaceContractAddress} from "@/constants/constants";
+import LoadingAnimation from "@/components/LoadingAnimation";
 
 export default function ListItem() {
     const {chainId, isWeb3Enabled, account} = useMoralis();
@@ -32,7 +33,7 @@ export default function ListItem() {
         isGift: false,
     });
 
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [buttonsDisabled, setButtonsDisabled] = useState(false);
 
     const [images, setImages] = useState([]); // Start with one empty image input
 
@@ -92,7 +93,7 @@ export default function ListItem() {
     };
 
     const handleSubmit = async (e) => {
-        setIsSubmitting(true);
+        setButtonsDisabled(true);
         e.preventDefault();
         var hashes = [];
 
@@ -112,7 +113,7 @@ export default function ListItem() {
                 id: `notification-${Date.now()}`
             });
             removePinnedImages(hashes);
-            setIsSubmitting(false);
+            setButtonsDisabled(false);
             return;
         }
 
@@ -149,7 +150,7 @@ export default function ListItem() {
                 handleListWaitingConfirmation();
                 tx.wait().then((finalTx) => {
                     handleListSuccess();
-                    setIsSubmitting(false);
+                    setButtonsDisabled(false);
                     // console.log("finalTx");
                     // console.log(finalTx);
                     //
@@ -163,7 +164,7 @@ export default function ListItem() {
             onError: (error) => {
                 removePinnedImages(hashes);
                 handleListError(error);
-                setIsSubmitting(false);
+                setButtonsDisabled(false);
             },
         });
 
@@ -213,7 +214,7 @@ export default function ListItem() {
         console.log("error", error)
         dispatch({
             type: "error",
-            message: error.data.message,
+            message: "error.data.message", //todo
             title: "Listing item error",
             position: "topR",
             id: `notification-${Date.now()}`
@@ -240,7 +241,14 @@ export default function ListItem() {
     return (
         <div className="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-lg">
             {isWeb3Enabled && chainId ? (
-                <div>
+                <div className={buttonsDisabled ? "pointer-events-none" : ""}>
+                    {/* Loading Overlay */}
+                    {buttonsDisabled && (
+                        <div className="absolute inset-0 bg-white bg-opacity-40 flex justify-center items-center z-20">
+                            <LoadingAnimation/>
+                        </div>
+                    )}
+
                     <h1 className="text-2xl font-bold text-center mb-6">Create Listing</h1>
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div>
@@ -412,6 +420,7 @@ export default function ListItem() {
                                     {image && (
                                         <button
                                             type="button"
+                                            disabled={buttonsDisabled}
                                             onClick={() => handleRemoveImage(index)}
                                             className="text-red-500 hover:text-red-700"
                                         >
@@ -422,18 +431,28 @@ export default function ListItem() {
                             ))}
                             <button
                                 type="button"
+                                disabled={buttonsDisabled}
                                 onClick={handleAddImage}
-                                className="w-full py-2 bg-green-500 text-white rounded-md shadow hover:bg-green-600"
+                                // className="w-full py-2 bg-emerald-500 text-white rounded-md shadow hover:bg-emerald-600"
+                                className={`px-4 py-2 w-full rounded-lg text-white ${
+                                    buttonsDisabled ? "bg-gray-200 text-gray-500 cursor-not-allowed" : "bg-emerald-500 hover:bg-emerald-600 text-gray-800"
+                                }`}
                             >
                                 Add Image
                             </button>
                         </div>
 
                         <button
-                            disabled={!formData.title || !formData.description || !formData.price || isSubmitting || images.length === 0 || images.includes(null)
+                            disabled={!formData.title || !formData.description || !formData.price || buttonsDisabled || images.length === 0 || images.includes(null)
                                 || !formData.category || !formData.subcategory || !formData.country}
                             type="submit"
-                            className="w-full py-2 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                            // className="w-full py-2 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                            className={`py-2 px-4 rounded-lg w-full ${
+                                !formData.title || !formData.description || !formData.price || buttonsDisabled || images.length === 0 || images.includes(null)
+                                || !formData.category || !formData.subcategory || !formData.country
+                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    : 'bg-blue-500 hover:bg-blue-600 text-white'
+                            } rounded-md shadow focus:outline-none`}
                         >
                             Submit
                         </button>
