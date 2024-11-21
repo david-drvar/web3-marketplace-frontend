@@ -288,7 +288,7 @@ export default function UserProfile() {
     );
 }
 
-export async function getServerSideProps(context) {
+export async function getServerSideProps(_) {
     return {
         props: {},
     };

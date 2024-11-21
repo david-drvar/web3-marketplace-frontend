@@ -14,7 +14,7 @@ import {addAddressToOrder, addNotification, getUserIdsWithItemInFavorites, isIte
 import {fetchItemById, fetchUserProfileByAddress} from "@/utils/apolloService";
 import ChatPopup from "@/components/chat/ChatPopup";
 import Link from "next/link";
-import {formatDate, formatEthAddress, saniziteCondition} from "@/utils/utils";
+import {formatDate, formatEthAddress, handleNotification, saniziteCondition} from "@/utils/utils";
 import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
@@ -151,7 +151,8 @@ export default function ItemPage() {
                 runContractFunction({
                     params: contractParams,
                     onSuccess: (tx) => {
-                        handleListWaitingConfirmation();
+                        handleNotification(dispatch, "info", "Waiting for confirmations...", "Transaction submitted");
+
                         tx.wait().then((finalTx) => {
                             addAddressToOrder(id, address);
                             addNotification(seller, `Your item ${title} has been bought by ${formatEthAddress(account)} with moderator ${formatEthAddress(moderator)}`, account, id, `order/${id}`, "item_bought")
@@ -164,22 +165,21 @@ export default function ItemPage() {
                                         addNotification(userId, `Your favorite item ${title} has been sold`, account, id, `item/${id}`, "favorite_item_sold")
                                 })
                             })
-
-                            handleBuyItemSuccess();
+                            handleNotification(dispatch, "success", "Item purchase confirmed", "Item Bought");
                             resolve(finalTx);
                             router.push({pathname: `/order/${id}`});
                         })
                     },
                     onError: (error) => {
                         reject(error);
-                        handleBuyItemError(error);
+                        handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred - Please inspect the logs in console", "Item buying error");
                     },
                 });
             });
 
         } catch (error) {
             console.error("Error during purchase:", error);
-            handleBuyItemError(error);
+            handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred - Please inspect the logs in console", "Item buying error");
             return Promise.resolve();
         }
     }
@@ -205,7 +205,7 @@ export default function ItemPage() {
                 runContractFunction({
                     params: contractParams,
                     onSuccess: (tx) => {
-                        handleListWaitingConfirmation();
+                        handleNotification(dispatch, "info", "Waiting for confirmations...", "Transaction submitted");
                         tx.wait().then((finalTx) => {
                             addAddressToOrder(id, address);
                             addNotification(seller, `Your item ${title} has been bought by ${formatEthAddress(account)}`, account, id, `order/${id}`, "item_bought")
@@ -218,21 +218,21 @@ export default function ItemPage() {
                                 })
                             })
 
-                            handleBuyItemSuccess();
+                            handleNotification(dispatch, "success", "Item purchase confirmed", "Item Bought");
                             resolve(finalTx);
                             router.push({pathname: `/order/${id}`});
                         })
                     },
                     onError: (error) => {
                         reject(error);
-                        handleBuyItemError(error);
+                        handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred - Please inspect the logs in console", "Item buying error");
                     },
                 });
             });
 
         } catch (error) {
             console.error("Error during purchase:", error);
-            handleBuyItemError(error);
+            handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred - Please inspect the logs in console", "Item buying error");
             return Promise.resolve();
         }
     }
@@ -258,8 +258,6 @@ export default function ItemPage() {
 
             // 2. approve more if not enough
             if (allowance < approvalAmount) {
-                console.log("Allowance is not enough. More approval required");
-                console.log("allowance", allowance);
 
                 const approveParams = {
                     abi: tokenAbi,
@@ -275,90 +273,28 @@ export default function ItemPage() {
                     runContractFunction({
                         params: approveParams,
                         onSuccess: async (tx) => {
-                            handleApprovalWaitingConfirmation();
+                            handleNotification(dispatch, "info", "Waiting for confirmations...", "Transaction submitted");
+
                             try {
-                                const finalTx = await tx.wait(); // Wait for transaction confirmation
-                                handleApprovalSuccess(); // Call success handler after confirmation
-                                resolve(finalTx); // Resolve the promise after successful confirmation
+                                const finalTx = await tx.wait();
+                                handleNotification(dispatch, "success", "Token approval success", "Approval confirmed");
+                                resolve(finalTx);
                             } catch (error) {
-                                handleApprovalError(error); // Handle errors during waiting
-                                reject(error); // Reject the promise on error
+                                handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred - Please inspect the logs in console", "Approval error");
+                                reject(error);
                             }
                         },
                         onError: (error) => {
-                            handleApprovalError(error);
-                            reject(error); // Reject the promise on error
+                            handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred - Please inspect the logs in console", "Approval error");
+                            reject(error);
                         },
                     });
                 });
             } else {
-                console.log("Sufficient allowance exists; no need to approve.", allowance);
-                return Promise.resolve(); // Resolve immediately if no approval is needed
+                return Promise.resolve();
             }
         }
     }
-
-    async function handleListWaitingConfirmation() {
-        dispatch({
-            type: "info",
-            message: "Transaction submitted. Waiting for confirmations.",
-            title: "Waiting for confirmations",
-            position: "topR",
-            id: `notification-${Date.now()}`
-        });
-    }
-
-    async function handleApprovalWaitingConfirmation() {
-        dispatch({
-            type: "info",
-            message: "Approval submitted. Waiting for confirmations.",
-            title: "Waiting for confirmations",
-            position: "topR",
-            id: `notification-${Date.now()}`
-        });
-    }
-
-    const handleBuyItemSuccess = () => {
-        dispatch({
-            type: "success",
-            message: "Item bought!",
-            title: "Item Bought",
-            position: "topR",
-            id: `notification-${Date.now()}`
-        });
-    };
-
-    const handleApprovalSuccess = () => {
-        dispatch({
-            type: "success",
-            message: "Token approval success",
-            title: "Approval confirmed",
-            position: "topR",
-            id: `notification-${Date.now()}`
-        });
-    };
-
-    const handleApprovalError = (error) => {
-        console.log("error", error)
-        dispatch({
-            type: "error",
-            message: "Token approval error",
-            title: "Approval error",
-            position: "topR",
-            id: `notification-${Date.now()}`
-        });
-    };
-
-    const handleBuyItemError = (error) => {
-        // before it used to be error?.data?.message
-        dispatch({
-            type: "error",
-            message: error?.message ? error.message : "Insufficient funds",
-            title: "Item buying error",
-            position: "topR",
-            id: `notification-${Date.now()}`
-        });
-    };
 
     const handleFavoriteClick = async () => {
         setIsFavorite(!isFavorite);
@@ -377,7 +313,7 @@ export default function ItemPage() {
                             {
                                 showUpdateModal && (
                                     <UpdateItemModal
-                                        key = {1}
+                                        key={1}
                                         isVisible={showUpdateModal}
                                         id={id}
                                         title={title}
@@ -402,7 +338,7 @@ export default function ItemPage() {
                             {
                                 showModalDelete && (
                                     <DeleteItemModal
-                                        key = {2}
+                                        key={2}
                                         isVisible={showModalDelete}
                                         id={id}
                                         onClose={() => setShowModalDelete(false)}
@@ -413,7 +349,7 @@ export default function ItemPage() {
                             {
                                 showBuyModal && (
                                     <BuyItemModal
-                                        key = {3}
+                                        key={3}
                                         isVisible={showBuyModal}
                                         onClose={() => setShowBuyModal(false)}
                                         onBuyItemWithModerator={handleBuyItemWithModerator}
@@ -554,7 +490,7 @@ export default function ItemPage() {
 }
 
 
-export async function getServerSideProps(context) {
+export async function getServerSideProps(_) {
     return {
         props: {},
     };

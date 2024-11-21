@@ -210,9 +210,9 @@ export default function OrderPage() {
         await runContractFunction({
             params: contractParams,
             onSuccess: (tx) => {
-                handleNotification(dispatch, "info", "Transaction submitted. Waiting for confirmations.", "Waiting for confirmations");
+                handleNotification(dispatch, "info", "Waiting for confirmations...", "Transaction submitted");
                 tx.wait().then((_) => {
-                    handleNotification(dispatch, "success", "Item approved successfully", "Item confirmed");
+                    handleNotification(dispatch, "success", "Order approved successfully", "Order confirmed");
                     addNotification(transaction.seller === account ? transaction.buyer : transaction.seller, `${transaction.seller === account ? "Seller" : "Buyer"} approved order ${title}`, account, id, `order/${id}`, "order_approved")
                     setApproveButtonDisabled(true);
                     setButtonsDisabled(false);
@@ -220,7 +220,7 @@ export default function OrderPage() {
                 })
             },
             onError: (error) => {
-                handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Approval error");
+                handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred. Please inspect the logs in console", "Item approval error");
                 setButtonsDisabled(false);
             },
         });
@@ -241,9 +241,9 @@ export default function OrderPage() {
         await runContractFunction({
             params: contractParams,
             onSuccess: (tx) => {
-                handleNotification(dispatch, "info", "Transaction submitted. Waiting for confirmations.", "Waiting for confirmations");
+                handleNotification(dispatch, "info", "Waiting for confirmations...", "Transaction submitted");
                 tx.wait().then((_) => {
-                    handleNotification(dispatch, "success", "Item disputed successfully", "Item disputed");
+                    handleNotification(dispatch, "success", "Order disputed successfully", "Order disputed");
                     addNotification(transaction.seller === account ? transaction.buyer : transaction.seller, `${transaction.seller === account ? "Seller" : "Buyer"} disputed order ${title}`, account, id, `order/${id}`, "order_disputed")
                     addNotification(transaction.moderator, `${transaction.seller === account ? "Seller" : "Buyer"} disputed order ${title}`, account, id, `order/${id}`, "order_disputed")
                     setDisputeButtonDisabled(true);
@@ -252,7 +252,7 @@ export default function OrderPage() {
                 })
             },
             onError: (error) => {
-                handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Dispute error");
+                handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred - Please inspect the logs in console", "Dispute error");
                 setButtonsDisabled(false);
             },
         });
@@ -274,17 +274,17 @@ export default function OrderPage() {
             runContractFunction({
                 params: contractParams,
                 onSuccess: (tx) => {
-                    handleNotification(dispatch, "info", "Transaction submitted. Waiting for confirmations.", "Waiting for confirmations");
+                    handleNotification(dispatch, "info", "Waiting for confirmations.", "Transaction submitted");
                     tx.wait().then((finalTx) => {
                         addNotification(transaction.seller, `Moderator ${formatEthAddress(account)} finalized your order ${title}`, account, id, `order/${id}`, "order_finalized")
                         addNotification(transaction.buyer, `Moderator ${formatEthAddress(account)} finalized your order ${title}`, account, id, `order/${id}`, "order_finalized")
-                        handleNotification(dispatch, "success", "Item finalized successfully", "Item finalized");
+                        handleNotification(dispatch, "success", "Order finalized successfully", "Order finalized");
                         resolve(finalTx);
                         setRefreshPage(refreshPage + 1);
                     })
                 },
                 onError: (error) => {
-                    handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Finalize error");
+                    handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred - Please inspect the logs in console", "Finalize error");
                     reject(error);
                 },
             });
@@ -308,7 +308,7 @@ export default function OrderPage() {
             runContractFunction({
                 params: contractParams,
                 onSuccess: (tx) => {
-                    handleNotification(dispatch, "info", "Review submitted. Waiting for confirmations.", "Waiting for confirmations");
+                    handleNotification(dispatch, "info", "Waiting for confirmations...", "Review submitted");
                     tx.wait().then((finalTx) => {
                         handleNotification(dispatch, "success", "User reviewed successfully", "Review finalized");
                         addNotification(toWhom, `${transaction.seller === account ? "Seller" : transaction.buyer === account ? "Buyer" : "Moderator"} submitted review for you order ${title}`, account, id, `order/${id}`, "review_submitted")
@@ -318,7 +318,7 @@ export default function OrderPage() {
                 },
                 onError: (error) => {
                     reject(error);
-                    handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Finalize error");
+                    handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred - Please inspect the logs in console", "Finalize error");
                 },
             });
         });
@@ -630,7 +630,7 @@ export default function OrderPage() {
 }
 
 
-export async function getServerSideProps(context) {
+export async function getServerSideProps(_) {
     return {
         props: {},
     };
