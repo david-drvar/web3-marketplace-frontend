@@ -6,6 +6,7 @@ import Modal from "react-modal";
 import {marketplaceContractAddress} from "@/constants/constants";
 import {useState} from "react";
 import LoadingAnimation from "@/components/LoadingAnimation";
+import {handleNotification} from "@/utils/utils";
 
 export default function DeleteItemModal({id, onClose, isVisible}) {
     const dispatch = useNotification();
@@ -29,49 +30,21 @@ export default function DeleteItemModal({id, onClose, isVisible}) {
         await runContractFunction({
             params: listOptions,
             onSuccess: (tx) => {
-                handleListWaitingConfirmation();
+                handleNotification(dispatch, "info", "Waiting for confirmations...", "Transaction submitted");
                 tx.wait().then((_) => {
                     setButtonsDisabled(false);
                     onClose();
-                    handleItemDeletionSuccess().then(() => router.push("/"))
+                    handleNotification(dispatch, "success", "Item deleted successfully!", "Item deleted");
+                    router.push("/");
                 })
             },
             onError: (error) => {
                 setButtonsDisabled(false);
-                handleItemDeletionError(error);
+                console.error("Error", error);
+                handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred. Please inspect the logs in console", "Item deletion error");
             },
         });
     };
-
-    async function handleListWaitingConfirmation() {
-        dispatch({
-            type: "info",
-            message: "Transaction submitted. Waiting for confirmations.",
-            title: "Waiting for confirmations",
-            position: "topR",
-            id: `notification-${Date.now()}`
-        });
-    }
-
-    async function handleItemDeletionSuccess() {
-        dispatch({
-            type: "success",
-            message: "Item deleted successfully!",
-            title: "Item deleted",
-            position: "topR",
-            id: `notification-${Date.now()}`
-        });
-    }
-
-    async function handleItemDeletionError(error) {
-        dispatch({
-            type: "error",
-            message: `error`, //todo fix error.data.message not always accessible, depends on error if it is from metamask or contract itself
-            title: "Item delete error",
-            position: "topR",
-            id: `notification-${Date.now()}`
-        });
-    }
 
     return (
         <Modal
@@ -108,16 +81,7 @@ export default function DeleteItemModal({id, onClose, isVisible}) {
                             Cancel
                         </button>
                         <button
-                            onClick={() => {
-                                handleSubmit({
-                                    onError: (error) => {
-                                        handleItemDeletionSuccess(error);
-                                    },
-                                    onSuccess: () => {
-                                        handleItemDeletionError();
-                                    },
-                                });
-                            }}
+                            onClick={handleSubmit}
                             className={`px-4 py-2 rounded-lg ${
                                 buttonsDisabled
                                     ? "bg-gray-300 text-gray-500 cursor-not-allowed"
@@ -130,5 +94,5 @@ export default function DeleteItemModal({id, onClose, isVisible}) {
                 </div>
             </div>
         </Modal>
-);
+    );
 }

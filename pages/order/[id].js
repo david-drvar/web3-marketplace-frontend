@@ -220,6 +220,7 @@ export default function OrderPage() {
                 })
             },
             onError: (error) => {
+                console.error("Error", error);
                 handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred. Please inspect the logs in console", "Item approval error");
                 setButtonsDisabled(false);
             },
@@ -252,6 +253,7 @@ export default function OrderPage() {
                 })
             },
             onError: (error) => {
+                console.error("Error", error);
                 handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred - Please inspect the logs in console", "Dispute error");
                 setButtonsDisabled(false);
             },
@@ -284,6 +286,7 @@ export default function OrderPage() {
                     })
                 },
                 onError: (error) => {
+                    console.error("Error", error);
                     handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred - Please inspect the logs in console", "Finalize error");
                     reject(error);
                 },
@@ -317,6 +320,7 @@ export default function OrderPage() {
                     })
                 },
                 onError: (error) => {
+                    console.error("Error", error);
                     reject(error);
                     handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred - Please inspect the logs in console", "Finalize error");
                 },

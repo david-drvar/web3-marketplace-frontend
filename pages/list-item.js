@@ -5,7 +5,7 @@ import marketplaceAbi from "../constants/Marketplace.json";
 import React, {useState} from "react";
 import {useRouter} from "next/router";
 import {useDispatch} from "react-redux";
-import {getCategories, getCountries} from "@/utils/utils";
+import {getCategories, getCountries, handleNotification} from "@/utils/utils";
 import {marketplaceContractAddress} from "@/constants/constants";
 import LoadingAnimation from "@/components/LoadingAnimation";
 
@@ -39,13 +39,7 @@ export default function ListItem() {
 
     const handleAddImage = () => {
         if (images.length >= 3) {
-            dispatch({
-                type: "error",
-                message: "Cannot add more than 3 images",
-                title: "Item listing",
-                position: "topR",
-                id: `notification-${Date.now()}`
-            });
+            handleNotification(dispatch, "error", "Cannot add more than 3 images", "Item image error");
             return;
         }
         setImages([...images, null]); // Add a new empty image input
@@ -103,15 +97,8 @@ export default function ListItem() {
                 hashes.push(hash);
             }
         } catch (e) {
-            console.error(e);
-            console.log("stopping listing new item");
-            dispatch({
-                type: "error",
-                message: "Uploading images to IPFS failed.",
-                title: "Listing item error",
-                position: "topR",
-                id: `notification-${Date.now()}`
-            });
+            console.error("Error", e);
+            handleNotification(dispatch, "error", "Uploading images to IPFS failed.", "Listing item error");
             removePinnedImages(hashes);
             setButtonsDisabled(false);
             return;
@@ -147,9 +134,11 @@ export default function ListItem() {
         await runContractFunction({
             params: listOptions,
             onSuccess: (tx) => {
-                handleListWaitingConfirmation();
+                handleNotification(dispatch, "info", "Waiting for confirmations...", "Transaction submitted");
+
                 tx.wait().then((finalTx) => {
-                    handleListSuccess();
+                    handleNotification(dispatch, "success", "Item listed successfully!", "Item listed");
+
                     setButtonsDisabled(false);
                     // console.log("finalTx");
                     // console.log(finalTx);
@@ -163,7 +152,8 @@ export default function ListItem() {
             },
             onError: (error) => {
                 removePinnedImages(hashes);
-                handleListError(error);
+                handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred. Please inspect the logs in console", "Item listing error");
+                console.error("Error", error);
                 setButtonsDisabled(false);
             },
         });
@@ -188,37 +178,6 @@ export default function ListItem() {
                 throw e;
             }
         }
-    }
-
-    async function handleListSuccess() {
-        dispatch({
-            type: "success",
-            message: "Item listed successfully!",
-            title: "Item listed",
-            position: "topR",
-            id: `notification-${Date.now()}`
-        });
-    }
-
-    async function handleListWaitingConfirmation() {
-        dispatch({
-            type: "info",
-            message: "Transaction submitted. Waiting for confirmations.",
-            title: "Waiting for confirmations",
-            position: "topR",
-            id: `notification-${Date.now()}`
-        });
-    }
-
-    async function handleListError(error) {
-        console.log("error", error)
-        dispatch({
-            type: "error",
-            message: "error.data.message", //todo
-            title: "Listing item error",
-            position: "topR",
-            id: `notification-${Date.now()}`
-        });
     }
 
     const uploadFile = async (fileToUpload) => {

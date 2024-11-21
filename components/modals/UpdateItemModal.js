@@ -4,7 +4,7 @@ import {useWeb3Contract} from "react-moralis";
 import marketplaceAbi from "../../constants/Marketplace.json";
 import {ethers} from "ethers";
 import Image from "next/image";
-import {getCategories, getCountries} from "@/utils/utils";
+import {getCategories, getCountries, handleNotification} from "@/utils/utils";
 import Modal from "react-modal";
 import {marketplaceContractAddress} from "@/constants/constants";
 import LoadingAnimation from "@/components/LoadingAnimation";
@@ -69,17 +69,6 @@ export default function UpdateItemModal({
         }));
     }
 
-    const handleUpdateListingSuccess = () => {
-        dispatch({
-            type: "success",
-            message: "listing updated",
-            title: "Listing updated - please refresh (and move blocks)",
-            position: "topR",
-            id: `notification-${Date.now()}`
-        });
-        onClose && onClose();
-    };
-
     const handleChange = (e) => {
         const {name, value, files} = e.target;
         setFormData((prevState) => ({
@@ -102,17 +91,11 @@ export default function UpdateItemModal({
                 hashes.push(hash);
             }
         } catch (e) {
-            console.error(e);
-            console.log("stopping listing new item");
+            console.error("Error", e);
+            handleNotification(dispatch, "error", "Uploading images to IPFS failed.", "Updating item error");
+
             //remove uploaded images
             removePinnedImages(hashes);
-            dispatch({
-                type: "error",
-                message: "Uploading images to IPFS failed.",
-                title: "Listing item error",
-                position: "topR",
-                id: `notification-${Date.now()}`
-            });
             return;
         }
 
@@ -147,9 +130,10 @@ export default function UpdateItemModal({
         await runContractFunction({
             params: listOptions,
             onSuccess: (tx) => {
-                handleListWaitingConfirmation();
-                tx.wait().then((finalTx) => {
-                    handleListSuccess();
+                handleNotification(dispatch, "info", "Waiting for confirmations...", "Transaction submitted");
+
+                tx.wait().then((_) => {
+                    handleNotification(dispatch, "success", "Item updated successfully!", "Item updated");
                     onClose();
                     setButtonsDisabled(false);
                 })
@@ -157,20 +141,11 @@ export default function UpdateItemModal({
             onError: (error) => {
                 setButtonsDisabled(false);
                 removePinnedImages(hashes);
-                handleListError(error);
+                console.error("Error", error);
+                handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred. Please inspect the logs in console", "Item update error");
             },
         });
     };
-
-    async function handleListWaitingConfirmation() {
-        dispatch({
-            type: "info",
-            message: "Transaction submitted. Waiting for confirmations.",
-            title: "Waiting for confirmations",
-            position: "topR",
-            id: `notification-${Date.now()}`
-        });
-    }
 
     const uploadFile = async (fileToUpload) => {
         try {
@@ -188,27 +163,6 @@ export default function UpdateItemModal({
             throw e;
         }
     };
-
-
-    async function handleListSuccess() {
-        dispatch({
-            type: "success",
-            message: "Item updated successfully!",
-            title: "Item updated",
-            position: "topR",
-            id: `notification-${Date.now()}`
-        });
-    }
-
-    async function handleListError(error) {
-        dispatch({
-            type: "error",
-            message: `error`, //todo fix error.data.message not always accessible, depends on error if it is from metamask or contract itself
-            title: "Item update error",
-            position: "topR",
-            id: `notification-${Date.now()}`
-        });
-    }
 
     async function removePinnedImages(hashes) {
         for (const hash of hashes) {
@@ -238,13 +192,7 @@ export default function UpdateItemModal({
 
     const handleAddImageButton = () => {
         if (imageURIs.length + newImages.length >= 3) {
-            dispatch({
-                type: "error",
-                message: "Cannot add more than 3 images",
-                title: "Item listing",
-                position: "topR",
-                id: `notification-${Date.now()}`
-            });
+            handleNotification(dispatch, "error", "Cannot add more than 3 images", "Item image error");
             return;
         }
         setNewImages([...newImages, null]); // Add a new empty image input
@@ -553,5 +501,5 @@ export default function UpdateItemModal({
                 </div>
             </div>
         </Modal>
-);
+    );
 }

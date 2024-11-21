@@ -5,9 +5,9 @@ import {useDispatch} from "react-redux";
 import usersAbi from "@/constants/Users.json";
 import {clearUser} from "@/store/slices/userSlice";
 import {usersContractAddress} from "@/constants/constants";
+import {handleNotification} from "@/utils/utils";
 
 const AdvancedSettings = () => {
-    // State to control modal visibility
     const [isModalOpen, setIsModalOpen] = useState(false);
     const dispatch = useNotification();
     const {runContractFunction} = useWeb3Contract();
@@ -28,53 +28,23 @@ const AdvancedSettings = () => {
         await runContractFunction({
             params: callParams,
             onSuccess: (tx) => {
-                handleDeleteWaitingConfirmation();
-                tx.wait().then((finalTx) => {
-                    handleDeleteSuccess();
+                handleNotification(dispatch, "info", "Waiting for confirmations...", "Transaction submitted");
+                tx.wait().then((_) => {
+                    handleNotification(dispatch, "success", "User deleted successfully!", "User deleted");
                     setIsSubmitting(false);
                     setIsModalOpen(false);
                     dispatchState(clearUser())
                 });
             },
             onError: (error) => {
-                handleUserError(error);
+                console.error("Error", error);
+                handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred. Please inspect the logs in console", "User delete error");
                 setIsSubmitting(false);
                 setIsModalOpen(false);
             },
         });
         setIsModalOpen(false);
     };
-
-
-    async function handleDeleteWaitingConfirmation() {
-        dispatch({
-            type: "info",
-            message: "Transaction submitted. Waiting for confirmations.",
-            title: "Waiting for confirmations",
-            position: "topR",
-            id: `notification-${Date.now()}`
-        });
-    }
-
-    async function handleDeleteSuccess() {
-        dispatch({
-            type: "success",
-            message: "User deleted successfully!",
-            title: "User deleted",
-            position: "topR",
-            id: `notification-${Date.now()}`
-        });
-    }
-
-    async function handleUserError(error) {
-        dispatch({
-            type: "error",
-            message: `error`, //todo fix error.data.message not always accessible, depends on error if it is from metamask or contract itself
-            title: "User delete error",
-            position: "topR",
-            id: `notification-${Date.now()}`
-        });
-    }
 
     return (
         <div className="flex justify-center items-center h-full">

@@ -3,7 +3,7 @@ import {useNotification} from "web3uikit";
 import {useMoralis, useWeb3Contract} from "react-moralis";
 import {useDispatch, useSelector} from "react-redux";
 import usersAbi from "@/constants/Users.json";
-import {getCountries, removePinnedImage, uploadFile} from "@/utils/utils";
+import {getCountries, handleNotification, removePinnedImage, uploadFile} from "@/utils/utils";
 import {setUser} from "@/store/slices/userSlice";
 import LoadingAnimation from "@/components/LoadingAnimation";
 import {usersContractAddress} from "@/constants/constants";
@@ -133,9 +133,9 @@ export default function ManageProfile({setButtonsDisabledTrue, setButtonsDisable
         await runContractFunction({
             params: callParams,
             onSuccess: (tx) => {
-                handleListWaitingConfirmation();
-                tx.wait().then((finalTx) => {
-                    handleUserSuccess();
+                handleNotification(dispatch, "info", "Waiting for confirmations...", "Transaction submitted");
+                tx.wait().then((_) => {
+                    handleNotification(dispatch, "success", userExists ? "User updated successfully!" : "User created successfully!", userExists ? "User updated" : "User created");
                     setIsSubmitting(false);
                     dispatchState(setUser({
                         username: formData.username,
@@ -155,43 +155,13 @@ export default function ManageProfile({setButtonsDisabledTrue, setButtonsDisable
                 });
             },
             onError: (error) => {
-                handleUserError(error);
+                console.error("Error", error);
+                handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred. Please inspect the logs in console", userExists ? "User update error" : "User creation error");
                 setIsSubmitting(false);
                 setButtonsDisabledFalse();
             },
         });
     };
-
-    async function handleListWaitingConfirmation() {
-        dispatch({
-            type: "info",
-            message: "Transaction submitted. Waiting for confirmations.",
-            title: "Waiting for confirmations",
-            position: "topR",
-            id: `notification-${Date.now()}`
-        });
-    }
-
-    async function handleUserSuccess() {
-        dispatch({
-            type: "success",
-            message: userExists ? "User updated successfully!" : "User created successfully!",
-            title: userExists ? "User updated" : "User created",
-            position: "topR",
-            id: `notification-${Date.now()}`
-        });
-    }
-
-    async function handleUserError(error) {
-        console.log(error);
-        dispatch({
-            type: "error",
-            message: userExists ? "Error while updating user. Please try again" : "Error while creating user. Please try again",
-            title: userExists ? "User update error" : "User creation error",
-            position: "topR",
-            id: `notification-${Date.now()}`
-        });
-    }
 
     return (
         <>

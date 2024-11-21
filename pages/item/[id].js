@@ -172,6 +172,7 @@ export default function ItemPage() {
                     },
                     onError: (error) => {
                         reject(error);
+                        console.error("Error", error);
                         handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred - Please inspect the logs in console", "Item buying error");
                     },
                 });
@@ -225,6 +226,7 @@ export default function ItemPage() {
                     },
                     onError: (error) => {
                         reject(error);
+                        console.error("Error", error);
                         handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred - Please inspect the logs in console", "Item buying error");
                     },
                 });
@@ -280,11 +282,13 @@ export default function ItemPage() {
                                 handleNotification(dispatch, "success", "Token approval success", "Approval confirmed");
                                 resolve(finalTx);
                             } catch (error) {
+                                console.error("Error", error);
                                 handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred - Please inspect the logs in console", "Approval error");
                                 reject(error);
                             }
                         },
                         onError: (error) => {
+                            console.error("Error", error);
                             handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred - Please inspect the logs in console", "Approval error");
                             reject(error);
                         },
