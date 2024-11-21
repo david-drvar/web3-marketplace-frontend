@@ -244,7 +244,7 @@ export default function ListItem() {
                 <div className={buttonsDisabled ? "pointer-events-none" : ""}>
                     {/* Loading Overlay */}
                     {buttonsDisabled && (
-                        <div className="absolute inset-0 bg-white bg-opacity-40 flex justify-center items-center z-20">
+                        <div className="absolute inset-0 bg-white bg-opacity-50 flex justify-center items-center z-20">
                             <LoadingAnimation/>
                         </div>
                     )}
@@ -402,10 +402,15 @@ export default function ListItem() {
                                         accept="image/*"
                                         onChange={(e) => handleImageChange(index, e)}
                                         className="hidden"
+                                        disabled={buttonsDisabled}
                                     />
                                     <label
                                         htmlFor={`img${index}`}
-                                        className="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700"
+                                        className={`px-4 py-2 rounded-lg ${
+                                            buttonsDisabled
+                                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                                : "bg-indigo-500 hover:bg-indigo-600 text-white cursor-pointer"
+                                        }`}
                                     >
                                         Select File
                                     </label>
@@ -422,7 +427,9 @@ export default function ListItem() {
                                             type="button"
                                             disabled={buttonsDisabled}
                                             onClick={() => handleRemoveImage(index)}
-                                            className="text-red-500 hover:text-red-700"
+                                            className={`${
+                                                buttonsDisabled ? "text-gray-500 hover:text-gray-700 cursor-not-allowed" : "text-red-500 hover:text-red-700 hover:underline"
+                                            }`}
                                         >
                                             Remove
                                         </button>
