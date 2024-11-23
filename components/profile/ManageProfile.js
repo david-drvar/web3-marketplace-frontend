@@ -126,7 +126,7 @@ export default function ManageProfile({setButtonsDisabledTrue, setButtonsDisable
                 _email: formData.email,
                 _avatarHash: avatarImageHash === "" && userExists ? user.avatarHash : avatarImageHash,
                 _isModerator: formData.isModerator,
-                _moderatorFee: formData.moderatorFee
+                _moderatorFee: formData.isModerator ? formData.moderatorFee : 0
             },
         };
 
