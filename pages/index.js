@@ -48,12 +48,7 @@ export default function Home() {
     useEffect(() => {
         loadData();
         loadNextPage();
-    }, [dispatch, account]);
-
-    useEffect(() => {
-        loadData();
-        loadNextPage();
-    }, [page]);
+    }, [dispatch, account, page]);
 
     const handleNextPage = () => {
         setPage((prevPage) => prevPage + 1);

@@ -57,10 +57,10 @@ export default function Profile() {
                                         onClick={() => setActiveTab('reviews')}>
                                         Your Reviews
                                     </li>
-                                    <li className={`py-2 cursor-pointer hover:bg-gray-200 rounded-md ${activeTab === 'advanced' ? 'text-blue-500 font-bold' : 'text-gray-500'}`}
-                                        onClick={() => setActiveTab('advanced')}>
-                                        Advanced
-                                    </li>
+                                    {/*<li className={`py-2 cursor-pointer hover:bg-gray-200 rounded-md ${activeTab === 'advanced' ? 'text-blue-500 font-bold' : 'text-gray-500'}`}*/}
+                                    {/*    onClick={() => setActiveTab('advanced')}>*/}
+                                    {/*    Advanced*/}
+                                    {/*</li>*/}
                                 </ul>
                             </div>
 
@@ -84,12 +84,12 @@ export default function Profile() {
                                     </div>
                                 )}
 
-                                {activeTab === 'advanced' && (
-                                    <div className="bg-white p-8 shadow-lg rounded-lg">
-                                        <h1 className="text-3xl font-semibold mb-8">Advanced Settings</h1>
-                                        <AdvancedSettings/>
-                                    </div>
-                                )}
+                                {/*{activeTab === 'advanced' && (*/}
+                                {/*    <div className="bg-white p-8 shadow-lg rounded-lg">*/}
+                                {/*        <h1 className="text-3xl font-semibold mb-8">Advanced Settings</h1>*/}
+                                {/*        <AdvancedSettings/>*/}
+                                {/*    </div>*/}
+                                {/*)}*/}
                             </div>
                         </div>
                     )
