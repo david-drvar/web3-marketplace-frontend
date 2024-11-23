@@ -716,7 +716,7 @@ export const fetchAllReviewsByUser = async (userAddress) => {
 
     } catch (error) {
         console.error("Error fetching all reviews from user", error);
-        return false;
+        return [];
     }
 };
 
@@ -756,6 +756,6 @@ export const fetchAllReviewsForItem = async (itemId) => {
 
     } catch (error) {
         console.error("Error fetching all reviews from user", error);
-        return false;
+        return [];
     }
 };
