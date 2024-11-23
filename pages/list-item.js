@@ -4,10 +4,11 @@ import {ethers} from "ethers";
 import marketplaceAbi from "../constants/Marketplace.json";
 import React, {useState} from "react";
 import {useRouter} from "next/router";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {getCategories, getCountries, handleNotification} from "@/utils/utils";
 import {marketplaceContractAddress} from "@/constants/constants";
 import LoadingAnimation from "@/components/LoadingAnimation";
+import RegisterAlertModal from "@/components/modals/RegisterAlertModal";
 
 export default function ListItem() {
     const {chainId, isWeb3Enabled, account} = useMoralis();
@@ -15,7 +16,8 @@ export default function ListItem() {
 
     const dispatchRedux = useDispatch();
     const supportedCurrencies = ["ETH", "USDC", "EURC"]
-
+    const userExists = useSelector((state) => state.user).isActive;
+    const [showRegisterUserModal, setShowRegisterUserModal] = useState(false);
 
     const {runContractFunction} = useWeb3Contract();
 
@@ -88,7 +90,6 @@ export default function ListItem() {
 
     const handleSubmit = async (e) => {
         setButtonsDisabled(true);
-        e.preventDefault();
         var hashes = [];
 
         try {
@@ -201,6 +202,16 @@ export default function ListItem() {
         <div className="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-lg">
             {isWeb3Enabled && chainId ? (
                 <div className={buttonsDisabled ? "pointer-events-none" : ""}>
+
+                    {
+                        setShowRegisterUserModal && (
+                            <RegisterAlertModal
+                                isVisible={showRegisterUserModal}
+                                onClose={() => setShowRegisterUserModal(false)}
+                            />
+                        )
+                    }
+
                     {/* Loading Overlay */}
                     {buttonsDisabled && (
                         <div className="fixed inset-0 bg-white bg-opacity-50 flex justify-center items-center z-50">
@@ -209,7 +220,14 @@ export default function ListItem() {
                     )}
 
                     <h1 className="text-2xl font-bold text-center mb-6">Create Listing</h1>
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form onSubmit={(e) => {
+                        e.preventDefault();
+                        if (userExists)
+                            handleSubmit();
+                        else
+                            setShowRegisterUserModal(true);
+
+                    }} className="space-y-6">
                         <div>
                             <label htmlFor="title" className="block text-sm font-medium text-gray-700">
                                 Title

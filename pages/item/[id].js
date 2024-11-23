@@ -27,6 +27,8 @@ import {
     marketplaceContractAddress,
     usdcContractAddress
 } from "@/constants/constants";
+import RegisterAlertModal from "@/components/modals/RegisterAlertModal";
+import {useSelector} from "react-redux";
 
 export default function ItemPage() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -35,6 +37,7 @@ export default function ItemPage() {
     const id = router.query.id;
 
     const [item, setItem] = useState({});
+    const userExists = useSelector((state) => state.user).isActive;
 
     const [title, setTitle] = useState("");
     const [price, setPrice] = useState(0);
@@ -51,6 +54,7 @@ export default function ItemPage() {
     const [blockTimestamp, setBlockTimestamp] = useState("");
 
     const [showBuyModal, setShowBuyModal] = useState(false);
+    const [showRegisterUserModal, setShowRegisterUserModal] = useState(false);
     const [showUpdateModal, setShowUpdateModal] = useState(false);
     const [showModalDelete, setShowModalDelete] = useState(false);
     const [showChat, setShowChat] = useState(false);
@@ -362,6 +366,16 @@ export default function ItemPage() {
                                 )
                             }
 
+                            {
+                                setShowRegisterUserModal && (
+                                    <RegisterAlertModal
+                                        key={6}
+                                        isVisible={showRegisterUserModal}
+                                        onClose={() => setShowRegisterUserModal(false)}
+                                    />
+                                )
+                            }
+
                             {showChat &&
                                 <ChatPopup key={4} onClose={() => setShowChat(false)}
                                            transaction={{seller: item.seller, buyer: account, itemId: id, moderator: ""}}
@@ -467,12 +481,22 @@ export default function ItemPage() {
                                         ) : (
                                             <>
                                                 <button className="bg-green-600 text-white font-semibold py-2 px-4 rounded-lg w-full hover:bg-green-700"
-                                                        onClick={() => setShowChat(!showChat)}>
+                                                        onClick={() => {
+                                                            if (userExists)
+                                                                setShowChat(!showChat);
+                                                            else
+                                                                setShowRegisterUserModal(true);
+                                                        }}>
                                                     Send Message to Seller
                                                 </button>
 
                                                 <button className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg w-full hover:bg-blue-700"
-                                                        onClick={() => setShowBuyModal(true)}>
+                                                        onClick={() => {
+                                                            if (userExists)
+                                                                setShowBuyModal(true);
+                                                            else
+                                                                setShowRegisterUserModal(true);
+                                                        }}>
                                                     Buy Item
                                                 </button>
                                             </>
