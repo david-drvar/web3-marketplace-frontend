@@ -6,7 +6,7 @@ import React, {useState} from "react";
 import {useRouter} from "next/router";
 import {useDispatch, useSelector} from "react-redux";
 import {getCategories, getCountries, handleNotification} from "@/utils/utils";
-import {marketplaceContractAddress} from "@/constants/constants";
+import {contractAddresses} from "@/constants/constants";
 import LoadingAnimation from "@/components/LoadingAnimation";
 import RegisterAlertModal from "@/components/modals/RegisterAlertModal";
 
@@ -125,7 +125,7 @@ export default function ListItem() {
 
         const listOptions = {
             abi: marketplaceAbi,
-            contractAddress: marketplaceContractAddress,
+            contractAddress: contractAddresses[chainId].marketplaceContractAddress,
             functionName: "listNewItem",
             params: {
                 item: item

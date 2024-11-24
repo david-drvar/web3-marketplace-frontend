@@ -1,12 +1,12 @@
 import {useNotification} from "web3uikit";
 import {useEffect, useState} from "react";
-import {useWeb3Contract} from "react-moralis";
+import {useMoralis, useWeb3Contract} from "react-moralis";
 import marketplaceAbi from "../../constants/Marketplace.json";
 import {ethers} from "ethers";
 import Image from "next/image";
 import {getCategories, getCountries, handleNotification} from "@/utils/utils";
 import Modal from "react-modal";
-import {marketplaceContractAddress} from "@/constants/constants";
+import {contractAddresses} from "@/constants/constants";
 import LoadingAnimation from "@/components/LoadingAnimation";
 
 export default function UpdateItemModal({
@@ -28,6 +28,8 @@ export default function UpdateItemModal({
     const dispatch = useNotification();
 
     const supportedCurrencies = ["ETH", "USDC", "EURC"]
+    const {chainId} = useMoralis();
+
 
     const [formData, setFormData] = useState({
         title: title,
@@ -121,7 +123,7 @@ export default function UpdateItemModal({
 
         const listOptions = {
             abi: marketplaceAbi,
-            contractAddress: marketplaceContractAddress,
+            contractAddress: contractAddresses[chainId].marketplaceContractAddress,
             functionName: "updateItem",
             params: {
                 item: item

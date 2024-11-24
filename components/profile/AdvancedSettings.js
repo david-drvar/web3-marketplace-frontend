@@ -1,10 +1,10 @@
 import React, {useState} from 'react';
 import {useNotification} from "web3uikit";
-import {useWeb3Contract} from "react-moralis";
+import {useMoralis, useWeb3Contract} from "react-moralis";
 import {useDispatch} from "react-redux";
 import usersAbi from "@/constants/Users.json";
 import {clearUser} from "@/store/slices/userSlice";
-import {usersContractAddress} from "@/constants/constants";
+import {contractAddresses} from "@/constants/constants";
 import {handleNotification} from "@/utils/utils";
 
 const AdvancedSettings = () => {
@@ -13,6 +13,7 @@ const AdvancedSettings = () => {
     const {runContractFunction} = useWeb3Contract();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const dispatchState = useDispatch();
+    const {chainId} = useMoralis();
 
     const openModal = () => {
         setIsModalOpen(true);
@@ -21,7 +22,7 @@ const AdvancedSettings = () => {
     const handleDeleteProfile = async () => {
         const callParams = {
             abi: usersAbi,
-            contractAddress: usersContractAddress,
+            contractAddress: contractAddresses[chainId].usersContractAddress,
             functionName: "deleteProfile",
         };
 

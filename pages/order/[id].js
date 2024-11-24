@@ -15,7 +15,7 @@ import ReviewItemModal from "@/components/modals/ReviewItemModal";
 import Slider from "react-slick";
 import RatingDisplay from "@/components/RatingDisplay";
 import Link from "next/link";
-import {escrowContractAddress, usersContractAddress} from "@/constants/constants";
+import {contractAddresses} from "@/constants/constants";
 
 export default function OrderPage() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -61,6 +61,7 @@ export default function OrderPage() {
     const [refreshPage, setRefreshPage] = useState(0);
 
     const [buttonsDisabled, setButtonsDisabled] = useState(false);
+    const {chainId} = useMoralis();
 
     const sliderSettings = {
         dots: true,
@@ -200,7 +201,7 @@ export default function OrderPage() {
         setButtonsDisabled(true);
         const contractParams = {
             abi: escrowAbi,
-            contractAddress: escrowContractAddress,
+            contractAddress: contractAddresses[chainId].escrowContractAddress,
             functionName: `approve`,
             params: {
                 _itemId: id,
@@ -231,7 +232,7 @@ export default function OrderPage() {
         setButtonsDisabled(true);
         const contractParams = {
             abi: escrowAbi,
-            contractAddress: escrowContractAddress,
+            contractAddress: contractAddresses[chainId].escrowContractAddress,
             functionName: `raiseDispute`,
             params: {
                 _itemId: id,
@@ -264,7 +265,7 @@ export default function OrderPage() {
     const handleFinalize = async (percentageSeller, percentageBuyer) => {
         const contractParams = {
             abi: escrowAbi,
-            contractAddress: escrowContractAddress,
+            contractAddress: contractAddresses[chainId].escrowContractAddress,
             functionName: `finalizeTransactionByModerator`,
             params: {
                 _itemId: id,
@@ -297,7 +298,7 @@ export default function OrderPage() {
     const handleSubmitReview = async (content, rating, toWhom) => {
         const contractParams = {
             abi: usersAbi,
-            contractAddress: usersContractAddress,
+            contractAddress: contractAddresses[chainId].usersContractAddress,
             functionName: `createReview`,
             params: {
                 itemId: id,

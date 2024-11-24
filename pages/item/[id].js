@@ -21,12 +21,7 @@ import "slick-carousel/slick/slick-theme.css";
 import {HeartIcon as HeartIconSolid} from "@heroicons/react/solid";
 import {HeartIcon} from "@heroicons/react/outline";
 import RatingDisplay from "@/components/RatingDisplay";
-import {
-    escrowContractAddress,
-    eurcContractAddress,
-    marketplaceContractAddress,
-    usdcContractAddress
-} from "@/constants/constants";
+import {contractAddresses} from "@/constants/constants";
 import RegisterAlertModal from "@/components/modals/RegisterAlertModal";
 import {useSelector} from "react-redux";
 
@@ -63,6 +58,7 @@ export default function ItemPage() {
     const {runContractFunction} = useWeb3Contract();
 
     const [isFavorite, setIsFavorite] = useState(false);
+    const {chainId} = useMoralis();
 
 
     const dispatch = useNotification();
@@ -135,13 +131,13 @@ export default function ItemPage() {
 
     const handleBuyItemWithModerator = async (moderator, address) => {
         try {
-            await handleApprovals(marketplaceContractAddress);
+            await handleApprovals(contractAddresses[chainId].marketplaceContractAddress);
 
             const finalPrice = currency === "ETH" ? price : 0;
 
             const contractParams = {
                 abi: marketplaceAbi,
-                contractAddress: marketplaceContractAddress,
+                contractAddress: contractAddresses[chainId].marketplaceContractAddress,
                 functionName: "buyItem",
                 msgValue: finalPrice,
                 params: {
@@ -191,13 +187,13 @@ export default function ItemPage() {
 
     const handleBuyItemWithoutModerator = async (address) => {
         try {
-            await handleApprovals(escrowContractAddress);
+            await handleApprovals(contractAddresses[chainId].escrowContractAddress);
 
             const finalPrice = currency === "ETH" ? price : 0;
 
             const contractParams = {
                 abi: marketplaceAbi,
-                contractAddress: marketplaceContractAddress,
+                contractAddress: contractAddresses[chainId].marketplaceContractAddress,
                 functionName: "buyItemWithoutModerator",
                 msgValue: finalPrice,
                 params: {
@@ -247,7 +243,7 @@ export default function ItemPage() {
         if (currency !== "ETH") {
             const approvalAmount = price * 1e6;
 
-            const tokenAddress = currency === "USDC" ? usdcContractAddress : eurcContractAddress;
+            const tokenAddress = currency === "USDC" ? contractAddresses[chainId].usdcContractAddress : contractAddresses[chainId].eurcContractAddress;
             const tokenAbi = currency === "USDC" ? usdcAbi : eurcAbi;
 
             // 1. check if allowance is enough

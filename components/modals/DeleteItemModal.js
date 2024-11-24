@@ -1,9 +1,9 @@
 import {useNotification} from "web3uikit";
-import {useWeb3Contract} from "react-moralis";
+import {useMoralis, useWeb3Contract} from "react-moralis";
 import marketplaceAbi from "../../constants/Marketplace.json";
 import {useRouter} from "next/router";
 import Modal from "react-modal";
-import {marketplaceContractAddress} from "@/constants/constants";
+import {contractAddresses} from "@/constants/constants";
 import {useState} from "react";
 import LoadingAnimation from "@/components/LoadingAnimation";
 import {handleNotification} from "@/utils/utils";
@@ -12,6 +12,7 @@ export default function DeleteItemModal({id, onClose, isVisible}) {
     const dispatch = useNotification();
 
     const {runContractFunction} = useWeb3Contract();
+    const {chainId} = useMoralis();
 
     const router = useRouter();
 
@@ -21,7 +22,7 @@ export default function DeleteItemModal({id, onClose, isVisible}) {
         setButtonsDisabled(true);
         const listOptions = {
             abi: marketplaceAbi,
-            contractAddress: marketplaceContractAddress,
+            contractAddress: contractAddresses[chainId].marketplaceContractAddress,
             functionName: "deleteItem",
             params: {
                 id: id,

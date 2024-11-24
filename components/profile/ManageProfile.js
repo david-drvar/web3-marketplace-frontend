@@ -6,7 +6,7 @@ import usersAbi from "@/constants/Users.json";
 import {getCountries, handleNotification, removePinnedImage, uploadFile} from "@/utils/utils";
 import {setUser} from "@/store/slices/userSlice";
 import LoadingAnimation from "@/components/LoadingAnimation";
-import {usersContractAddress} from "@/constants/constants";
+import {contractAddresses} from "@/constants/constants";
 
 export default function ManageProfile({setButtonsDisabledTrue, setButtonsDisabledFalse}) {
     const {isWeb3Enabled} = useMoralis();
@@ -34,6 +34,7 @@ export default function ManageProfile({setButtonsDisabledTrue, setButtonsDisable
     const [imagePreview, setImagePreview] = useState(null); // State for image preview
 
     const [isLoading, setIsLoading] = useState(true);
+    const {chainId} = useMoralis();
 
 
     useEffect(() => {
@@ -115,7 +116,7 @@ export default function ManageProfile({setButtonsDisabledTrue, setButtonsDisable
 
         const callParams = {
             abi: usersAbi,
-            contractAddress: usersContractAddress,
+            contractAddress: contractAddresses[chainId].usersContractAddress,
             functionName: userExists ? "updateProfile" : "createProfile",
             params: {
                 _username: formData.username,
