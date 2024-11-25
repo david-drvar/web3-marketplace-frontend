@@ -51,7 +51,7 @@ export const fetchItemsPaginated = async (apolloClient, first, skip) => {
 };
 
 
-export const fetchItemById = async (apolloClient,id) => {
+export const fetchItemById = async (apolloClient, id) => {
     if (!apolloClient) return [];
 
     if (!id) {
@@ -94,7 +94,7 @@ export const fetchItemById = async (apolloClient,id) => {
     }
 }
 
-export const fetchItemsOrderedByUser = async (apolloClient,userAddress, first, skip) => {
+export const fetchItemsOrderedByUser = async (apolloClient, userAddress, first, skip) => {
     if (!userAddress || !apolloClient) {
         return [];
     }
@@ -136,7 +136,7 @@ export const fetchItemsOrderedByUser = async (apolloClient,userAddress, first, s
 }
 
 
-export const fetchAllAdsByUser = async (apolloClient,userAddress) => {
+export const fetchAllAdsByUser = async (apolloClient, userAddress) => {
     if (!userAddress || !apolloClient) {
         return [];
     }
@@ -177,7 +177,7 @@ export const fetchAllAdsByUser = async (apolloClient,userAddress) => {
     }
 }
 
-export const fetchListedAdsByUserPaginated = async (apolloClient,userAddress, first, skip) => {
+export const fetchListedAdsByUserPaginated = async (apolloClient, userAddress, first, skip) => {
     if (!userAddress || !apolloClient) {
         return [];
     }
@@ -218,7 +218,7 @@ export const fetchListedAdsByUserPaginated = async (apolloClient,userAddress, fi
     }
 }
 
-export const fetchActiveAdsByUserPaginated = async (apolloClient,userAddress, first, skip) => {
+export const fetchActiveAdsByUserPaginated = async (apolloClient, userAddress, first, skip) => {
     if (!userAddress || !apolloClient) {
         return [];
     }
@@ -259,7 +259,7 @@ export const fetchActiveAdsByUserPaginated = async (apolloClient,userAddress, fi
     }
 }
 
-export const fetchItemsByIdsList = async (apolloClient,itemIds, first, skip) => {
+export const fetchItemsByIdsList = async (apolloClient, itemIds, first, skip) => {
     if (!itemIds || itemIds.length === 0 || !apolloClient) {
         return [];
     }
@@ -301,7 +301,7 @@ export const fetchItemsByIdsList = async (apolloClient,itemIds, first, skip) => 
     }
 }
 
-export const fetchTransactionsByItemIds = async (apolloClient,itemIds) => {
+export const fetchTransactionsByItemIds = async (apolloClient, itemIds) => {
     if (!itemIds || itemIds.length === 0 || !apolloClient) {
         return [];
     }
@@ -383,7 +383,7 @@ export const fetchModerators = async (apolloClient) => {
 }
 
 
-export const fetchUserByAddress = async (apolloClient,userAddress) => {
+export const fetchUserByAddress = async (apolloClient, userAddress) => {
     if (!userAddress || !apolloClient) {
         return [];
     }
@@ -422,7 +422,7 @@ export const fetchUserByAddress = async (apolloClient,userAddress) => {
 }
 
 
-export const fetchUserProfileByAddress = async (apolloClient,userAddress) => {
+export const fetchUserProfileByAddress = async (apolloClient, userAddress) => {
     if (!userAddress || !apolloClient) {
         return [];
     }
@@ -440,8 +440,8 @@ export const fetchUserProfileByAddress = async (apolloClient,userAddress) => {
 
     try {
         const [userData, reviews, lastSeen] = await Promise.all([
-            fetchUserByAddress(userAddress),
-            fetchAllReviewsByUser(userAddress),
+            fetchUserByAddress(apolloClient, userAddress),
+            fetchAllReviewsByUser(apolloClient, userAddress),
             getLastSeenForUser(userAddress),
         ]);
 
@@ -467,7 +467,7 @@ export const fetchUserProfileByAddress = async (apolloClient,userAddress) => {
     }
 }
 
-export const fetchTransactionByItemId = async (apolloClient,itemId) => {
+export const fetchTransactionByItemId = async (apolloClient, itemId) => {
     if (!itemId || !apolloClient) {
         return [];
     }
@@ -514,7 +514,7 @@ export const fetchTransactionByItemId = async (apolloClient,itemId) => {
 }
 
 
-export const fetchAllItemsByModerator = async (apolloClient,moderator, first, skip) => {
+export const fetchAllItemsByModerator = async (apolloClient, moderator, first, skip) => {
     if (!moderator || !apolloClient) {
         return [];
     }
@@ -595,7 +595,7 @@ export const fetchAllItemsByModerator = async (apolloClient,moderator, first, sk
     }
 }
 
-export const fetchAllTransactionsByUser = async (apolloClient,userAddress) => {
+export const fetchAllTransactionsByUser = async (apolloClient, userAddress) => {
     if (!userAddress || !apolloClient) {
         return [];
     }
@@ -646,7 +646,7 @@ export const fetchAllTransactionsByUser = async (apolloClient,userAddress) => {
 }
 
 
-export const checkReviewExistence = async (apolloClient,from, to, itemId) => {
+export const checkReviewExistence = async (apolloClient, from, to, itemId) => {
     if (!from || !to || !itemId || !apolloClient) {
         return false;
     }
@@ -685,7 +685,7 @@ export const checkReviewExistence = async (apolloClient,from, to, itemId) => {
 
 
 // reviews that were given to this user
-export const fetchAllReviewsByUser = async (apolloClient,userAddress) => {
+export const fetchAllReviewsByUser = async (apolloClient, userAddress) => {
     if (!userAddress || !apolloClient) {
         return [];
     }

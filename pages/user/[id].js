@@ -76,12 +76,12 @@ export default function UserProfile() {
             setIsLoading(true);
 
             const [reviewsData, userData, itemsData, lastSeenData, transactionsData, favoriteItemsIdsData] = await Promise.all([
-                fetchAllReviewsByUser(apolloClient,id),
-                fetchUserByAddress(apolloClient,id),
-                fetchAllAdsByUser(apolloClient,id),
-                getLastSeenForUser(apolloClient,id),
-                fetchAllTransactionsByUser(apolloClient,id),
-                getFavoriteItemsIds(apolloClient,account)
+                fetchAllReviewsByUser(apolloClient, id),
+                fetchUserByAddress(apolloClient, id),
+                fetchAllAdsByUser(apolloClient, id),
+                getLastSeenForUser(id),
+                fetchAllTransactionsByUser(apolloClient, id),
+                getFavoriteItemsIds(account)
             ]);
 
             if (Array.isArray(userData) && userData.length === 0)
@@ -125,7 +125,7 @@ export default function UserProfile() {
 
         const skip = (page - 1) * pageSize;
 
-        const fetchedItems = await fetchListedAdsByUserPaginated(id, pageSize, skip);
+        const fetchedItems = await fetchListedAdsByUserPaginated(apolloClient, id, pageSize, skip);
         setItems(fetchedItems);
 
         setIsLoading(false);
@@ -136,7 +136,7 @@ export default function UserProfile() {
 
         const skip = page * pageSize;
 
-        const fetchedItems = await fetchListedAdsByUserPaginated(id, pageSize, skip);
+        const fetchedItems = await fetchListedAdsByUserPaginated(apolloClient, id, pageSize, skip);
         fetchedItems.length > 0 ? setNextPageButtonDisabled(false) : setNextPageButtonDisabled(true);
 
         setIsLoading(false);

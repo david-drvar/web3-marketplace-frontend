@@ -24,7 +24,7 @@ function App({Component, pageProps}) {
                         <link rel="icon" href="/favicon.ico"/>
                     </Head>
                     <MoralisProvider initializeOnMount={false}>
-                        <MoralisApp Component={Component} pageProps={pageProps} />
+                        <MoralisApp Component={Component} pageProps={pageProps}/>
                     </MoralisProvider>
                 </div>
             </PersistGate>
@@ -34,7 +34,7 @@ function App({Component, pageProps}) {
 
 
 function MoralisApp({Component, pageProps}) {
-    const {chainId, deactivateWeb3} = useMoralis();
+    const {chainId} = useMoralis();
     const [apolloClient, setApolloClient] = useState(null);
 
     useEffect(() => {

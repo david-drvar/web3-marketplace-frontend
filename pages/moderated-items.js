@@ -3,6 +3,7 @@ import {useEffect, useState} from "react";
 import ItemBox from "@/components/ItemBox";
 import {fetchAllItemsByModerator, fetchTransactionsByItemIds} from "@/utils/apolloService";
 import LoadingAnimation from "@/components/LoadingAnimation";
+import {useApolloClient} from "@apollo/client";
 
 export default function ModeratedItems() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -16,6 +17,7 @@ export default function ModeratedItems() {
     const [page, setPage] = useState(1);
     const pageSize = 12;
     const [nextPageButtonDisabled, setNextPageButtonDisabled] = useState(false);
+    const apolloClient = useApolloClient();
 
     useEffect(() => {
         if (isWeb3Enabled && account) {
@@ -29,12 +31,12 @@ export default function ModeratedItems() {
 
         const skip = (page - 1) * pageSize;
 
-        const fetchedItems = await fetchAllItemsByModerator(account, pageSize, skip);
+        const fetchedItems = await fetchAllItemsByModerator(apolloClient, account, pageSize, skip);
         setItems(fetchedItems);
         setFilteredItems(fetchedItems)
 
         const itemIds = fetchedItems.map(item => item.id);
-        const fetchedTransactions = await fetchTransactionsByItemIds(itemIds);
+        const fetchedTransactions = await fetchTransactionsByItemIds(apolloClient, itemIds);
         setTransactions(fetchedTransactions);
 
         setIsLoading(false);
@@ -45,7 +47,7 @@ export default function ModeratedItems() {
 
         const skip = page * pageSize;
 
-        const fetchedItems = await fetchAllItemsByModerator(account, pageSize, skip);
+        const fetchedItems = await fetchAllItemsByModerator(apolloClient, account, pageSize, skip);
         fetchedItems.length > 0 ? setNextPageButtonDisabled(false) : setNextPageButtonDisabled(true);
 
         setIsLoading(false);

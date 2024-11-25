@@ -50,7 +50,7 @@ export default function Home() {
     useEffect(() => {
         loadData();
         loadNextPage();
-    }, [dispatch, account, page]);
+    }, [dispatch, account, page, apolloClient]);
 
     const handleNextPage = () => {
         setPage((prevPage) => prevPage + 1);
