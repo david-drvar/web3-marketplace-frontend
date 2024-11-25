@@ -4,14 +4,16 @@ import {fetchAllReviewsByUser} from "@/utils/apolloService";
 import Link from 'next/link';
 import LoadingAnimation from "@/components/LoadingAnimation";
 import {formatDate, renderStars} from "@/utils/utils";
+import {useApolloClient} from "@apollo/client";
 
 const YourReviews = () => {
     const [reviews, setReviews] = useState([]);
     const {account} = useMoralis();
     const [isLoading, setIsLoading] = useState(true);
+    const apolloClient = useApolloClient();
 
     useEffect(() => {
-        fetchAllReviewsByUser(account).then((reviews) => setReviews(reviews)).then(() => setIsLoading(false));
+        fetchAllReviewsByUser(apolloClient,account).then((reviews) => setReviews(reviews)).then(() => setIsLoading(false));
     }, [account]);
 
     return (

@@ -1,5 +1,7 @@
 import {useState} from 'react';
 import {getCategories, getCountries} from "@/utils/utils";
+import {getContractAddresses} from "@/constants/constants";
+import {useMoralis} from "react-moralis";
 
 const SearchFilterBar = ({onFilter, onReset}) => {
     const [searchQuery, setSearchQuery] = useState('');
@@ -9,13 +11,14 @@ const SearchFilterBar = ({onFilter, onReset}) => {
     const [condition, setCondition] = useState('');
     const [country, setCountry] = useState('');
     const [currency, setCurrency] = useState('');
+    const {chainId} = useMoralis();
 
     const categories = getCategories();
     const countries = getCountries();
 
     const subcategories = category ? categories[category] : [];
 
-    const supportedCurrencies = ["ETH", "USDC", "EURC"]
+    const supportedCurrencies = [getContractAddresses(chainId).nativeCurrency, "USDC", "EURC"]
 
     const handleSearch = () => {
         onFilter({

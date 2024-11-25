@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import ManageProfile from "@/components/profile/ManageProfile";
-import AdvancedSettings from "@/components/profile/AdvancedSettings";
 import ManageAddresses from "@/components/profile/ManageAddresses";
 import {fetchUserByAddress} from "@/utils/apolloService";
 import {setUser} from "@/store/slices/userSlice";
@@ -8,6 +7,7 @@ import {useMoralis} from "react-moralis";
 import {useDispatch} from "react-redux";
 import LoadingAnimation from "@/components/LoadingAnimation";
 import YourReviews from "@/components/profile/YourReviews";
+import {useApolloClient} from "@apollo/client";
 
 
 export default function Profile() {
@@ -20,9 +20,10 @@ export default function Profile() {
 
     const setButtonsDisabledTrue = () => setButtonsDisabled(true);
     const setButtonsDisabledFalse = () => setButtonsDisabled(false);
+    const apolloClient = useApolloClient();
 
     useEffect(() => {
-        fetchUserByAddress(account).then((data) => dispatch(setUser(data))).then(() => setIsLoading(false));
+        fetchUserByAddress(apolloClient,account).then((data) => dispatch(setUser(data))).then(() => setIsLoading(false));
     }, [account]);
 
     return (

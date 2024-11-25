@@ -6,7 +6,7 @@ import {ethers} from "ethers";
 import Image from "next/image";
 import {getCategories, getCountries, handleNotification} from "@/utils/utils";
 import Modal from "react-modal";
-import {contractAddresses} from "@/constants/constants";
+import {getContractAddresses} from "@/constants/constants";
 import LoadingAnimation from "@/components/LoadingAnimation";
 
 export default function UpdateItemModal({
@@ -26,15 +26,15 @@ export default function UpdateItemModal({
                                             isGift,
                                         }) {
     const dispatch = useNotification();
-
-    const supportedCurrencies = ["ETH", "USDC", "EURC"]
     const {chainId} = useMoralis();
+
+    const supportedCurrencies = [getContractAddresses(chainId).nativeCurrency, "USDC", "EURC"]
 
 
     const [formData, setFormData] = useState({
         title: title,
         description: description,
-        price: currency === "ETH" ? ethers.utils.formatEther(price) : price / 1e6,
+        price: currency === getContractAddresses(chainId).nativeCurrency ? ethers.utils.formatEther(price) : price / 1e6,
         currency: currency,
         condition: condition,
         category: category,
@@ -103,7 +103,7 @@ export default function UpdateItemModal({
 
         const newItemImageHashes = imageURIs.concat(hashes);
 
-        const finalPrice = formData.currency === "ETH" ? ethers.utils.parseEther(formData.price.toString()).toString() : formData.price * 1e6;
+        const finalPrice = formData.currency === getContractAddresses(chainId).nativeCurrency ? ethers.utils.parseEther(formData.price.toString()).toString() : formData.price * 1e6;
 
         const item = {
             id: id,
@@ -123,7 +123,7 @@ export default function UpdateItemModal({
 
         const listOptions = {
             abi: marketplaceAbi,
-            contractAddress: contractAddresses[chainId].marketplaceContractAddress,
+            contractAddress: getContractAddresses(chainId).marketplaceContractAddress,
             functionName: "updateItem",
             params: {
                 item: item

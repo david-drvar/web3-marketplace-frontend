@@ -6,6 +6,7 @@ import {useMoralis} from "react-moralis";
 import {firebase_db} from "@/utils/firebaseConfig";
 import {getChatID} from "@/utils/utils";
 import {fetchUserByAddress} from "@/utils/apolloService";
+import {useApolloClient} from "@apollo/client";
 
 const ChatPopup = ({onClose, transaction}) => {
     const {account} = useMoralis();
@@ -14,17 +15,18 @@ const ChatPopup = ({onClose, transaction}) => {
     const [buyer, setBuyer] = useState({});
     const [seller, setSeller] = useState({});
     const [moderator, setModerator] = useState({});
+    const apolloClient = useApolloClient();
 
 
     useEffect(() => {
         // get all users involved in transaction
-        fetchUserByAddress(transaction.seller).then((data) => {
+        fetchUserByAddress(apolloClient,transaction.seller).then((data) => {
             setSeller(data);
         });
-        fetchUserByAddress(transaction.buyer).then((data) => {
+        fetchUserByAddress(apolloClient,transaction.buyer).then((data) => {
             setBuyer(data);
         });
-        fetchUserByAddress(transaction.moderator).then((data) => {
+        fetchUserByAddress(apolloClient,transaction.moderator).then((data) => {
             setModerator(data);
         });
     }, []);

@@ -6,7 +6,7 @@ import usersAbi from "@/constants/Users.json";
 import {getCountries, handleNotification, removePinnedImage, uploadFile} from "@/utils/utils";
 import {setUser} from "@/store/slices/userSlice";
 import LoadingAnimation from "@/components/LoadingAnimation";
-import {contractAddresses} from "@/constants/constants";
+import {getContractAddresses} from "@/constants/constants";
 
 export default function ManageProfile({setButtonsDisabledTrue, setButtonsDisabledFalse}) {
     const {isWeb3Enabled} = useMoralis();
@@ -116,7 +116,7 @@ export default function ManageProfile({setButtonsDisabledTrue, setButtonsDisable
 
         const callParams = {
             abi: usersAbi,
-            contractAddress: contractAddresses[chainId].usersContractAddress,
+            contractAddress: getContractAddresses(chainId).usersContractAddress,
             functionName: userExists ? "updateProfile" : "createProfile",
             params: {
                 _username: formData.username,
@@ -130,6 +130,8 @@ export default function ManageProfile({setButtonsDisabledTrue, setButtonsDisable
                 _moderatorFee: formData.isModerator ? formData.moderatorFee : 0
             },
         };
+
+        console.log("callParams", callParams)
 
         await runContractFunction({
             params: callParams,

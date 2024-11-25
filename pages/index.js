@@ -6,6 +6,7 @@ import LoadingAnimation from "@/components/LoadingAnimation";
 import {fetchItemsPaginated} from "@/utils/apolloService";
 import SearchFilterBar from "@/components/SearchFilterBar";
 import {getFavoriteItemsIds} from "@/utils/firebaseService";
+import {useApolloClient} from "@apollo/client";
 
 
 export default function Home() {
@@ -22,6 +23,7 @@ export default function Home() {
     const pageSize = 12;
 
     const [nextPageButtonDisabled, setNextPageButtonDisabled] = useState(false);
+    const apolloClient = useApolloClient();
 
 
     const handleFilter = (filter) => {
@@ -63,7 +65,7 @@ export default function Home() {
 
         const skip = (page - 1) * pageSize;
 
-        const fetchedItems = await fetchItemsPaginated(pageSize, skip);
+        const fetchedItems = await fetchItemsPaginated(apolloClient, pageSize, skip);
         const favoriteItemsIds = await getFavoriteItemsIds(account);
 
         setItems(fetchedItems);
@@ -78,7 +80,7 @@ export default function Home() {
 
         const skip = page * pageSize;
 
-        const fetchedItems = await fetchItemsPaginated(pageSize, skip);
+        const fetchedItems = await fetchItemsPaginated(apolloClient, pageSize, skip);
         fetchedItems.length > 0 ? setNextPageButtonDisabled(false) : setNextPageButtonDisabled(true);
 
         setIsLoading(false);

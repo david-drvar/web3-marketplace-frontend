@@ -1,13 +1,19 @@
 import {ApolloClient, gql, InMemoryCache} from "@apollo/client";
 import {getLastSeenForUser} from "@/utils/firebaseService";
+import {apolloUris} from "@/constants/constants";
 
-export const apolloClient = new ApolloClient({
-    cache: new InMemoryCache(),
-    uri: "https://api.studio.thegraph.com/query/72409/marketplace-dapp/version/latest",
-});
+export const getApolloClient = (chainId) => {
+    const uri = apolloUris[chainId] || apolloUris["0x13882"]; // Default to Polygon Mumbai
+    console.log("novi uri", uri)
+    return new ApolloClient({
+        uri,
+        cache: new InMemoryCache(),
+    });
+};
 
+export const fetchItemsPaginated = async (apolloClient, first, skip) => {
+    if (!apolloClient) return [];
 
-export const fetchItemsPaginated = async (first, skip) => {
     const getItemsQuery = gql`
     query GetItems($first: Int!, $skip: Int!) {
       items(first: $first, skip: $skip, where: { itemStatus: "Listed" }) {
@@ -45,7 +51,9 @@ export const fetchItemsPaginated = async (first, skip) => {
 };
 
 
-export const fetchItemById = async (id) => {
+export const fetchItemById = async (apolloClient,id) => {
+    if (!apolloClient) return [];
+
     if (!id) {
         return [];
     }
@@ -72,6 +80,7 @@ export const fetchItemById = async (id) => {
   `;
 
     try {
+
         const {data} = await apolloClient.query({
             query: getItemByIdQuery,
             variables: {id: id},
@@ -85,8 +94,8 @@ export const fetchItemById = async (id) => {
     }
 }
 
-export const fetchItemsOrderedByUser = async (userAddress, first, skip) => {
-    if (!userAddress) {
+export const fetchItemsOrderedByUser = async (apolloClient,userAddress, first, skip) => {
+    if (!userAddress || !apolloClient) {
         return [];
     }
     const getItemsQuery = gql`
@@ -112,6 +121,7 @@ export const fetchItemsOrderedByUser = async (userAddress, first, skip) => {
   `;
 
     try {
+
         const {data} = await apolloClient.query({
             query: getItemsQuery,
             variables: {userAddress, first, skip},
@@ -126,8 +136,8 @@ export const fetchItemsOrderedByUser = async (userAddress, first, skip) => {
 }
 
 
-export const fetchAllAdsByUser = async (userAddress) => {
-    if (!userAddress) {
+export const fetchAllAdsByUser = async (apolloClient,userAddress) => {
+    if (!userAddress || !apolloClient) {
         return [];
     }
     const getItemsQuery = gql`
@@ -153,6 +163,7 @@ export const fetchAllAdsByUser = async (userAddress) => {
   `;
 
     try {
+
         const {data} = await apolloClient.query({
             query: getItemsQuery,
             variables: {userAddress},
@@ -166,8 +177,8 @@ export const fetchAllAdsByUser = async (userAddress) => {
     }
 }
 
-export const fetchListedAdsByUserPaginated = async (userAddress, first, skip) => {
-    if (!userAddress) {
+export const fetchListedAdsByUserPaginated = async (apolloClient,userAddress, first, skip) => {
+    if (!userAddress || !apolloClient) {
         return [];
     }
     const getItemsQuery = gql`
@@ -193,6 +204,7 @@ export const fetchListedAdsByUserPaginated = async (userAddress, first, skip) =>
   `;
 
     try {
+
         const {data} = await apolloClient.query({
             query: getItemsQuery,
             variables: {userAddress, first, skip},
@@ -206,8 +218,8 @@ export const fetchListedAdsByUserPaginated = async (userAddress, first, skip) =>
     }
 }
 
-export const fetchActiveAdsByUserPaginated = async (userAddress, first, skip) => {
-    if (!userAddress) {
+export const fetchActiveAdsByUserPaginated = async (apolloClient,userAddress, first, skip) => {
+    if (!userAddress || !apolloClient) {
         return [];
     }
     const getItemsQuery = gql`
@@ -233,6 +245,7 @@ export const fetchActiveAdsByUserPaginated = async (userAddress, first, skip) =>
   `;
 
     try {
+
         const {data} = await apolloClient.query({
             query: getItemsQuery,
             variables: {userAddress, first, skip},
@@ -246,8 +259,8 @@ export const fetchActiveAdsByUserPaginated = async (userAddress, first, skip) =>
     }
 }
 
-export const fetchItemsByIdsList = async (itemIds, first, skip) => {
-    if (!itemIds || itemIds.length === 0) {
+export const fetchItemsByIdsList = async (apolloClient,itemIds, first, skip) => {
+    if (!itemIds || itemIds.length === 0 || !apolloClient) {
         return [];
     }
 
@@ -274,6 +287,7 @@ export const fetchItemsByIdsList = async (itemIds, first, skip) => {
     `;
 
     try {
+
         const {data} = await apolloClient.query({
             query: getItemsQuery,
             variables: {itemIds, first, skip},
@@ -287,8 +301,8 @@ export const fetchItemsByIdsList = async (itemIds, first, skip) => {
     }
 }
 
-export const fetchTransactionsByItemIds = async (itemIds) => {
-    if (!itemIds || itemIds.length === 0) {
+export const fetchTransactionsByItemIds = async (apolloClient,itemIds) => {
+    if (!itemIds || itemIds.length === 0 || !apolloClient) {
         return [];
     }
 
@@ -320,6 +334,7 @@ export const fetchTransactionsByItemIds = async (itemIds) => {
     `;
 
     try {
+
         const {data} = await apolloClient.query({
             query: getTransactionsQuery,
             variables: {itemIds},
@@ -333,7 +348,9 @@ export const fetchTransactionsByItemIds = async (itemIds) => {
     }
 };
 
-export const fetchModerators = async () => {
+export const fetchModerators = async (apolloClient) => {
+    if (!apolloClient) return [];
+
     const getModeratorsQuery = gql`
     {
       users (where: { isActive: true, isModerator: true }) {
@@ -366,8 +383,8 @@ export const fetchModerators = async () => {
 }
 
 
-export const fetchUserByAddress = async (userAddress) => {
-    if (!userAddress) {
+export const fetchUserByAddress = async (apolloClient,userAddress) => {
+    if (!userAddress || !apolloClient) {
         return [];
     }
     const getUserQuery = gql`
@@ -405,8 +422,8 @@ export const fetchUserByAddress = async (userAddress) => {
 }
 
 
-export const fetchUserProfileByAddress = async (userAddress) => {
-    if (!userAddress) {
+export const fetchUserProfileByAddress = async (apolloClient,userAddress) => {
+    if (!userAddress || !apolloClient) {
         return [];
     }
 
@@ -422,8 +439,6 @@ export const fetchUserProfileByAddress = async (userAddress) => {
     };
 
     try {
-
-
         const [userData, reviews, lastSeen] = await Promise.all([
             fetchUserByAddress(userAddress),
             fetchAllReviewsByUser(userAddress),
@@ -452,8 +467,8 @@ export const fetchUserProfileByAddress = async (userAddress) => {
     }
 }
 
-export const fetchTransactionByItemId = async (itemId) => {
-    if (!itemId) {
+export const fetchTransactionByItemId = async (apolloClient,itemId) => {
+    if (!itemId || !apolloClient) {
         return [];
     }
     const getTransactionByItemId = gql`
@@ -484,6 +499,7 @@ export const fetchTransactionByItemId = async (itemId) => {
   `;
 
     try {
+
         const {data} = await apolloClient.query({
             query: getTransactionByItemId,
             variables: {itemId},
@@ -498,8 +514,8 @@ export const fetchTransactionByItemId = async (itemId) => {
 }
 
 
-export const fetchAllItemsByModerator = async (moderator, first, skip) => {
-    if (!moderator) {
+export const fetchAllItemsByModerator = async (apolloClient,moderator, first, skip) => {
+    if (!moderator || !apolloClient) {
         return [];
     }
     const getTransactionByModerator = gql`
@@ -552,6 +568,8 @@ export const fetchAllItemsByModerator = async (moderator, first, skip) => {
     `;
 
     try {
+
+
         let items = []
 
         const {data} = await apolloClient.query({
@@ -577,8 +595,8 @@ export const fetchAllItemsByModerator = async (moderator, first, skip) => {
     }
 }
 
-export const fetchAllTransactionsByUser = async (userAddress) => {
-    if (!userAddress) {
+export const fetchAllTransactionsByUser = async (apolloClient,userAddress) => {
+    if (!userAddress || !apolloClient) {
         return [];
     }
     const getTransactionsByBuyer = gql`
@@ -606,6 +624,8 @@ export const fetchAllTransactionsByUser = async (userAddress) => {
     `;
 
     try {
+
+
         const [buyerResult, sellerResult, moderatorResult] = await Promise.all([
             apolloClient.query({query: getTransactionsByBuyer, variables: {user: userAddress}, fetchPolicy: 'network-only'}),
             apolloClient.query({query: getTransactionsBySeller, variables: {user: userAddress}, fetchPolicy: 'network-only'}),
@@ -626,8 +646,8 @@ export const fetchAllTransactionsByUser = async (userAddress) => {
 }
 
 
-export const checkReviewExistence = async (from, to, itemId) => {
-    if (!from || !to || !itemId) {
+export const checkReviewExistence = async (apolloClient,from, to, itemId) => {
+    if (!from || !to || !itemId || !apolloClient) {
         return false;
     }
 
@@ -649,6 +669,7 @@ export const checkReviewExistence = async (from, to, itemId) => {
   `;
 
     try {
+
         const {data} = await apolloClient.query({
             query: checkReviewExistenceQuery,
             variables: {from, to, itemId},
@@ -664,8 +685,8 @@ export const checkReviewExistence = async (from, to, itemId) => {
 
 
 // reviews that were given to this user
-export const fetchAllReviewsByUser = async (userAddress) => {
-    if (!userAddress) {
+export const fetchAllReviewsByUser = async (apolloClient,userAddress) => {
+    if (!userAddress || !apolloClient) {
         return [];
     }
 
@@ -688,6 +709,7 @@ export const fetchAllReviewsByUser = async (userAddress) => {
   `;
 
     try {
+
         const {data} = await apolloClient.query({
             query: fetchAllReviewsByUser,
             variables: {userAddress},
@@ -696,8 +718,8 @@ export const fetchAllReviewsByUser = async (userAddress) => {
 
         const reviewsWithDetails = await Promise.all(
             data.reviews.map(async (review) => {
-                const item = await fetchItemById(review.itemId)
-                const fromUser = await fetchUserByAddress(review.from)
+                const item = await fetchItemById(apolloClient, review.itemId)
+                const fromUser = await fetchUserByAddress(apolloClient, review.from)
                 return {
                     id: review.id,
                     from: review.from,
@@ -722,8 +744,8 @@ export const fetchAllReviewsByUser = async (userAddress) => {
 
 
 // reviews that were given to this user
-export const fetchAllReviewsForItem = async (itemId) => {
-    if (!itemId) {
+export const fetchAllReviewsForItem = async (apolloClient, itemId) => {
+    if (!itemId || !apolloClient) {
         return [];
     }
 

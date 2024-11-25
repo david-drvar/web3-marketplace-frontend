@@ -6,6 +6,7 @@ import ChatWindow from "@/components/chat/ChatWindow";
 import {useDispatch, useSelector} from "react-redux";
 import {setUnreadCount} from "@/store/slices/unreadChatCounterSlice";
 import LoadingAnimation from "@/components/LoadingAnimation";
+import {useApolloClient} from "@apollo/client";
 
 const Chats = () => {
     const {account} = useMoralis();
@@ -18,6 +19,7 @@ const Chats = () => {
     const chatCounter = useSelector((state) => state.chatCounter.unreadCount);
 
     const [isLoading, setIsLoading] = useState(true);
+    const apolloClient = useApolloClient();
 
 
     useEffect(() => {
@@ -36,10 +38,10 @@ const Chats = () => {
 
                 // Run all async operations concurrently for each chat
                 const [item, seller, buyer, moderator] = await Promise.all([
-                    fetchItemById(chat.itemId),
-                    fetchUserByAddress(chat.participants.seller),
-                    fetchUserByAddress(chat.participants.buyer),
-                    fetchUserByAddress(chat.participants.moderator),
+                    fetchItemById(apolloClient,chat.itemId),
+                    fetchUserByAddress(apolloClient,chat.participants.seller),
+                    fetchUserByAddress(apolloClient,chat.participants.buyer),
+                    fetchUserByAddress(apolloClient,chat.participants.moderator),
                 ]);
 
                 // Store the results in the finalOneChat object

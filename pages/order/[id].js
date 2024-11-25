@@ -15,7 +15,8 @@ import ReviewItemModal from "@/components/modals/ReviewItemModal";
 import Slider from "react-slick";
 import RatingDisplay from "@/components/RatingDisplay";
 import Link from "next/link";
-import {contractAddresses} from "@/constants/constants";
+import {getContractAddresses} from "@/constants/constants";
+import {useApolloClient} from "@apollo/client";
 
 export default function OrderPage() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -62,6 +63,7 @@ export default function OrderPage() {
 
     const [buttonsDisabled, setButtonsDisabled] = useState(false);
     const {chainId} = useMoralis();
+    const apolloClient = useApolloClient();
 
     const sliderSettings = {
         dots: true,
@@ -89,10 +91,10 @@ export default function OrderPage() {
 
             // Fetch all data simultaneously
             const [itemData, transactionData, orderAddressData, reviewsData] = await Promise.all([
-                fetchItemById(id),
-                fetchTransactionByItemId(id),
+                fetchItemById(apolloClient,id),
+                fetchTransactionByItemId(apolloClient,id),
                 getOrderAddress(id),
-                fetchAllReviewsForItem(id)
+                fetchAllReviewsForItem(apolloClient,id)
             ]);
 
             // Handle participants' profiles
@@ -180,8 +182,8 @@ export default function OrderPage() {
         }
 
         const [participant1ProfileData, participant2ProfileData] = await Promise.all([
-            fetchUserProfileByAddress(participant1Address),
-            fetchUserProfileByAddress(participant2Address),
+            fetchUserProfileByAddress(apolloClient,participant1Address),
+            fetchUserProfileByAddress(apolloClient,participant2Address),
         ]);
 
         setParticipant1Profile({
@@ -201,7 +203,7 @@ export default function OrderPage() {
         setButtonsDisabled(true);
         const contractParams = {
             abi: escrowAbi,
-            contractAddress: contractAddresses[chainId].escrowContractAddress,
+            contractAddress: getContractAddresses(chainId).escrowContractAddress,
             functionName: `approve`,
             params: {
                 _itemId: id,
@@ -232,7 +234,7 @@ export default function OrderPage() {
         setButtonsDisabled(true);
         const contractParams = {
             abi: escrowAbi,
-            contractAddress: contractAddresses[chainId].escrowContractAddress,
+            contractAddress: getContractAddresses(chainId).escrowContractAddress,
             functionName: `raiseDispute`,
             params: {
                 _itemId: id,
@@ -265,7 +267,7 @@ export default function OrderPage() {
     const handleFinalize = async (percentageSeller, percentageBuyer) => {
         const contractParams = {
             abi: escrowAbi,
-            contractAddress: contractAddresses[chainId].escrowContractAddress,
+            contractAddress: getContractAddresses(chainId).escrowContractAddress,
             functionName: `finalizeTransactionByModerator`,
             params: {
                 _itemId: id,
@@ -298,7 +300,7 @@ export default function OrderPage() {
     const handleSubmitReview = async (content, rating, toWhom) => {
         const contractParams = {
             abi: usersAbi,
-            contractAddress: contractAddresses[chainId].usersContractAddress,
+            contractAddress: getContractAddresses(chainId).usersContractAddress,
             functionName: `createReview`,
             params: {
                 itemId: id,
@@ -397,7 +399,7 @@ export default function OrderPage() {
                                     <div className="flex justify-between items-center">
                                         <h1 className="text-2xl font-bold mb-2">{title}</h1>
                                     </div>
-                                    <p className="text-gray-700 text-lg mb-4">{isGift ? "FREE" : `Price : ${currency === "ETH" ? ethers.utils.formatEther(price) : price / 1e6} ${currency}`}</p>
+                                    <p className="text-gray-700 text-lg mb-4">{isGift ? "FREE" : `Price : ${currency === getContractAddresses(chainId).nativeCurrency ? ethers.utils.formatEther(price) : price / 1e6} ${currency}`}</p>
                                     <p className="text-sm text-gray-600 mb-2">Posted on: {formatDate(blockTimestamp * 1000)}</p>
                                     <p className="text-sm text-gray-600 mb-2">Condition: {saniziteCondition(condition)}</p>
                                     <p className="text-sm text-gray-600 mb-2">Ships from: {country}</p>

@@ -1,15 +1,16 @@
 import "@/styles/globals.css";
 import Head from "next/head";
-import {MoralisProvider} from "react-moralis";
+import {MoralisProvider, useMoralis} from "react-moralis";
 import Header from "@/components/Header";
 import {ApolloProvider} from "@apollo/client";
 import {NotificationProvider} from "web3uikit";
 import {store, persistor} from '@/store/store';
 import {Provider} from "react-redux";
 import {PersistGate} from "redux-persist/integration/react";
-import {apolloClient} from "@/utils/apolloService"
+import {getApolloClient} from "@/utils/apolloService"
 import AccountChangedListener from "@/components/AccountChangedListener";
 import {SpeedInsights} from '@vercel/speed-insights/next';
+import {useEffect, useState} from "react";
 
 function App({Component, pageProps}) {
     return (
@@ -23,18 +24,36 @@ function App({Component, pageProps}) {
                         <link rel="icon" href="/favicon.ico"/>
                     </Head>
                     <MoralisProvider initializeOnMount={false}>
-                        <AccountChangedListener/>
-                        <ApolloProvider client={apolloClient}>
-                            <NotificationProvider>
-                                <Header/>
-                                <Component {...pageProps} />
-                                <SpeedInsights/>
-                            </NotificationProvider>
-                        </ApolloProvider>
+                        <MoralisApp Component={Component} pageProps={pageProps} />
                     </MoralisProvider>
                 </div>
             </PersistGate>
         </Provider>
+    );
+}
+
+
+function MoralisApp({Component, pageProps}) {
+    const {chainId, deactivateWeb3} = useMoralis();
+    const [apolloClient, setApolloClient] = useState(null);
+
+    useEffect(() => {
+        const client = getApolloClient(chainId);
+        setApolloClient(client);
+    }, [chainId]);
+
+    // Wait until Apollo Client is ready
+    if (!apolloClient) return null;
+
+    return (
+        <ApolloProvider client={apolloClient}>
+            <NotificationProvider>
+                <AccountChangedListener/>
+                <Header/>
+                <Component {...pageProps} />
+                <SpeedInsights/>
+            </NotificationProvider>
+        </ApolloProvider>
     );
 }
 

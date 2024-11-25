@@ -3,6 +3,7 @@ import ItemBox from "@/components/ItemBox";
 import {useEffect, useState} from "react";
 import LoadingAnimation from "@/components/LoadingAnimation";
 import {fetchActiveAdsByUserPaginated, fetchTransactionsByItemIds} from "@/utils/apolloService";
+import {useApolloClient} from "@apollo/client";
 
 export default function MyAds() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -17,6 +18,7 @@ export default function MyAds() {
     const [page, setPage] = useState(1);
     const pageSize = 12;
     const [nextPageButtonDisabled, setNextPageButtonDisabled] = useState(false);
+    const apolloClient = useApolloClient();
 
     useEffect(() => {
         if (isWeb3Enabled && account) {
@@ -30,12 +32,12 @@ export default function MyAds() {
 
         const skip = (page - 1) * pageSize;
 
-        const fetchedItems = await fetchActiveAdsByUserPaginated(account, pageSize, skip);
+        const fetchedItems = await fetchActiveAdsByUserPaginated(apolloClient,account, pageSize, skip);
         setItems(fetchedItems);
         setFilteredItems(fetchedItems)
 
         const itemIds = fetchedItems.map(item => item.id);
-        const fetchedTransactions = await fetchTransactionsByItemIds(itemIds);
+        const fetchedTransactions = await fetchTransactionsByItemIds(apolloClient,itemIds);
         setTransactions(fetchedTransactions);
 
         setIsLoading(false);
@@ -46,7 +48,7 @@ export default function MyAds() {
 
         const skip = page * pageSize;
 
-        const fetchedItems = await fetchActiveAdsByUserPaginated(account, pageSize, skip);
+        const fetchedItems = await fetchActiveAdsByUserPaginated(apolloClient,account, pageSize, skip);
         fetchedItems.length > 0 ? setNextPageButtonDisabled(false) : setNextPageButtonDisabled(true);
 
         setIsLoading(false);

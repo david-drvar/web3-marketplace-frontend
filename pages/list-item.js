@@ -6,7 +6,7 @@ import React, {useState} from "react";
 import {useRouter} from "next/router";
 import {useDispatch, useSelector} from "react-redux";
 import {getCategories, getCountries, handleNotification} from "@/utils/utils";
-import {contractAddresses} from "@/constants/constants";
+import {getContractAddresses} from "@/constants/constants";
 import LoadingAnimation from "@/components/LoadingAnimation";
 import RegisterAlertModal from "@/components/modals/RegisterAlertModal";
 
@@ -15,7 +15,7 @@ export default function ListItem() {
     const dispatch = useNotification();
 
     const dispatchRedux = useDispatch();
-    const supportedCurrencies = ["ETH", "USDC", "EURC"]
+    const supportedCurrencies = [getContractAddresses(chainId).nativeCurrency, "USDC", "EURC"]
     const userExists = useSelector((state) => state.user).isActive;
     const [showRegisterUserModal, setShowRegisterUserModal] = useState(false);
 
@@ -28,7 +28,7 @@ export default function ListItem() {
         description: "",
         price: "",
         condition: "0",
-        currency: "ETH",
+        currency: getContractAddresses(chainId).nativeCurrency,
         category: "",
         subcategory: "",
         country: "",
@@ -105,7 +105,7 @@ export default function ListItem() {
             return;
         }
 
-        const finalPrice = formData.currency === "ETH" ? ethers.utils.parseEther(formData.price).toString() : formData.price * 1e6;
+        const finalPrice = formData.currency === getContractAddresses(chainId).nativeCurrency ? ethers.utils.parseEther(formData.price).toString() : formData.price * 1e6;
 
         const item = {
             id: 0,
@@ -125,12 +125,14 @@ export default function ListItem() {
 
         const listOptions = {
             abi: marketplaceAbi,
-            contractAddress: contractAddresses[chainId].marketplaceContractAddress,
+            contractAddress: getContractAddresses(chainId).marketplaceContractAddress,
             functionName: "listNewItem",
             params: {
                 item: item
             },
         };
+
+        console.log("listOptions", listOptions)
 
         await runContractFunction({
             params: listOptions,

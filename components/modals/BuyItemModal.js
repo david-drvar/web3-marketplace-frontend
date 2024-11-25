@@ -4,6 +4,7 @@ import {fetchModerators} from "@/utils/apolloService";
 import {getUserAddresses} from "@/utils/firebaseService";
 import {useMoralis} from "react-moralis";
 import LoadingAnimation from "@/components/LoadingAnimation";
+import {useApolloClient} from "@apollo/client";
 
 export default function BuyItemModal({isVisible, onClose, onBuyItemWithModerator, onBuyItemWithoutModerator}) {
     const [useModerator, setUseModerator] = useState(false);
@@ -16,9 +17,10 @@ export default function BuyItemModal({isVisible, onClose, onBuyItemWithModerator
     const [selectedAddress, setSelectedAddress] = useState(-1);
 
     const [buttonsDisabled, setButtonsDisabled] = useState(false);
+    const apolloClient = useApolloClient();
 
     useEffect(() => {
-        fetchModerators().then((data) => setModerators(data));
+        fetchModerators(apolloClient).then((data) => setModerators(data));
         getUserAddresses(account).then((data) => setAddresses(data));
     }, [account]);
 

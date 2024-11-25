@@ -21,9 +21,10 @@ import "slick-carousel/slick/slick-theme.css";
 import {HeartIcon as HeartIconSolid} from "@heroicons/react/solid";
 import {HeartIcon} from "@heroicons/react/outline";
 import RatingDisplay from "@/components/RatingDisplay";
-import {contractAddresses} from "@/constants/constants";
+import {getContractAddresses} from "@/constants/constants";
 import RegisterAlertModal from "@/components/modals/RegisterAlertModal";
 import {useSelector} from "react-redux";
+import {useApolloClient} from "@apollo/client";
 
 export default function ItemPage() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -59,6 +60,7 @@ export default function ItemPage() {
 
     const [isFavorite, setIsFavorite] = useState(false);
     const {chainId} = useMoralis();
+    const apolloClient = useApolloClient();
 
 
     const dispatch = useNotification();
@@ -96,7 +98,7 @@ export default function ItemPage() {
         try {
             setIsLoading(true);
 
-            const itemData = await fetchItemById(id);
+            const itemData = await fetchItemById(apolloClient, id);
             const isFavoriteData = await isItemFavorited(account, id);
             const sellerAddress = itemData[0].seller;
 
@@ -116,7 +118,7 @@ export default function ItemPage() {
             setSeller(sellerAddress);
             setIsAccountSeller(sellerAddress === account || !sellerAddress);
 
-            const sellerProfileData = await fetchUserProfileByAddress(sellerAddress);
+            const sellerProfileData = await fetchUserProfileByAddress(apolloClient, sellerAddress);
 
             setSellerProfile(sellerProfileData);
             setIsFavorite(isFavoriteData);
@@ -131,13 +133,13 @@ export default function ItemPage() {
 
     const handleBuyItemWithModerator = async (moderator, address) => {
         try {
-            await handleApprovals(contractAddresses[chainId].marketplaceContractAddress);
+            await handleApprovals(getContractAddresses(chainId).marketplaceContractAddress);
 
-            const finalPrice = currency === "ETH" ? price : 0;
+            const finalPrice = currency === getContractAddresses(chainId).nativeCurrency ? price : 0;
 
             const contractParams = {
                 abi: marketplaceAbi,
-                contractAddress: contractAddresses[chainId].marketplaceContractAddress,
+                contractAddress: getContractAddresses(chainId).marketplaceContractAddress,
                 functionName: "buyItem",
                 msgValue: finalPrice,
                 params: {
@@ -187,13 +189,13 @@ export default function ItemPage() {
 
     const handleBuyItemWithoutModerator = async (address) => {
         try {
-            await handleApprovals(contractAddresses[chainId].escrowContractAddress);
+            await handleApprovals(getContractAddresses(chainId).escrowContractAddress);
 
-            const finalPrice = currency === "ETH" ? price : 0;
+            const finalPrice = currency === getContractAddresses(chainId).nativeCurrency ? price : 0;
 
             const contractParams = {
                 abi: marketplaceAbi,
-                contractAddress: contractAddresses[chainId].marketplaceContractAddress,
+                contractAddress: getContractAddresses(chainId).marketplaceContractAddress,
                 functionName: "buyItemWithoutModerator",
                 msgValue: finalPrice,
                 params: {
@@ -240,10 +242,10 @@ export default function ItemPage() {
     }
 
     const handleApprovals = async (whichContractToAllowAddress) => {
-        if (currency !== "ETH") {
+        if (currency !== getContractAddresses(chainId).nativeCurrency) {
             const approvalAmount = price * 1e6;
 
-            const tokenAddress = currency === "USDC" ? contractAddresses[chainId].usdcContractAddress : contractAddresses[chainId].eurcContractAddress;
+            const tokenAddress = currency === "USDC" ? getContractAddresses(chainId).usdcContractAddress : getContractAddresses(chainId).eurcContractAddress;
             const tokenAbi = currency === "USDC" ? usdcAbi : eurcAbi;
 
             // 1. check if allowance is enough
@@ -421,7 +423,7 @@ export default function ItemPage() {
                                         }
 
                                     </div>
-                                    <p className="text-gray-700 text-lg mb-4">{isGift ? "FREE" : `Price : ${currency === "ETH" ? ethers.utils.formatEther(price) : price / 1e6} ${currency}`}</p>
+                                    <p className="text-gray-700 text-lg mb-4">{isGift ? "FREE" : `Price : ${currency === getContractAddresses(chainId).nativeCurrency ? ethers.utils.formatEther(price) : price / 1e6} ${currency}`}</p>
                                     <p className="text-sm text-gray-600 mb-2">Posted on: {formatDate(blockTimestamp * 1000)}</p>
                                     <p className="text-sm text-gray-600 mb-2">Condition: {saniziteCondition(condition)}</p>
                                     <p className="text-sm text-gray-600 mb-2">Ships from: {country}</p>

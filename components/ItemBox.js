@@ -8,10 +8,11 @@ import {HeartIcon} from "@heroicons/react/outline";
 import {HeartIcon as HeartIconSolid} from "@heroicons/react/solid";
 import {toggleFavoriteItem} from "@/utils/firebaseService";
 import {saniziteCondition} from "@/utils/utils";
+import {getContractAddresses} from "@/constants/constants";
 
 
 export default function ItemBox({id, price, currency, title, description, seller, photosIPFSHashes, itemStatus, blockTimestamp, displayOwnedStatus, category, subcategory, condition, displayFavorite = false, isFavorite = false, loadFavorites = null}) {
-    const {isWeb3Enabled, account} = useMoralis();
+    const {isWeb3Enabled, account, chainId} = useMoralis();
     const [imageURI, setImageURI] = useState("");
     const [isFavoriteItemLatestUpdate, setIsFavoriteItemLatestUpdate] = useState(isFavorite);
 
@@ -75,7 +76,7 @@ export default function ItemBox({id, price, currency, title, description, seller
 
                                 <div className="flex justify-between items-center mt-4">
                                     <div className="text-lg font-bold text-gray-800">
-                                        {price === "0" ? "FREE" : `${currency === "ETH" ? ethers.utils.formatEther(price) : price / 1e6} ${currency}`}
+                                        {price === "0" ? "FREE" : `${currency === getContractAddresses(chainId).nativeCurrency ? ethers.utils.formatEther(price) : price / 1e6} ${currency}`}
                                     </div>
 
                                     {displayFavorite && !isOwnedByUser && (

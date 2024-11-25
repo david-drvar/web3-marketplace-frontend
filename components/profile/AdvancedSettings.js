@@ -4,7 +4,7 @@ import {useMoralis, useWeb3Contract} from "react-moralis";
 import {useDispatch} from "react-redux";
 import usersAbi from "@/constants/Users.json";
 import {clearUser} from "@/store/slices/userSlice";
-import {contractAddresses} from "@/constants/constants";
+import {getContractAddresses} from "@/constants/constants";
 import {handleNotification} from "@/utils/utils";
 
 const AdvancedSettings = () => {
@@ -22,7 +22,7 @@ const AdvancedSettings = () => {
     const handleDeleteProfile = async () => {
         const callParams = {
             abi: usersAbi,
-            contractAddress: contractAddresses[chainId].usersContractAddress,
+            contractAddress: getContractAddresses(chainId).usersContractAddress,
             functionName: "deleteProfile",
         };
 

@@ -4,6 +4,7 @@ import {useEffect, useState} from "react";
 import LoadingAnimation from "@/components/LoadingAnimation";
 import {fetchItemsByIdsList} from "@/utils/apolloService";
 import {getFavoriteItemsIds} from "@/utils/firebaseService";
+import {useApolloClient} from "@apollo/client";
 
 export default function Favorites() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -14,6 +15,7 @@ export default function Favorites() {
     const [page, setPage] = useState(1);
     const pageSize = 12;
     const [nextPageButtonDisabled, setNextPageButtonDisabled] = useState(false);
+    const apolloClient = useApolloClient();
 
     useEffect(() => {
         loadFavorites();
@@ -26,7 +28,7 @@ export default function Favorites() {
         const skip = (page - 1) * pageSize;
 
         const favoriteItemsIds = await getFavoriteItemsIds(account);
-        const items = await fetchItemsByIdsList(favoriteItemsIds, pageSize, skip);
+        const items = await fetchItemsByIdsList(apolloClient,favoriteItemsIds, pageSize, skip);
 
         await setItems(items);
         setIsLoading(false);
@@ -38,7 +40,7 @@ export default function Favorites() {
         const skip = page * pageSize;
 
         const fetchedItems = await getFavoriteItemsIds(account);
-        const items = await fetchItemsByIdsList(fetchedItems, pageSize, skip);
+        const items = await fetchItemsByIdsList(apolloClient,fetchedItems, pageSize, skip);
         items.length > 0 ? setNextPageButtonDisabled(false) : setNextPageButtonDisabled(true);
 
         setIsLoading(false);

@@ -6,21 +6,23 @@ import {setUser} from "@/store/slices/userSlice";
 import {setLastSeenForUser} from "@/utils/firebaseService";
 import Modal from "react-modal";
 import {contractAddresses} from "@/constants/constants";
+import {useApolloClient} from "@apollo/client";
 
 const AccountChangedListener = () => {
     const dispatch = useDispatch();
     const {account, chainId, deactivateWeb3} = useMoralis();
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const apolloClient = useApolloClient();
 
     useEffect(() => {
-        fetchUserByAddress(account).then((data) => {
+        fetchUserByAddress(apolloClient, account).then((data) => {
             dispatch(setUser(data));
             setLastSeenForUser(account);
         });
     }, [account]);
 
     useEffect(() => {
-        if (chainId && !Object.keys(contractAddresses).includes(chainId))
+        if (chainId && !Object.keys(contractAddresses).includes(chainId.toLowerCase()))
             setIsModalOpen(true);
     }, [chainId]);
 

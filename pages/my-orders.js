@@ -3,6 +3,7 @@ import ItemBox from "@/components/ItemBox";
 import {useEffect, useState} from "react";
 import LoadingAnimation from "@/components/LoadingAnimation";
 import {fetchItemsOrderedByUser, fetchTransactionsByItemIds} from "@/utils/apolloService";
+import {useApolloClient} from "@apollo/client";
 
 export default function MyOrders() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -16,6 +17,7 @@ export default function MyOrders() {
     const [page, setPage] = useState(1);
     const pageSize = 12;
     const [nextPageButtonDisabled, setNextPageButtonDisabled] = useState(false);
+    const apolloClient = useApolloClient();
 
 
     useEffect(() => {
@@ -30,12 +32,12 @@ export default function MyOrders() {
 
         const skip = (page - 1) * pageSize;
 
-        const fetchedItems = await fetchItemsOrderedByUser(account, pageSize, skip);
+        const fetchedItems = await fetchItemsOrderedByUser(apolloClient, account, pageSize, skip);
         setItems(fetchedItems);
         setFilteredItems(fetchedItems)
 
         const itemIds = fetchedItems.map(item => item.id);
-        const fetchedTransactions = await fetchTransactionsByItemIds(itemIds);
+        const fetchedTransactions = await fetchTransactionsByItemIds(apolloClient,itemIds);
         setTransactions(fetchedTransactions);
 
         setIsLoading(false);
@@ -46,7 +48,7 @@ export default function MyOrders() {
 
         const skip = page * pageSize;
 
-        const fetchedItems = await fetchItemsOrderedByUser(account, pageSize, skip);
+        const fetchedItems = await fetchItemsOrderedByUser(apolloClient,account, pageSize, skip);
         fetchedItems.length > 0 ? setNextPageButtonDisabled(false) : setNextPageButtonDisabled(true);
 
         setIsLoading(false);

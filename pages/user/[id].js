@@ -11,6 +11,7 @@ import {getFavoriteItemsIds, getLastSeenForUser} from "@/utils/firebaseService";
 import RatingDisplay from "@/components/RatingDisplay";
 import {formatDate, renderStars} from "@/utils/utils";
 import {useMoralis} from "react-moralis";
+import {useApolloClient} from "@apollo/client";
 
 
 export default function UserProfile() {
@@ -35,6 +36,7 @@ export default function UserProfile() {
     const [page, setPage] = useState(1);
     const pageSize = 12;
     const [nextPageButtonDisabled, setNextPageButtonDisabled] = useState(false);
+    const apolloClient = useApolloClient();
 
     useEffect(() => {
         loadUserIndependentData();
@@ -74,12 +76,12 @@ export default function UserProfile() {
             setIsLoading(true);
 
             const [reviewsData, userData, itemsData, lastSeenData, transactionsData, favoriteItemsIdsData] = await Promise.all([
-                fetchAllReviewsByUser(id),
-                fetchUserByAddress(id),
-                fetchAllAdsByUser(id),
-                getLastSeenForUser(id),
-                fetchAllTransactionsByUser(id),
-                getFavoriteItemsIds(account)
+                fetchAllReviewsByUser(apolloClient,id),
+                fetchUserByAddress(apolloClient,id),
+                fetchAllAdsByUser(apolloClient,id),
+                getLastSeenForUser(apolloClient,id),
+                fetchAllTransactionsByUser(apolloClient,id),
+                getFavoriteItemsIds(apolloClient,account)
             ]);
 
             if (Array.isArray(userData) && userData.length === 0)
