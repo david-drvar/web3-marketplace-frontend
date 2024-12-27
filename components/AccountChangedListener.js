@@ -22,6 +22,8 @@ const AccountChangedListener = () => {
     useEffect(() => {
         if (chainId && !Object.keys(contractAddresses).includes(chainId))
             setIsModalOpen(true);
+        else
+            setIsModalOpen(false);
     }, [chainId]);
 
     const handleDisconnect = () => {
@@ -42,8 +44,8 @@ const AccountChangedListener = () => {
                     Unsupported Network
                 </p>
                 <p className="text-sm text-gray-600 mb-6">
-                    Only Sepolia and Polygon Amoy testnets are supported. Please switch
-                    networks or disconnect your wallet.
+                    Only Polygon Amoy testnet is supported. Please switch
+                    network.
                 </p>
                 <div className="flex justify-center">
                     <button

@@ -397,7 +397,7 @@ export default function OrderPage() {
                                     <div className="flex justify-between items-center">
                                         <h1 className="text-2xl font-bold mb-2">{title}</h1>
                                     </div>
-                                    <p className="text-gray-700 text-lg mb-4">{isGift ? "FREE" : `Price : ${currency === "ETH" ? ethers.utils.formatEther(price) : price / 1e6} ${currency}`}</p>
+                                    <p className="text-gray-700 text-lg mb-4">{isGift ? "FREE" : `Price : ${currency === "POL" ? ethers.utils.formatEther(price) : price / 1e6} ${currency}`}</p>
                                     <p className="text-sm text-gray-600 mb-2">Posted on: {formatDate(blockTimestamp * 1000)}</p>
                                     <p className="text-sm text-gray-600 mb-2">Condition: {saniziteCondition(condition)}</p>
                                     <p className="text-sm text-gray-600 mb-2">Ships from: {country}</p>

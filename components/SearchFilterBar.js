@@ -15,7 +15,7 @@ const SearchFilterBar = ({onFilter, onReset}) => {
 
     const subcategories = category ? categories[category] : [];
 
-    const supportedCurrencies = ["ETH", "USDC", "EURC"]
+    const supportedCurrencies = ["POL", "USDC"] // "EURC" not supported on Polygon Amoy
 
     const handleSearch = () => {
         onFilter({

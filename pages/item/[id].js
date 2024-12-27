@@ -133,7 +133,7 @@ export default function ItemPage() {
         try {
             await handleApprovals(contractAddresses[chainId].marketplaceContractAddress);
 
-            const finalPrice = currency === "ETH" ? price : 0;
+            const finalPrice = currency === "POL" ? price : 0;
 
             const contractParams = {
                 abi: marketplaceAbi,
@@ -141,7 +141,6 @@ export default function ItemPage() {
                 functionName: "buyItem",
                 msgValue: finalPrice,
                 params: {
-                    sellerAddress: seller,
                     id: id,
                     _moderator: moderator,
                 },
@@ -189,7 +188,7 @@ export default function ItemPage() {
         try {
             await handleApprovals(contractAddresses[chainId].escrowContractAddress);
 
-            const finalPrice = currency === "ETH" ? price : 0;
+            const finalPrice = currency === "POL" ? price : 0;
 
             const contractParams = {
                 abi: marketplaceAbi,
@@ -197,7 +196,6 @@ export default function ItemPage() {
                 functionName: "buyItemWithoutModerator",
                 msgValue: finalPrice,
                 params: {
-                    sellerAddress: seller,
                     id: id,
                 },
             };
@@ -240,7 +238,7 @@ export default function ItemPage() {
     }
 
     const handleApprovals = async (whichContractToAllowAddress) => {
-        if (currency !== "ETH") {
+        if (currency !== "POL") {
             const approvalAmount = price * 1e6;
 
             const tokenAddress = currency === "USDC" ? contractAddresses[chainId].usdcContractAddress : contractAddresses[chainId].eurcContractAddress;
@@ -421,7 +419,7 @@ export default function ItemPage() {
                                         }
 
                                     </div>
-                                    <p className="text-gray-700 text-lg mb-4">{isGift ? "FREE" : `Price : ${currency === "ETH" ? ethers.utils.formatEther(price) : price / 1e6} ${currency}`}</p>
+                                    <p className="text-gray-700 text-lg mb-4">{isGift ? "FREE" : `Price : ${currency === "POL" ? ethers.utils.formatEther(price) : price / 1e6} ${currency}`}</p>
                                     <p className="text-sm text-gray-600 mb-2">Posted on: {formatDate(blockTimestamp * 1000)}</p>
                                     <p className="text-sm text-gray-600 mb-2">Condition: {saniziteCondition(condition)}</p>
                                     <p className="text-sm text-gray-600 mb-2">Ships from: {country}</p>
