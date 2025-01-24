@@ -232,7 +232,6 @@ export default function UpdateItemModal({
             overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
         >
 
-            {/* Loading Overlay */}
             {buttonsDisabled && (
                 <div className="absolute inset-0 bg-white bg-opacity-40 flex justify-center items-center z-20">
                     <LoadingAnimation/>

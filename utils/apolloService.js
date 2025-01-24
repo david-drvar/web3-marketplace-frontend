@@ -348,6 +348,7 @@ export const fetchModerators = async () => {
         isActive
         avatarHash
         isModerator
+        moderatorFee
       }
     }
   `;

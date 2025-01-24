@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import ManageProfile from "@/components/profile/ManageProfile";
-import AdvancedSettings from "@/components/profile/AdvancedSettings";
 import ManageAddresses from "@/components/profile/ManageAddresses";
 import {fetchUserByAddress} from "@/utils/apolloService";
 import {setUser} from "@/store/slices/userSlice";
@@ -34,7 +33,6 @@ export default function Profile() {
                     ) : (
                         <div className={`flex min-h-screen bg-gray-100 ${buttonsDisabled ? 'pointer-events-none' : ''}`}>
 
-                            {/* Loading Overlay */}
                             {buttonsDisabled && (
                                 <div className="fixed inset-0 bg-white bg-opacity-50 flex justify-center items-center z-50">
                                     <LoadingAnimation/>

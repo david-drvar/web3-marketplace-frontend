@@ -339,7 +339,6 @@ export default function OrderPage() {
                     {isWeb3Enabled ? (
                         <div className={buttonsDisabled ? "pointer-events-none" : ""}>
 
-                            {/* Loading Overlay */}
                             {buttonsDisabled && (
                                 <div className="fixed inset-0 bg-white bg-opacity-50 flex justify-center items-center z-50">
                                     <LoadingAnimation/>
@@ -371,7 +370,6 @@ export default function OrderPage() {
 
                             <div className="max-w-5xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
 
-                                {/* Product Image Carousel */}
                                 <div className="p-6 flex justify-center">
                                     {photosIPFSHashes.length > 0 ? (
                                         <Slider {...sliderSettings} className="w-full max-w-3xl"> {/* Adjust max-w-3xl for the width you want */}
@@ -392,7 +390,6 @@ export default function OrderPage() {
                                     )}
                                 </div>
 
-                                {/* Product Details */}
                                 <div className="p-6">
                                     <div className="flex justify-between items-center">
                                         <h1 className="text-2xl font-bold mb-2">{title}</h1>
@@ -490,7 +487,6 @@ export default function OrderPage() {
                             }
 
 
-                            {/* Buttons */}
                             <div className="max-w-5xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden mt-5 px-5">
                                 <div className="flex justify-center mt-6 space-x-4 mb-5">
                                     <button

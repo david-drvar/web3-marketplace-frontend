@@ -35,7 +35,6 @@ const FinalizeTransactionModal = ({isVisible, onClose, onFinalize, moderatorFee}
             className="bg-white rounded-lg shadow-xl max-w-lg w-full p-6"
             overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
         >
-            {/* Loading Overlay */}
             {buttonsDisabled && (
                 <div className="absolute inset-0 bg-white bg-opacity-40 flex justify-center items-center z-20">
                     <LoadingAnimation/>
@@ -50,7 +49,7 @@ const FinalizeTransactionModal = ({isVisible, onClose, onFinalize, moderatorFee}
                     {`Your part is ${moderatorFee}% as moderator.`}
                 </p>
                 <p className="text-red-500 mb-4">
-                    {`The sum of buyer, seller, and your percentage must equal 100.`}
+                    {`The sum of buyer and seller percentages must equal 100.`}
                 </p>
 
                 <div className="mb-4">
@@ -62,7 +61,7 @@ const FinalizeTransactionModal = ({isVisible, onClose, onFinalize, moderatorFee}
                         value={percentageBuyer}
                         onChange={(e) => {
                             setPercentageBuyer(e.target.value);
-                            setSubmitDisabled(Number(e.target.value) + Number(percentageSeller) + Number(moderatorFee) !== 100);
+                            setSubmitDisabled(Number(e.target.value) + Number(percentageSeller) !== 100);
                         }}
                         className="mt-1 block w-full border-2 border-gray-300 rounded-md shadow-sm p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     />
@@ -77,7 +76,7 @@ const FinalizeTransactionModal = ({isVisible, onClose, onFinalize, moderatorFee}
                         value={percentageSeller}
                         onChange={(e) => {
                             setPercentageSeller(e.target.value);
-                            setSubmitDisabled(Number(e.target.value) + Number(percentageBuyer) + Number(moderatorFee) !== 100);
+                            setSubmitDisabled(Number(e.target.value) + Number(percentageBuyer) !== 100);
                         }}
                         className="mt-1 block w-full border-2 border-gray-300 rounded-md shadow-sm p-2 focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     />
