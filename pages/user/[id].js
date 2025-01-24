@@ -154,7 +154,6 @@ export default function UserProfile() {
                 ) : (
                     <div className="bg-gray-100 p-6">
 
-                        {/* User details */}
                         <div className="mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
                             <div className="flex items-center space-x-4 m-5">
                                 <img
@@ -181,7 +180,6 @@ export default function UserProfile() {
                                 </div>
                             </div>
 
-                            {/* Current ads */}
                             <div className="border-t p-6 space-x-4">
                                 <h2 className="text-2xl font-semibold mb-4 ml-5">Current ads</h2>
                                 {
@@ -218,7 +216,6 @@ export default function UserProfile() {
                                 }
                             </div>
 
-                            {/* Pagination buttons */}
                             <div className="flex justify-center mt-4 space-x-4 mb-5">
                                 <button
                                     onClick={handlePreviousPage}
@@ -255,7 +252,7 @@ export default function UserProfile() {
                                     <h2 className="text-xl font-semibold mb-4">Reviews</h2>
                                     {reviews.map((review, index) => (
                                         <div key={index}
-                                             className="p-6 border mt-2 border-gray-200 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 flex items-center"> {/* Added items-center */}
+                                             className="p-6 border mt-2 border-gray-200 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 flex items-center">
                                             <div className="flex-grow">
                                                 <div className="flex justify-between items-center mb-2">
                                                     <p className="text-gray-700">{review.content}</p>

@@ -137,7 +137,6 @@ export default function Home() {
                             </div>
                         )}
 
-                        {/* Pagination buttons */}
                         <div className="flex justify-center mt-4 space-x-4">
                             <button
                                 onClick={handlePreviousPage}

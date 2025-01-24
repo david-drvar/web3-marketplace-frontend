@@ -40,8 +40,7 @@ export default function ReviewItemModal({isVisible, onClose, onSubmit, transacti
             resetAndCloseForm();
         } catch (error) {
             console.log(error)
-        }
-        finally {
+        } finally {
             setButtonsDisabled(false);
         }
     };
@@ -65,7 +64,6 @@ export default function ReviewItemModal({isVisible, onClose, onSubmit, transacti
             ariaHideApp={false}  // To avoid warnings if you're not using a main element
         >
 
-            {/* Loading Overlay */}
             {buttonsDisabled && (
                 <div className="absolute inset-0 bg-white bg-opacity-40 flex justify-center items-center z-20">
                     <LoadingAnimation/>
@@ -103,7 +101,6 @@ export default function ReviewItemModal({isVisible, onClose, onSubmit, transacti
                     />
 
 
-
                     <div className="flex space-x-2">
                         <span className="text-gray-600">Rating:</span>
                         {[1, 2, 3, 4, 5].map((num) => (
@@ -129,8 +126,8 @@ export default function ReviewItemModal({isVisible, onClose, onSubmit, transacti
                             Cancel
                         </button>
                         <button
-                            className={`py-2 px-4 rounded-lg ${rating === 0 || reviewText === "" || toSelected === "select review receiver" || buttonsDisabled 
-                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
+                            className={`py-2 px-4 rounded-lg ${rating === 0 || reviewText === "" || toSelected === "select review receiver" || buttonsDisabled
+                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                                 : 'bg-blue-500 hover:bg-blue-600 text-white'
                             }`}
                             onClick={handleSubmit}

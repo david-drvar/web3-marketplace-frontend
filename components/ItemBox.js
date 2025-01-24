@@ -75,7 +75,7 @@ export default function ItemBox({id, price, currency, title, description, seller
 
                                 <div className="flex justify-between items-center mt-4">
                                     <div className="text-lg font-bold text-gray-800">
-                                        {price === "0" ? "FREE" : `${currency === "ETH" ? ethers.utils.formatEther(price) : price / 1e6} ${currency}`}
+                                        {price === "0" ? "FREE" : `${currency === "POL" ? ethers.utils.formatEther(price) : price / 1e6} ${currency}`}
                                     </div>
 
                                     {displayFavorite && !isOwnedByUser && (

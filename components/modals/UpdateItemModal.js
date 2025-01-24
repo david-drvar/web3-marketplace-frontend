@@ -27,14 +27,14 @@ export default function UpdateItemModal({
                                         }) {
     const dispatch = useNotification();
 
-    const supportedCurrencies = ["ETH", "USDC", "EURC"]
+    const supportedCurrencies = ["POL", "USDC"] // "EURC" not supported on Polygon Amoy
     const {chainId} = useMoralis();
 
 
     const [formData, setFormData] = useState({
         title: title,
         description: description,
-        price: currency === "ETH" ? ethers.utils.formatEther(price) : price / 1e6,
+        price: currency === "POL" ? ethers.utils.formatEther(price) : price / 1e6,
         currency: currency,
         condition: condition,
         category: category,
@@ -103,7 +103,7 @@ export default function UpdateItemModal({
 
         const newItemImageHashes = imageURIs.concat(hashes);
 
-        const finalPrice = formData.currency === "ETH" ? ethers.utils.parseEther(formData.price.toString()).toString() : formData.price * 1e6;
+        const finalPrice = formData.currency === "POL" ? ethers.utils.parseEther(formData.price.toString()).toString() : formData.price * 1e6;
 
         const item = {
             id: id,
@@ -232,7 +232,6 @@ export default function UpdateItemModal({
             overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
         >
 
-            {/* Loading Overlay */}
             {buttonsDisabled && (
                 <div className="absolute inset-0 bg-white bg-opacity-40 flex justify-center items-center z-20">
                     <LoadingAnimation/>

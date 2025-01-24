@@ -4,14 +4,13 @@ import {useMoralis, useWeb3Contract} from "react-moralis";
 import {useNotification} from "web3uikit";
 import marketplaceAbi from "../../constants/Marketplace.json";
 import usdcAbi from "../../constants/USDCAbi.json";
-import eurcAbi from "../../constants/EURCAbi.json";
 import {ethers} from "ethers";
 import UpdateItemModal from "@/components/modals/UpdateItemModal";
 import DeleteItemModal from "@/components/modals/DeleteItemModal";
 import BuyItemModal from "@/components/modals/BuyItemModal";
 import LoadingAnimation from "@/components/LoadingAnimation";
 import {addAddressToOrder, addNotification, getUserIdsWithItemInFavorites, isItemFavorited, toggleFavoriteItem} from "@/utils/firebaseService";
-import {fetchItemById, fetchUserProfileByAddress} from "@/utils/apolloService";
+import {fetchItemById, fetchUserByAddress, fetchUserProfileByAddress} from "@/utils/apolloService";
 import ChatPopup from "@/components/chat/ChatPopup";
 import Link from "next/link";
 import {formatDate, formatEthAddress, handleNotification, saniziteCondition} from "@/utils/utils";
@@ -128,12 +127,15 @@ export default function ItemPage() {
         }
     };
 
+    // address is shipping address
+    const handleBuyItemWithModerator = async (moderatorAddress, shippingAddress) => {
+        const moderator = await fetchUserByAddress(moderatorAddress);
+        const totalCost = Math.floor((1 + moderator.moderatorFee / 100) * price);
 
-    const handleBuyItemWithModerator = async (moderator, address) => {
         try {
-            await handleApprovals(contractAddresses[chainId].marketplaceContractAddress);
+            await handleApprovals(contractAddresses[chainId].marketplaceContractAddress, totalCost);
 
-            const finalPrice = currency === "ETH" ? price : 0;
+            const finalPrice = currency === "POL" ? totalCost : 0;
 
             const contractParams = {
                 abi: marketplaceAbi,
@@ -141,9 +143,8 @@ export default function ItemPage() {
                 functionName: "buyItem",
                 msgValue: finalPrice,
                 params: {
-                    sellerAddress: seller,
                     id: id,
-                    _moderator: moderator,
+                    _moderator: moderatorAddress,
                 },
             };
 
@@ -154,9 +155,9 @@ export default function ItemPage() {
                         handleNotification(dispatch, "info", "Waiting for confirmations...", "Transaction submitted");
 
                         tx.wait().then((finalTx) => {
-                            addAddressToOrder(id, address);
-                            addNotification(seller, `Your item ${title} has been bought by ${formatEthAddress(account)} with moderator ${formatEthAddress(moderator)}`, account, id, `order/${id}`, "item_bought")
-                            addNotification(moderator, `You have been assigned as moderator for item ${title} by ${formatEthAddress(account)}`, account, id, `order/${id}`, "item_assigned_moderator")
+                            addAddressToOrder(id, shippingAddress);
+                            addNotification(seller, `Your item ${title} has been bought by ${formatEthAddress(account)} with moderator ${formatEthAddress(moderatorAddress)}`, account, id, `order/${id}`, "item_bought")
+                            addNotification(moderatorAddress, `You have been assigned as moderator for item ${title} by ${formatEthAddress(account)}`, account, id, `order/${id}`, "item_assigned_moderator")
 
                             // notify users who have this item in their favorites
                             getUserIdsWithItemInFavorites(id).then((userIds) => {
@@ -187,9 +188,9 @@ export default function ItemPage() {
 
     const handleBuyItemWithoutModerator = async (address) => {
         try {
-            await handleApprovals(contractAddresses[chainId].escrowContractAddress);
+            await handleApprovals(contractAddresses[chainId].escrowContractAddress, price);
 
-            const finalPrice = currency === "ETH" ? price : 0;
+            const finalPrice = currency === "POL" ? price : 0;
 
             const contractParams = {
                 abi: marketplaceAbi,
@@ -197,7 +198,6 @@ export default function ItemPage() {
                 functionName: "buyItemWithoutModerator",
                 msgValue: finalPrice,
                 params: {
-                    sellerAddress: seller,
                     id: id,
                 },
             };
@@ -239,12 +239,16 @@ export default function ItemPage() {
         }
     }
 
-    const handleApprovals = async (whichContractToAllowAddress) => {
-        if (currency !== "ETH") {
-            const approvalAmount = price * 1e6;
+    const handleApprovals = async (whichContractToAllowAddress, totalCost) => {
+        if (currency !== "POL") {
+            // totalCost for purchases without moderator will be equal to item price
+            // for those with moderator it will be totalCost = (1 + moderatorFee/100) * price
+            const approvalAmount = totalCost * 1e6;
 
-            const tokenAddress = currency === "USDC" ? contractAddresses[chainId].usdcContractAddress : contractAddresses[chainId].eurcContractAddress;
-            const tokenAbi = currency === "USDC" ? usdcAbi : eurcAbi;
+            // const tokenAddress = currency === "USDC" ? contractAddresses[chainId].usdcContractAddress : contractAddresses[chainId].eurcContractAddress;
+            const tokenAddress = contractAddresses[chainId].usdcContractAddress;
+            // const tokenAbi = currency === "USDC" ? usdcAbi : eurcAbi;
+            const tokenAbi = usdcAbi;
 
             // 1. check if allowance is enough
             const allowanceParams = {
@@ -356,6 +360,8 @@ export default function ItemPage() {
                                         key={3}
                                         isVisible={showBuyModal}
                                         onClose={() => setShowBuyModal(false)}
+                                        itemPrice={price}
+                                        currency={currency}
                                         onBuyItemWithModerator={handleBuyItemWithModerator}
                                         onBuyItemWithoutModerator={handleBuyItemWithoutModerator}
                                     />
@@ -421,7 +427,7 @@ export default function ItemPage() {
                                         }
 
                                     </div>
-                                    <p className="text-gray-700 text-lg mb-4">{isGift ? "FREE" : `Price : ${currency === "ETH" ? ethers.utils.formatEther(price) : price / 1e6} ${currency}`}</p>
+                                    <p className="text-gray-700 text-lg mb-4">{isGift ? "FREE" : `Price : ${currency === "POL" ? ethers.utils.formatEther(price) : price / 1e6} ${currency}`}</p>
                                     <p className="text-sm text-gray-600 mb-2">Posted on: {formatDate(blockTimestamp * 1000)}</p>
                                     <p className="text-sm text-gray-600 mb-2">Condition: {saniziteCondition(condition)}</p>
                                     <p className="text-sm text-gray-600 mb-2">Ships from: {country}</p>

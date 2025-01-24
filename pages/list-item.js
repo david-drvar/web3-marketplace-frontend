@@ -15,7 +15,7 @@ export default function ListItem() {
     const dispatch = useNotification();
 
     const dispatchRedux = useDispatch();
-    const supportedCurrencies = ["ETH", "USDC", "EURC"]
+    const supportedCurrencies = ["POL", "USDC"] // "EURC" not supported on Polygon Amoy
     const userExists = useSelector((state) => state.user).isActive;
     const [showRegisterUserModal, setShowRegisterUserModal] = useState(false);
 
@@ -28,7 +28,7 @@ export default function ListItem() {
         description: "",
         price: "",
         condition: "0",
-        currency: "ETH",
+        currency: "POL",
         category: "",
         subcategory: "",
         country: "",
@@ -105,7 +105,7 @@ export default function ListItem() {
             return;
         }
 
-        const finalPrice = formData.currency === "ETH" ? ethers.utils.parseEther(formData.price).toString() : formData.price * 1e6;
+        const finalPrice = formData.currency === "POL" ? ethers.utils.parseEther(formData.price).toString() : formData.price * 1e6;
 
         const item = {
             id: 0,
@@ -212,7 +212,6 @@ export default function ListItem() {
                         )
                     }
 
-                    {/* Loading Overlay */}
                     {buttonsDisabled && (
                         <div className="fixed inset-0 bg-white bg-opacity-50 flex justify-center items-center z-50">
                             <LoadingAnimation/>

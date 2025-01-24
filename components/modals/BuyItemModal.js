@@ -4,8 +4,9 @@ import {fetchModerators} from "@/utils/apolloService";
 import {getUserAddresses} from "@/utils/firebaseService";
 import {useMoralis} from "react-moralis";
 import LoadingAnimation from "@/components/LoadingAnimation";
+import {ethers} from "ethers";
 
-export default function BuyItemModal({isVisible, onClose, onBuyItemWithModerator, onBuyItemWithoutModerator}) {
+export default function BuyItemModal({isVisible, onClose, itemPrice, currency, onBuyItemWithModerator, onBuyItemWithoutModerator}) {
     const [useModerator, setUseModerator] = useState(false);
     const [selectedModerator, setSelectedModerator] = useState(null);
     const [moderators, setModerators] = useState([]);
@@ -16,6 +17,8 @@ export default function BuyItemModal({isVisible, onClose, onBuyItemWithModerator
     const [selectedAddress, setSelectedAddress] = useState(-1);
 
     const [buttonsDisabled, setButtonsDisabled] = useState(false);
+
+    const [totalPrice, setTotalPrice] = useState(currency === "POL" ? ethers.utils.formatEther(itemPrice) : itemPrice / 1e6);
 
     useEffect(() => {
         fetchModerators().then((data) => setModerators(data));
@@ -34,8 +37,7 @@ export default function BuyItemModal({isVisible, onClose, onBuyItemWithModerator
             handleClose();
         } catch (error) {
             console.log(error)
-        }
-        finally {
+        } finally {
 
             setButtonsDisabled(false);
         }
@@ -49,6 +51,18 @@ export default function BuyItemModal({isVisible, onClose, onBuyItemWithModerator
         onClose();
     }
 
+    const calculateTotalPrice = (moderatorId) => {
+        const moderator = moderators.find((mod) => mod.id === moderatorId);
+        if (currency === "POL") {
+            const totalCost = parseFloat(ethers.utils.formatEther(BigInt(Math.floor((1 + moderator.moderatorFee / 100) * itemPrice)))).toFixed(4);
+            setTotalPrice(totalCost);
+        } else {
+            const totalCost = parseFloat((1 + moderator.moderatorFee / 100) * itemPrice / 1e6).toFixed(4);
+            setTotalPrice(totalCost);
+        }
+
+    };
+
     return (
         <Modal
             appElement={document.getElementById('__next')}
@@ -57,7 +71,6 @@ export default function BuyItemModal({isVisible, onClose, onBuyItemWithModerator
             overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
         >
 
-            {/* Loading Overlay */}
             {buttonsDisabled && (
                 <div className="absolute inset-0 bg-white bg-opacity-40 flex justify-center items-center z-20">
                     <LoadingAnimation/>
@@ -74,7 +87,11 @@ export default function BuyItemModal({isVisible, onClose, onBuyItemWithModerator
                     <input
                         type="checkbox"
                         checked={useModerator}
-                        onChange={(e) => setUseModerator(e.target.checked)}
+                        onChange={(e) => {
+                            setTotalPrice(currency === "POL" ? ethers.utils.formatEther(itemPrice) : itemPrice / 1e6);
+                            setSelectedModerator(null);
+                            setUseModerator(e.target.checked);
+                        }}
                         className="w-5 h-5"
                     />
                 </div>
@@ -96,7 +113,10 @@ export default function BuyItemModal({isVisible, onClose, onBuyItemWithModerator
                                         name="moderator"
                                         value={moderator.id}
                                         checked={selectedModerator === moderator.id}
-                                        onChange={() => setSelectedModerator(moderator.id)}
+                                        onChange={() => {
+                                            setSelectedModerator(moderator.id);
+                                            calculateTotalPrice(moderator.id);
+                                        }}
                                         className="mr-3 h-4 w-4"
                                     />
                                     <img
@@ -107,7 +127,8 @@ export default function BuyItemModal({isVisible, onClose, onBuyItemWithModerator
                                     <label htmlFor={moderator.id} className="flex-1 cursor-pointer">
                                         <div className="font-semibold">{`${moderator.firstName} ${moderator.lastName}`}</div>
                                         <div className="text-gray-600">@{moderator.username}</div>
-                                        <div className="text-gray-500 text-sm">{moderator.description}</div>
+                                        <div className="text-gray-500 text-sm">Description: {moderator.description}</div>
+                                        <div className="text-gray-500 text-sm font-bold">Moderator fee: {moderator.moderatorFee}%</div>
                                     </label>
                                 </li>
                             ))}
@@ -166,32 +187,37 @@ export default function BuyItemModal({isVisible, onClose, onBuyItemWithModerator
                     </div>
                 )}
 
-                {/* Buttons */}
-                <div className="flex justify-end gap-4">
-                    {/* Cancel Button */}
-                    <button
-                        className={`px-4 py-2 rounded-lg ${
-                            buttonsDisabled ? "bg-gray-200 text-gray-500 cursor-not-allowed" : "bg-gray-300 text-gray-800"
-                        }`}
-                        onClick={handleClose}
-                        disabled={buttonsDisabled}
-                    >
-                        Cancel
-                    </button>
+                <div className="flex justify-between items-center mt-6">
+                    {/* Total Price Section */}
+                    <div className="text-lg font-bold text-gray-800">
+                        Total Price: <span className="text-blue-500">{totalPrice} {currency}</span>
+                    </div>
 
-                    {/* Buy Item Button */}
-                    <button
-                        className={`px-4 py-2 rounded-lg ${
-                            (useModerator && !selectedModerator) || selectedAddress === -1 || buttonsDisabled
-                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                : "bg-blue-500 hover:bg-blue-600 text-white"
-                        }`}
-                        disabled={(useModerator && !selectedModerator) || selectedAddress === -1 || buttonsDisabled}
-                        onClick={handleBuyItem}
-                    >
-                        Buy Item
-                    </button>
+                    <div className="flex gap-4">
+                        <button
+                            className={`px-4 py-2 rounded-lg ${
+                                buttonsDisabled ? "bg-gray-200 text-gray-500 cursor-not-allowed" : "bg-gray-300 text-gray-800"
+                            }`}
+                            onClick={handleClose}
+                            disabled={buttonsDisabled}
+                        >
+                            Cancel
+                        </button>
+
+                        <button
+                            className={`px-4 py-2 rounded-lg ${
+                                (useModerator && !selectedModerator) || selectedAddress === -1 || buttonsDisabled
+                                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                    : "bg-blue-500 hover:bg-blue-600 text-white"
+                            }`}
+                            disabled={(useModerator && !selectedModerator) || selectedAddress === -1 || buttonsDisabled}
+                            onClick={handleBuyItem}
+                        >
+                            Buy Item
+                        </button>
+                    </div>
                 </div>
+
             </div>
 
         </Modal>
