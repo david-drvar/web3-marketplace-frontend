@@ -6,6 +6,7 @@ import {setUser} from "@/store/slices/userSlice";
 import {setLastSeenForUser} from "@/utils/firebaseService";
 import Modal from "react-modal";
 import {contractAddresses} from "@/constants/constants";
+import Link from "next/link";
 
 const AccountChangedListener = () => {
     const dispatch = useDispatch();
@@ -43,9 +44,23 @@ const AccountChangedListener = () => {
                 <p className="text-lg font-semibold text-gray-800 mb-4">
                     Unsupported Network
                 </p>
-                <p className="text-sm text-gray-600 mb-6">
-                    Only Polygon Amoy testnet is supported. Please switch
-                    network.
+                <p className="text-gray-600 mb-6">
+                    Only Polygon Amoy testnet is supported. <br/>
+                    Please switch network. <br/>
+                    You can add Polygon Amoy testnet
+                    <Link legacyBehavior
+                          href={`https://chainlist.org/chain/80002`}
+                          passHref
+                    >
+                        <a
+                            className="text-blue-500 hover:underline hover:text-blue-700 cursor-pointer"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            {' here'}
+                        </a>
+                    </Link>
+                    .
                 </p>
                 <div className="flex justify-center">
                     <button
