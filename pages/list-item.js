@@ -148,7 +148,9 @@ export default function ListItem() {
                     // console.log(Number(finalTx.logs[0].topics[1]))
 
                     let id = BigInt(finalTx.logs[0].topics[1]).toString();
-                    router.push({pathname: `/item/${id}`});
+                    setTimeout(() => {
+                        router.push({pathname: `/item/${id}`});
+                    }, 1000);
                 });
             },
             onError: (error) => {

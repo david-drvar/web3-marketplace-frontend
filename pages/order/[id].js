@@ -217,7 +217,9 @@ export default function OrderPage() {
                     addNotification(transaction.seller === account ? transaction.buyer : transaction.seller, `${transaction.seller === account ? "Seller" : "Buyer"} approved order ${title}`, account, id, `order/${id}`, "order_approved")
                     setApproveButtonDisabled(true);
                     setButtonsDisabled(false);
-                    setRefreshPage(refreshPage + 1);
+                    setTimeout(() => {
+                        setRefreshPage(refreshPage + 1);
+                    }, 1000);
                 })
             },
             onError: (error) => {
@@ -250,7 +252,9 @@ export default function OrderPage() {
                     addNotification(transaction.moderator, `${transaction.seller === account ? "Seller" : "Buyer"} disputed order ${title}`, account, id, `order/${id}`, "order_disputed")
                     setDisputeButtonDisabled(true);
                     setButtonsDisabled(false);
-                    setRefreshPage(refreshPage + 1);
+                    setTimeout(() => {
+                        setRefreshPage(refreshPage + 1);
+                    }, 1000);
                 })
             },
             onError: (error) => {
@@ -283,7 +287,9 @@ export default function OrderPage() {
                         addNotification(transaction.buyer, `Moderator ${formatEthAddress(account)} finalized your order ${title}`, account, id, `order/${id}`, "order_finalized")
                         handleNotification(dispatch, "success", "Order finalized successfully", "Order finalized");
                         resolve(finalTx);
-                        setRefreshPage(refreshPage + 1);
+                        setTimeout(() => {
+                            setRefreshPage(refreshPage + 1);
+                        }, 1000);
                     })
                 },
                 onError: (error) => {
@@ -317,7 +323,9 @@ export default function OrderPage() {
                         handleNotification(dispatch, "success", "User reviewed successfully", "Review finalized");
                         addNotification(toWhom, `${transaction.seller === account ? "Seller" : transaction.buyer === account ? "Buyer" : "Moderator"} submitted review for you order ${title}`, account, id, `order/${id}`, "review_submitted")
                         resolve(finalTx);
-                        setRefreshPage(refreshPage + 1);
+                        setTimeout(() => {
+                            setRefreshPage(refreshPage + 1);
+                        }, 1000);
                     })
                 },
                 onError: (error) => {

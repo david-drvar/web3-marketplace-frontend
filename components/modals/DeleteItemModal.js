@@ -36,7 +36,9 @@ export default function DeleteItemModal({id, onClose, isVisible}) {
                     setButtonsDisabled(false);
                     onClose();
                     handleNotification(dispatch, "success", "Item deleted successfully!", "Item deleted");
-                    router.push("/");
+                    setTimeout(() => {
+                        router.push("/");
+                    }, 1000);
                 })
             },
             onError: (error) => {

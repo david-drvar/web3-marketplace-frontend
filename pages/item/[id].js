@@ -168,7 +168,9 @@ export default function ItemPage() {
                             })
                             handleNotification(dispatch, "success", "Item purchase confirmed", "Item Bought");
                             resolve(finalTx);
-                            router.push({pathname: `/order/${id}`});
+                            setTimeout(() => {
+                                router.push({pathname: `/order/${id}`});
+                            }, 1000);
                         })
                     },
                     onError: (error) => {
@@ -221,7 +223,9 @@ export default function ItemPage() {
 
                             handleNotification(dispatch, "success", "Item purchase confirmed", "Item Bought");
                             resolve(finalTx);
-                            router.push({pathname: `/order/${id}`});
+                            setTimeout(() => {
+                                router.push({pathname: `/order/${id}`});
+                            }, 1000);
                         })
                     },
                     onError: (error) => {
