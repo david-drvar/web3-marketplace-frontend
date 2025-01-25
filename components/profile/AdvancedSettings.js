@@ -1,18 +1,19 @@
 import React, {useState} from 'react';
 import {useNotification} from "web3uikit";
-import {useWeb3Contract} from "react-moralis";
-import {useDispatch, useSelector} from "react-redux";
+import {useMoralis, useWeb3Contract} from "react-moralis";
+import {useDispatch} from "react-redux";
 import usersAbi from "@/constants/Users.json";
 import {clearUser} from "@/store/slices/userSlice";
+import {contractAddresses} from "@/constants/constants";
+import {handleNotification} from "@/utils/utils";
 
 const AdvancedSettings = () => {
-    // State to control modal visibility
     const [isModalOpen, setIsModalOpen] = useState(false);
     const dispatch = useNotification();
     const {runContractFunction} = useWeb3Contract();
-    const usersContractAddress = useSelector((state) => state.contract["usersContractAddress"]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const dispatchState = useDispatch();
+    const {chainId} = useMoralis();
 
     const openModal = () => {
         setIsModalOpen(true);
@@ -21,57 +22,30 @@ const AdvancedSettings = () => {
     const handleDeleteProfile = async () => {
         const callParams = {
             abi: usersAbi,
-            contractAddress: usersContractAddress,
+            contractAddress: contractAddresses[chainId].usersContractAddress,
             functionName: "deleteProfile",
         };
 
         await runContractFunction({
             params: callParams,
             onSuccess: (tx) => {
-                handleDeleteWaitingConfirmation();
-                tx.wait().then((finalTx) => {
-                    handleDeleteSuccess();
+                handleNotification(dispatch, "info", "Waiting for confirmations...", "Transaction submitted");
+                tx.wait().then((_) => {
+                    handleNotification(dispatch, "success", "User deleted successfully!", "User deleted");
                     setIsSubmitting(false);
                     setIsModalOpen(false);
                     dispatchState(clearUser())
                 });
             },
             onError: (error) => {
-                handleUserError(error);
+                console.error("Error", error);
+                handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred. Please inspect the logs in console", "User delete error");
                 setIsSubmitting(false);
                 setIsModalOpen(false);
             },
         });
         setIsModalOpen(false);
     };
-
-
-    async function handleDeleteWaitingConfirmation() {
-        dispatch({
-            type: "info",
-            message: "Transaction submitted. Waiting for confirmations.",
-            title: "Waiting for confirmations",
-            position: "topR",
-        });
-    }
-
-    async function handleDeleteSuccess() {
-        dispatch({
-            type: "success",
-            message: "User deleted successfully!",
-            title: "User deleted",
-            position: "topR",
-        });
-    }
-
-    async function handleUserError(error) {
-        dispatch({
-            type: "error",
-            message: `error`, //todo fix error.data.message not always accessible, depends on error if it is from metamask or contract itself
-            title: "User delete error",
-            position: "topR",
-        });
-    }
 
     return (
         <div className="flex justify-center items-center h-full">

@@ -1,13 +1,7 @@
 import {useMoralis} from "react-moralis";
-import networkMapping from "../constants/networkMapping.json";
 import ItemBox from "@/components/ItemBox";
 import {useEffect, useState} from "react";
 import {useDispatch} from "react-redux";
-import {
-    setEscrowContractAddress,
-    setMarketplaceContractAddress,
-    setUsersContractAddress
-} from "@/store/slices/contractSlice";
 import LoadingAnimation from "@/components/LoadingAnimation";
 import {fetchItemsPaginated} from "@/utils/apolloService";
 import SearchFilterBar from "@/components/SearchFilterBar";
@@ -15,11 +9,7 @@ import {getFavoriteItemsIds} from "@/utils/firebaseService";
 
 
 export default function Home() {
-    const {chainId, isWeb3Enabled, account} = useMoralis();
-    const chainString = chainId ? parseInt(chainId).toString() : null;
-    const marketplaceContractAddress = chainId ? networkMapping[chainString].Marketplace[0] : null;
-    const usersContractAddress = chainId ? networkMapping[chainString].Users[0] : null;
-    const escrowContractAddress = chainId ? networkMapping[chainString].Escrow[0] : null;
+    const {isWeb3Enabled, account} = useMoralis();
 
     const dispatch = useDispatch();
 
@@ -56,20 +46,9 @@ export default function Home() {
     }
 
     useEffect(() => {
-        if (marketplaceContractAddress && usersContractAddress && escrowContractAddress) {
-            dispatch(setMarketplaceContractAddress(marketplaceContractAddress))
-            dispatch(setUsersContractAddress(usersContractAddress))
-            dispatch(setEscrowContractAddress(escrowContractAddress))
-        }
-
         loadData();
         loadNextPage();
-    }, [marketplaceContractAddress, usersContractAddress, escrowContractAddress, dispatch, account]);
-
-    useEffect(() => {
-        loadData();
-        loadNextPage();
-    }, [page]);
+    }, [dispatch, account, page]);
 
     const handleNextPage = () => {
         setPage((prevPage) => prevPage + 1);
@@ -158,7 +137,6 @@ export default function Home() {
                             </div>
                         )}
 
-                        {/* Pagination buttons */}
                         <div className="flex justify-center mt-4 space-x-4">
                             <button
                                 onClick={handlePreviousPage}

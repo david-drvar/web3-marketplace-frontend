@@ -154,7 +154,6 @@ export default function MyOrders() {
                             </div>
                         )}
 
-                        {/* Pagination buttons */}
                         <div className="flex justify-center mt-4 space-x-4">
                             <button
                                 onClick={handlePreviousPage}

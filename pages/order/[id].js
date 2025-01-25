@@ -5,7 +5,6 @@ import {useNotification} from "web3uikit";
 import escrowAbi from "../../constants/Escrow.json";
 import usersAbi from "../../constants/Users.json";
 import {ethers} from "ethers";
-import {useSelector} from "react-redux";
 import ChatPopup from "@/components/chat/ChatPopup";
 import {fetchAllReviewsForItem, fetchItemById, fetchTransactionByItemId, fetchUserProfileByAddress} from "@/utils/apolloService";
 import {formatDate, formatEthAddress, handleNotification, renderStars, saniziteCondition} from "@/utils/utils";
@@ -16,6 +15,7 @@ import ReviewItemModal from "@/components/modals/ReviewItemModal";
 import Slider from "react-slick";
 import RatingDisplay from "@/components/RatingDisplay";
 import Link from "next/link";
+import {contractAddresses} from "@/constants/constants";
 
 export default function OrderPage() {
     const {isWeb3Enabled, account} = useMoralis();
@@ -46,9 +46,6 @@ export default function OrderPage() {
     const [disputeButtonDisabled, setDisputeButtonDisabled] = useState(true);
 
     const {runContractFunction} = useWeb3Contract();
-    const marketplaceContractAddress = useSelector((state) => state.contract["marketplaceContractAddress"]);
-    const escrowContractAddress = useSelector((state) => state.contract["escrowContractAddress"]);
-    const usersContractAddress = useSelector((state) => state.contract["usersContractAddress"]);
 
     const [transaction, setTransaction] = useState({});
     const [address, setAddress] = useState({});
@@ -62,6 +59,9 @@ export default function OrderPage() {
 
     const [isLoading, setIsLoading] = useState(true);
     const [refreshPage, setRefreshPage] = useState(0);
+
+    const [buttonsDisabled, setButtonsDisabled] = useState(false);
+    const {chainId} = useMoralis();
 
     const sliderSettings = {
         dots: true,
@@ -198,9 +198,10 @@ export default function OrderPage() {
     };
 
     const handleApprove = async () => {
+        setButtonsDisabled(true);
         const contractParams = {
             abi: escrowAbi,
-            contractAddress: escrowContractAddress,
+            contractAddress: contractAddresses[chainId].escrowContractAddress,
             functionName: `approve`,
             params: {
                 _itemId: id,
@@ -210,21 +211,30 @@ export default function OrderPage() {
         await runContractFunction({
             params: contractParams,
             onSuccess: (tx) => {
-                handleNotification(dispatch, "info", "Transaction submitted. Waiting for confirmations.", "Waiting for confirmations");
+                handleNotification(dispatch, "info", "Waiting for confirmations...", "Transaction submitted");
                 tx.wait().then((_) => {
-                    handleNotification(dispatch, "success", "Item approved successfully", "Item confirmed");
+                    handleNotification(dispatch, "success", "Order approved successfully", "Order confirmed");
                     addNotification(transaction.seller === account ? transaction.buyer : transaction.seller, `${transaction.seller === account ? "Seller" : "Buyer"} approved order ${title}`, account, id, `order/${id}`, "order_approved")
                     setApproveButtonDisabled(true);
+                    setButtonsDisabled(false);
+                    setTimeout(() => {
+                        setRefreshPage(refreshPage + 1);
+                    }, 1000);
                 })
             },
-            onError: (error) => handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Approval error"),
+            onError: (error) => {
+                console.error("Error", error);
+                handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred. Please inspect the logs in console", "Item approval error");
+                setButtonsDisabled(false);
+            },
         });
     }
 
     const handleDispute = async () => {
+        setButtonsDisabled(true);
         const contractParams = {
             abi: escrowAbi,
-            contractAddress: escrowContractAddress,
+            contractAddress: contractAddresses[chainId].escrowContractAddress,
             functionName: `raiseDispute`,
             params: {
                 _itemId: id,
@@ -235,15 +245,23 @@ export default function OrderPage() {
         await runContractFunction({
             params: contractParams,
             onSuccess: (tx) => {
-                handleNotification(dispatch, "info", "Transaction submitted. Waiting for confirmations.", "Waiting for confirmations");
+                handleNotification(dispatch, "info", "Waiting for confirmations...", "Transaction submitted");
                 tx.wait().then((_) => {
-                    handleNotification(dispatch, "success", "Item disputed successfully", "Item disputed");
+                    handleNotification(dispatch, "success", "Order disputed successfully", "Order disputed");
                     addNotification(transaction.seller === account ? transaction.buyer : transaction.seller, `${transaction.seller === account ? "Seller" : "Buyer"} disputed order ${title}`, account, id, `order/${id}`, "order_disputed")
                     addNotification(transaction.moderator, `${transaction.seller === account ? "Seller" : "Buyer"} disputed order ${title}`, account, id, `order/${id}`, "order_disputed")
                     setDisputeButtonDisabled(true);
+                    setButtonsDisabled(false);
+                    setTimeout(() => {
+                        setRefreshPage(refreshPage + 1);
+                    }, 1000);
                 })
             },
-            onError: (error) => handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Dispute error"),
+            onError: (error) => {
+                console.error("Error", error);
+                handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred - Please inspect the logs in console", "Dispute error");
+                setButtonsDisabled(false);
+            },
         });
     }
 
@@ -251,7 +269,7 @@ export default function OrderPage() {
     const handleFinalize = async (percentageSeller, percentageBuyer) => {
         const contractParams = {
             abi: escrowAbi,
-            contractAddress: escrowContractAddress,
+            contractAddress: contractAddresses[chainId].escrowContractAddress,
             functionName: `finalizeTransactionByModerator`,
             params: {
                 _itemId: id,
@@ -259,26 +277,34 @@ export default function OrderPage() {
                 percentageBuyer: percentageBuyer,
             },
         };
-
-        await runContractFunction({
-            params: contractParams,
-            onSuccess: (tx) => {
-                handleNotification(dispatch, "info", "Transaction submitted. Waiting for confirmations.", "Waiting for confirmations");
-                tx.wait().then((_) => {
-                    addNotification(transaction.seller, `Moderator ${formatEthAddress(account)} finalized your order ${title}`, account, id, `order/${id}`, "order_finalized")
-                    addNotification(transaction.buyer, `Moderator ${formatEthAddress(account)} finalized your order ${title}`, account, id, `order/${id}`, "order_finalized")
-                    handleNotification(dispatch, "success", "Item finalized successfully", "Item finalized");
-                    setShowFinalizeModal(false);
-                })
-            },
-            onError: (error) => handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Finalize error"),
+        return new Promise((resolve, reject) => {
+            runContractFunction({
+                params: contractParams,
+                onSuccess: (tx) => {
+                    handleNotification(dispatch, "info", "Waiting for confirmations.", "Transaction submitted");
+                    tx.wait().then((finalTx) => {
+                        addNotification(transaction.seller, `Moderator ${formatEthAddress(account)} finalized your order ${title}`, account, id, `order/${id}`, "order_finalized")
+                        addNotification(transaction.buyer, `Moderator ${formatEthAddress(account)} finalized your order ${title}`, account, id, `order/${id}`, "order_finalized")
+                        handleNotification(dispatch, "success", "Order finalized successfully", "Order finalized");
+                        resolve(finalTx);
+                        setTimeout(() => {
+                            setRefreshPage(refreshPage + 1);
+                        }, 1000);
+                    })
+                },
+                onError: (error) => {
+                    console.error("Error", error);
+                    handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred - Please inspect the logs in console", "Finalize error");
+                    reject(error);
+                },
+            });
         });
     }
 
     const handleSubmitReview = async (content, rating, toWhom) => {
         const contractParams = {
             abi: usersAbi,
-            contractAddress: usersContractAddress,
+            contractAddress: contractAddresses[chainId].usersContractAddress,
             functionName: `createReview`,
             params: {
                 itemId: id,
@@ -288,18 +314,26 @@ export default function OrderPage() {
             },
         };
 
-        await runContractFunction({
-            params: contractParams,
-            onSuccess: (tx) => {
-                handleNotification(dispatch, "info", "Review submitted. Waiting for confirmations.", "Waiting for confirmations");
-                tx.wait().then((_) => {
-                    handleNotification(dispatch, "success", "User reviewed successfully", "Review finalized");
-                    addNotification(toWhom, `${transaction.seller === account ? "Seller" : transaction.buyer === account ? "Buyer" : "Moderator"} submitted review for you order ${title}`, account, id, `order/${id}`, "review_submitted")
-                    setShowReviewItemModal(false);
-                    setRefreshPage(refreshPage + 1);
-                })
-            },
-            onError: (error) => handleNotification(dispatch, "error", error?.message ? error.message : "Insufficient funds", "Finalize error"),
+        return new Promise((resolve, reject) => {
+            runContractFunction({
+                params: contractParams,
+                onSuccess: (tx) => {
+                    handleNotification(dispatch, "info", "Waiting for confirmations...", "Review submitted");
+                    tx.wait().then((finalTx) => {
+                        handleNotification(dispatch, "success", "User reviewed successfully", "Review finalized");
+                        addNotification(toWhom, `${transaction.seller === account ? "Seller" : transaction.buyer === account ? "Buyer" : "Moderator"} submitted review for you order ${title}`, account, id, `order/${id}`, "review_submitted")
+                        resolve(finalTx);
+                        setTimeout(() => {
+                            setRefreshPage(refreshPage + 1);
+                        }, 1000);
+                    })
+                },
+                onError: (error) => {
+                    console.error("Error", error);
+                    reject(error);
+                    handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred - Please inspect the logs in console", "Finalize error");
+                },
+            });
         });
     }
 
@@ -311,12 +345,22 @@ export default function OrderPage() {
             ) : (
                 <div className="bg-gray-100 p-6">
                     {isWeb3Enabled ? (
-                        <div>
-                            <FinalizeTransactionModal
-                                isVisible={showFinalizeModal}
-                                onClose={() => setShowFinalizeModal(false)}
-                                onFinalize={handleFinalize}
-                            />
+                        <div className={buttonsDisabled ? "pointer-events-none" : ""}>
+
+                            {buttonsDisabled && (
+                                <div className="fixed inset-0 bg-white bg-opacity-50 flex justify-center items-center z-50">
+                                    <LoadingAnimation/>
+                                </div>
+                            )}
+
+                            {showFinalizeModal &&
+                                <FinalizeTransactionModal
+                                    isVisible={showFinalizeModal}
+                                    onClose={() => setShowFinalizeModal(false)}
+                                    onFinalize={handleFinalize}
+                                    moderatorFee={transaction.moderatorFee}
+                                />
+                            }
 
                             {showReviewItemModal && <ReviewItemModal
                                 isVisible={showReviewItemModal}
@@ -334,7 +378,6 @@ export default function OrderPage() {
 
                             <div className="max-w-5xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden">
 
-                                {/* Product Image Carousel */}
                                 <div className="p-6 flex justify-center">
                                     {photosIPFSHashes.length > 0 ? (
                                         <Slider {...sliderSettings} className="w-full max-w-3xl"> {/* Adjust max-w-3xl for the width you want */}
@@ -355,12 +398,11 @@ export default function OrderPage() {
                                     )}
                                 </div>
 
-                                {/* Product Details */}
                                 <div className="p-6">
                                     <div className="flex justify-between items-center">
                                         <h1 className="text-2xl font-bold mb-2">{title}</h1>
                                     </div>
-                                    <p className="text-gray-700 text-lg mb-4">{isGift ? "FREE" : `Price : ${currency === "ETH" ? ethers.utils.formatEther(price) : price / 1e6} ${currency}`}</p>
+                                    <p className="text-gray-700 text-lg mb-4">{isGift ? "FREE" : `Price : ${currency === "POL" ? ethers.utils.formatEther(price) : price / 1e6} ${currency}`}</p>
                                     <p className="text-sm text-gray-600 mb-2">Posted on: {formatDate(blockTimestamp * 1000)}</p>
                                     <p className="text-sm text-gray-600 mb-2">Condition: {saniziteCondition(condition)}</p>
                                     <p className="text-sm text-gray-600 mb-2">Ships from: {country}</p>
@@ -453,7 +495,6 @@ export default function OrderPage() {
                             }
 
 
-                            {/* Buttons */}
                             <div className="max-w-5xl mx-auto bg-white rounded-lg shadow-lg overflow-hidden mt-5 px-5">
                                 <div className="flex justify-center mt-6 space-x-4 mb-5">
                                     <button
@@ -466,10 +507,10 @@ export default function OrderPage() {
 
                                     {(roleInTransaction === "Buyer" || roleInTransaction === "Seller") && (
                                         <button
-                                            disabled={approveButtonDisabled}
+                                            disabled={approveButtonDisabled || buttonsDisabled}
                                             id="approveButton"
                                             className={`font-semibold py-2 px-4 rounded-lg w-full ${
-                                                approveButtonDisabled
+                                                approveButtonDisabled || buttonsDisabled
                                                     ? "bg-blue-300 text-white cursor-not-allowed" // Disabled style
                                                     : "bg-blue-600 text-white hover:bg-blue-700 cursor-pointer" // Enabled style
                                             }`}
@@ -481,10 +522,10 @@ export default function OrderPage() {
 
                                     {(roleInTransaction === "Buyer" || roleInTransaction === "Seller") && (
                                         <button
-                                            disabled={disputeButtonDisabled}
+                                            disabled={disputeButtonDisabled || buttonsDisabled}
                                             id="disputeButton"
                                             className={`font-semibold py-2 px-4 rounded-lg w-full ${
-                                                disputeButtonDisabled
+                                                disputeButtonDisabled || buttonsDisabled
                                                     ? "bg-red-300 text-white cursor-not-allowed" // Disabled style
                                                     : "bg-red-500 hover:bg-red-600 text-white cursor-pointer" // Enabled style
                                             }`}
@@ -598,7 +639,7 @@ export default function OrderPage() {
 }
 
 
-export async function getServerSideProps(context) {
+export async function getServerSideProps(_) {
     return {
         props: {},
     };

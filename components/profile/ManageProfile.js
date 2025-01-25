@@ -3,11 +3,12 @@ import {useNotification} from "web3uikit";
 import {useMoralis, useWeb3Contract} from "react-moralis";
 import {useDispatch, useSelector} from "react-redux";
 import usersAbi from "@/constants/Users.json";
-import {getCountries, removePinnedImage, uploadFile} from "@/utils/utils";
+import {getCountries, handleNotification, removePinnedImage, uploadFile} from "@/utils/utils";
 import {setUser} from "@/store/slices/userSlice";
 import LoadingAnimation from "@/components/LoadingAnimation";
+import {contractAddresses} from "@/constants/constants";
 
-export default function ManageProfile() {
+export default function ManageProfile({setButtonsDisabledTrue, setButtonsDisabledFalse}) {
     const {isWeb3Enabled} = useMoralis();
 
     const user = useSelector((state) => state.user);
@@ -27,13 +28,13 @@ export default function ManageProfile() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const dispatch = useNotification();
     const {runContractFunction} = useWeb3Contract();
-    const usersContractAddress = useSelector((state) => state.contract["usersContractAddress"]);
     const dispatchState = useDispatch();
     const [avatarImage, setAvatarImage] = useState(null);
     const [imageURI, setImageURI] = useState("");
     const [imagePreview, setImagePreview] = useState(null); // State for image preview
 
     const [isLoading, setIsLoading] = useState(true);
+    const {chainId} = useMoralis();
 
 
     useEffect(() => {
@@ -90,6 +91,7 @@ export default function ManageProfile() {
     };
 
     const handleSubmit = async (e) => {
+        setButtonsDisabledTrue();
         e.preventDefault();
         if (!validateEmail(formData.email)) {
             setEmailError('Invalid email format');
@@ -114,7 +116,7 @@ export default function ManageProfile() {
 
         const callParams = {
             abi: usersAbi,
-            contractAddress: usersContractAddress,
+            contractAddress: contractAddresses[chainId].usersContractAddress,
             functionName: userExists ? "updateProfile" : "createProfile",
             params: {
                 _username: formData.username,
@@ -125,16 +127,16 @@ export default function ManageProfile() {
                 _email: formData.email,
                 _avatarHash: avatarImageHash === "" && userExists ? user.avatarHash : avatarImageHash,
                 _isModerator: formData.isModerator,
-                _moderatorFee: formData.moderatorFee
+                _moderatorFee: formData.isModerator ? formData.moderatorFee : 0
             },
         };
 
         await runContractFunction({
             params: callParams,
             onSuccess: (tx) => {
-                handleListWaitingConfirmation();
-                tx.wait().then((finalTx) => {
-                    handleUserSuccess();
+                handleNotification(dispatch, "info", "Waiting for confirmations...", "Transaction submitted");
+                tx.wait().then((_) => {
+                    handleNotification(dispatch, "success", userExists ? "User updated successfully!" : "User created successfully!", userExists ? "User updated" : "User created");
                     setIsSubmitting(false);
                     dispatchState(setUser({
                         username: formData.username,
@@ -148,44 +150,19 @@ export default function ManageProfile() {
                         moderatorFee: formData.moderatorFee,
                         avatarHash: avatarImageHash
                     }));
+                    setButtonsDisabledFalse();
                     setImageURI(`${process.env.NEXT_PUBLIC_GATEWAY_URL}/ipfs/${avatarImageHash}?pinataGatewayToken=${process.env.NEXT_PUBLIC_GATEWAY_TOKEN}`);
                     setUserExists(true);
                 });
             },
             onError: (error) => {
-                handleUserError(error);
+                console.error("Error", error);
+                handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred. Please inspect the logs in console", userExists ? "User update error" : "User creation error");
                 setIsSubmitting(false);
+                setButtonsDisabledFalse();
             },
         });
     };
-
-    async function handleListWaitingConfirmation() {
-        dispatch({
-            type: "info",
-            message: "Transaction submitted. Waiting for confirmations.",
-            title: "Waiting for confirmations",
-            position: "topR",
-        });
-    }
-
-    async function handleUserSuccess() {
-        dispatch({
-            type: "success",
-            message: userExists ? "User updated successfully!" : "User created successfully!",
-            title: userExists ? "User updated" : "User created",
-            position: "topR",
-        });
-    }
-
-    async function handleUserError(error) {
-        console.log(error);
-        dispatch({
-            type: "error",
-            message: userExists ? "Error while updating user. Please try again" : "Error while creating user. Please try again",
-            title: userExists ? "User update error" : "User creation error",
-            position: "topR",
-        });
-    }
 
     return (
         <>
@@ -210,7 +187,7 @@ export default function ManageProfile() {
                         }
                     </h1>
                     <form onSubmit={handleSubmit} className="space-y-3">
-                    <div>
+                        <div>
                             <label htmlFor="username" className="block text-sm font-medium text-gray-700">
                                 Username
                             </label>

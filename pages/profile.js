@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import ManageProfile from "@/components/profile/ManageProfile";
-import AdvancedSettings from "@/components/profile/AdvancedSettings";
 import ManageAddresses from "@/components/profile/ManageAddresses";
 import {fetchUserByAddress} from "@/utils/apolloService";
 import {setUser} from "@/store/slices/userSlice";
@@ -16,6 +15,11 @@ export default function Profile() {
     const dispatch = useDispatch();
     const [isLoading, setIsLoading] = useState(true);
 
+    const [buttonsDisabled, setButtonsDisabled] = useState(false);
+
+    const setButtonsDisabledTrue = () => setButtonsDisabled(true);
+    const setButtonsDisabledFalse = () => setButtonsDisabled(false);
+
     useEffect(() => {
         fetchUserByAddress(account).then((data) => dispatch(setUser(data))).then(() => setIsLoading(false));
     }, [account]);
@@ -27,7 +31,14 @@ export default function Profile() {
                     isLoading ? (
                         <LoadingAnimation/>
                     ) : (
-                        <div className="flex min-h-screen bg-gray-100">
+                        <div className={`flex min-h-screen bg-gray-100 ${buttonsDisabled ? 'pointer-events-none' : ''}`}>
+
+                            {buttonsDisabled && (
+                                <div className="fixed inset-0 bg-white bg-opacity-50 flex justify-center items-center z-50">
+                                    <LoadingAnimation/>
+                                </div>
+                            )}
+
                             {/* Sidebar */}
                             <div className="w-1/4 bg-white p-6 shadow-md">
                                 <h2 className="text-xl font-semibold mb-4">Profile Settings</h2>
@@ -44,10 +55,10 @@ export default function Profile() {
                                         onClick={() => setActiveTab('reviews')}>
                                         Your Reviews
                                     </li>
-                                    <li className={`py-2 cursor-pointer hover:bg-gray-200 rounded-md ${activeTab === 'advanced' ? 'text-blue-500 font-bold' : 'text-gray-500'}`}
-                                        onClick={() => setActiveTab('advanced')}>
-                                        Advanced
-                                    </li>
+                                    {/*<li className={`py-2 cursor-pointer hover:bg-gray-200 rounded-md ${activeTab === 'advanced' ? 'text-blue-500 font-bold' : 'text-gray-500'}`}*/}
+                                    {/*    onClick={() => setActiveTab('advanced')}>*/}
+                                    {/*    Advanced*/}
+                                    {/*</li>*/}
                                 </ul>
                             </div>
 
@@ -55,7 +66,7 @@ export default function Profile() {
                             <div className="w-3/4 p-8">
                                 {activeTab === 'manageProfile' && (
                                     <div className="bg-white p-8 shadow-lg rounded-lg">
-                                        <ManageProfile/>
+                                        <ManageProfile setButtonsDisabledTrue={setButtonsDisabledTrue} setButtonsDisabledFalse={setButtonsDisabledFalse}/>
                                     </div>
                                 )}
 
@@ -71,12 +82,12 @@ export default function Profile() {
                                     </div>
                                 )}
 
-                                {activeTab === 'advanced' && (
-                                    <div className="bg-white p-8 shadow-lg rounded-lg">
-                                        <h1 className="text-3xl font-semibold mb-8">Advanced Settings</h1>
-                                        <AdvancedSettings/>
-                                    </div>
-                                )}
+                                {/*{activeTab === 'advanced' && (*/}
+                                {/*    <div className="bg-white p-8 shadow-lg rounded-lg">*/}
+                                {/*        <h1 className="text-3xl font-semibold mb-8">Advanced Settings</h1>*/}
+                                {/*        <AdvancedSettings/>*/}
+                                {/*    </div>*/}
+                                {/*)}*/}
                             </div>
                         </div>
                     )

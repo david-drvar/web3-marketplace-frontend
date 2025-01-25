@@ -2,19 +2,22 @@ import {useNotification} from "web3uikit";
 import {useMoralis, useWeb3Contract} from "react-moralis";
 import {ethers} from "ethers";
 import marketplaceAbi from "../constants/Marketplace.json";
-import {useState} from "react";
+import React, {useState} from "react";
 import {useRouter} from "next/router";
 import {useDispatch, useSelector} from "react-redux";
-import {getCategories, getCountries} from "@/utils/utils";
+import {getCategories, getCountries, handleNotification} from "@/utils/utils";
+import {contractAddresses} from "@/constants/constants";
+import LoadingAnimation from "@/components/LoadingAnimation";
+import RegisterAlertModal from "@/components/modals/RegisterAlertModal";
 
 export default function ListItem() {
     const {chainId, isWeb3Enabled, account} = useMoralis();
     const dispatch = useNotification();
 
-    const marketplaceContractAddress = useSelector((state) => state.contract["marketplaceContractAddress"]);
     const dispatchRedux = useDispatch();
-    const supportedCurrencies = ["ETH", "USDC", "EURC"]
-
+    const supportedCurrencies = ["POL", "USDC"] // "EURC" not supported on Polygon Amoy
+    const userExists = useSelector((state) => state.user).isActive;
+    const [showRegisterUserModal, setShowRegisterUserModal] = useState(false);
 
     const {runContractFunction} = useWeb3Contract();
 
@@ -25,25 +28,20 @@ export default function ListItem() {
         description: "",
         price: "",
         condition: "0",
-        currency: "ETH",
+        currency: "POL",
         category: "",
         subcategory: "",
         country: "",
         isGift: false,
     });
 
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [buttonsDisabled, setButtonsDisabled] = useState(false);
 
     const [images, setImages] = useState([]); // Start with one empty image input
 
     const handleAddImage = () => {
         if (images.length >= 3) {
-            dispatch({
-                type: "error",
-                message: "Cannot add more than 3 images",
-                title: "Item listing",
-                position: "topR",
-            });
+            handleNotification(dispatch, "error", "Cannot add more than 3 images", "Item image error");
             return;
         }
         setImages([...images, null]); // Add a new empty image input
@@ -91,8 +89,7 @@ export default function ListItem() {
     };
 
     const handleSubmit = async (e) => {
-        setIsSubmitting(true);
-        e.preventDefault();
+        setButtonsDisabled(true);
         var hashes = [];
 
         try {
@@ -101,20 +98,14 @@ export default function ListItem() {
                 hashes.push(hash);
             }
         } catch (e) {
-            console.error(e);
-            console.log("stopping listing new item");
-            dispatch({
-                type: "error",
-                message: "Uploading images to IPFS failed.",
-                title: "Listing item error",
-                position: "topR",
-            });
+            console.error("Error", e);
+            handleNotification(dispatch, "error", "Uploading images to IPFS failed.", "Listing item error");
             removePinnedImages(hashes);
-            setIsSubmitting(false);
+            setButtonsDisabled(false);
             return;
         }
 
-        const finalPrice = formData.currency === "ETH" ? ethers.utils.parseEther(formData.price).toString() : formData.price * 1e6;
+        const finalPrice = formData.currency === "POL" ? ethers.utils.parseEther(formData.price).toString() : formData.price * 1e6;
 
         const item = {
             id: 0,
@@ -134,7 +125,7 @@ export default function ListItem() {
 
         const listOptions = {
             abi: marketplaceAbi,
-            contractAddress: marketplaceContractAddress,
+            contractAddress: contractAddresses[chainId].marketplaceContractAddress,
             functionName: "listNewItem",
             params: {
                 item: item
@@ -144,10 +135,12 @@ export default function ListItem() {
         await runContractFunction({
             params: listOptions,
             onSuccess: (tx) => {
-                handleListWaitingConfirmation();
+                handleNotification(dispatch, "info", "Waiting for confirmations...", "Transaction submitted");
+
                 tx.wait().then((finalTx) => {
-                    handleListSuccess();
-                    setIsSubmitting(false);
+                    handleNotification(dispatch, "success", "Item listed successfully!", "Item listed");
+
+                    setButtonsDisabled(false);
                     // console.log("finalTx");
                     // console.log(finalTx);
                     //
@@ -155,13 +148,16 @@ export default function ListItem() {
                     // console.log(Number(finalTx.logs[0].topics[1]))
 
                     let id = BigInt(finalTx.logs[0].topics[1]).toString();
-                    router.push({pathname: `/item/${id}`});
+                    setTimeout(() => {
+                        router.push({pathname: `/item/${id}`});
+                    }, 1000);
                 });
             },
             onError: (error) => {
                 removePinnedImages(hashes);
-                handleListError(error);
-                setIsSubmitting(false);
+                handleNotification(dispatch, "error", error?.message ? error.message : "Error occurred. Please inspect the logs in console", "Item listing error");
+                console.error("Error", error);
+                setButtonsDisabled(false);
             },
         });
 
@@ -187,34 +183,6 @@ export default function ListItem() {
         }
     }
 
-    async function handleListSuccess() {
-        dispatch({
-            type: "success",
-            message: "Item listed successfully!",
-            title: "Item listed",
-            position: "topR",
-        });
-    }
-
-    async function handleListWaitingConfirmation() {
-        dispatch({
-            type: "info",
-            message: "Transaction submitted. Waiting for confirmations.",
-            title: "Waiting for confirmations",
-            position: "topR",
-        });
-    }
-
-    async function handleListError(error) {
-        console.log("error", error)
-        dispatch({
-            type: "error",
-            message: error.data.message,
-            title: "Listing item error",
-            position: "topR",
-        });
-    }
-
     const uploadFile = async (fileToUpload) => {
         try {
             const formData = new FormData();
@@ -235,9 +203,32 @@ export default function ListItem() {
     return (
         <div className="max-w-2xl mx-auto p-6 bg-white shadow-lg rounded-lg">
             {isWeb3Enabled && chainId ? (
-                <div>
+                <div className={buttonsDisabled ? "pointer-events-none" : ""}>
+
+                    {
+                        setShowRegisterUserModal && (
+                            <RegisterAlertModal
+                                isVisible={showRegisterUserModal}
+                                onClose={() => setShowRegisterUserModal(false)}
+                            />
+                        )
+                    }
+
+                    {buttonsDisabled && (
+                        <div className="fixed inset-0 bg-white bg-opacity-50 flex justify-center items-center z-50">
+                            <LoadingAnimation/>
+                        </div>
+                    )}
+
                     <h1 className="text-2xl font-bold text-center mb-6">Create Listing</h1>
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form onSubmit={(e) => {
+                        e.preventDefault();
+                        if (userExists)
+                            handleSubmit();
+                        else
+                            setShowRegisterUserModal(true);
+
+                    }} className="space-y-6">
                         <div>
                             <label htmlFor="title" className="block text-sm font-medium text-gray-700">
                                 Title
@@ -389,10 +380,15 @@ export default function ListItem() {
                                         accept="image/*"
                                         onChange={(e) => handleImageChange(index, e)}
                                         className="hidden"
+                                        disabled={buttonsDisabled}
                                     />
                                     <label
                                         htmlFor={`img${index}`}
-                                        className="cursor-pointer px-4 py-2 bg-blue-600 text-white rounded-md shadow hover:bg-blue-700"
+                                        className={`px-4 py-2 rounded-lg ${
+                                            buttonsDisabled
+                                                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                                                : "bg-indigo-500 hover:bg-indigo-600 text-white cursor-pointer"
+                                        }`}
                                     >
                                         Select File
                                     </label>
@@ -407,8 +403,11 @@ export default function ListItem() {
                                     {image && (
                                         <button
                                             type="button"
+                                            disabled={buttonsDisabled}
                                             onClick={() => handleRemoveImage(index)}
-                                            className="text-red-500 hover:text-red-700"
+                                            className={`${
+                                                buttonsDisabled ? "text-gray-500 hover:text-gray-700 cursor-not-allowed" : "text-red-500 hover:text-red-700 hover:underline"
+                                            }`}
                                         >
                                             Remove
                                         </button>
@@ -417,18 +416,28 @@ export default function ListItem() {
                             ))}
                             <button
                                 type="button"
+                                disabled={buttonsDisabled}
                                 onClick={handleAddImage}
-                                className="w-full py-2 bg-green-500 text-white rounded-md shadow hover:bg-green-600"
+                                // className="w-full py-2 bg-emerald-500 text-white rounded-md shadow hover:bg-emerald-600"
+                                className={`px-4 py-2 w-full rounded-lg text-white ${
+                                    buttonsDisabled ? "bg-gray-200 text-gray-500 cursor-not-allowed" : "bg-emerald-500 hover:bg-emerald-600 text-gray-800"
+                                }`}
                             >
                                 Add Image
                             </button>
                         </div>
 
                         <button
-                            disabled={!formData.title || !formData.description || !formData.price || isSubmitting || images.length === 0 || images.includes(null)
+                            disabled={!formData.title || !formData.description || !formData.price || buttonsDisabled || images.length === 0 || images.includes(null)
                                 || !formData.category || !formData.subcategory || !formData.country}
                             type="submit"
-                            className="w-full py-2 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                            // className="w-full py-2 bg-blue-500 text-white rounded-md shadow hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+                            className={`py-2 px-4 rounded-lg w-full ${
+                                !formData.title || !formData.description || !formData.price || buttonsDisabled || images.length === 0 || images.includes(null)
+                                || !formData.category || !formData.subcategory || !formData.country
+                                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                    : 'bg-blue-500 hover:bg-blue-600 text-white'
+                            } rounded-md shadow focus:outline-none`}
                         >
                             Submit
                         </button>
