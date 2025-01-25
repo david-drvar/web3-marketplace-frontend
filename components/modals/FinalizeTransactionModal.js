@@ -45,9 +45,6 @@ const FinalizeTransactionModal = ({isVisible, onClose, onFinalize, moderatorFee}
                 <h2 className="text-xl font-semibold text-gray-800 mb-4">
                     Finalize transaction
                 </h2>
-                <p className="text-red-500">
-                    {`Your part is ${moderatorFee}% as moderator.`}
-                </p>
                 <p className="text-red-500 mb-4">
                     {`The sum of buyer and seller percentages must equal 100.`}
                 </p>
